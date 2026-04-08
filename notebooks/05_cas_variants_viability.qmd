@@ -1,0 +1,229 @@
+---
+title: "Robust Cas Variant Viability"
+format: html
+editor: visual
+---
+
+## Purpose
+
+This notebook rebuilds the viability-versus-efficiency plots with explicit control-count joins and exports under `results/05_cas_variants_viability/`.
+
+## Setup
+
+```{r}
+resolve_project_root <- function() {
+  rstudio_path <- ""
+  if (requireNamespace("rstudioapi", quietly = TRUE)) {
+    rstudio_path <- tryCatch(rstudioapi::getSourceEditorContext()$path, error = function(e) "")
+    if (!nzchar(rstudio_path)) {
+      rstudio_path <- tryCatch(rstudioapi::getActiveDocumentContext()$path, error = function(e) "")
+    }
+  }
+
+  search_roots <- unique(c(
+    Sys.getenv("CAS12A_NOTEBOOK_PROJECT_ROOT", unset = ""),
+    tryCatch(knitr::current_input(dir = TRUE), error = function(e) ""),
+    rstudio_path,
+    getwd(),
+    normalizePath(file.path(getwd(), ".."), mustWork = FALSE),
+    normalizePath(file.path(getwd(), "..", ".."), mustWork = FALSE)
+  ))
+  search_roots <- search_roots[nzchar(search_roots)]
+
+  for (root in search_roots) {
+    current <- normalizePath(root, mustWork = FALSE)
+    if (!dir.exists(current)) {
+      current <- dirname(current)
+    }
+
+    repeat {
+      required_paths <- c(
+        file.path(current, "_quarto.yml"),
+        file.path(current, "config", "paths.R"),
+        file.path(current, "R", "common.R")
+      )
+
+      if (all(file.exists(required_paths))) {
+        return(current)
+      }
+
+      parent <- dirname(current)
+      if (identical(parent, current)) {
+        break
+      }
+
+      current <- parent
+    }
+  }
+
+  stop(
+    paste(
+      "Could not locate the notebook project root.",
+      "Save the notebook and either run it from the project root,",
+      "or set Sys.setenv(CAS12A_NOTEBOOK_PROJECT_ROOT = '/path/to/New project')."
+    ),
+    call. = FALSE
+  )
+}
+
+project_root <- resolve_project_root()
+
+source(file.path(project_root, "config", "paths.R"), local = knitr::knit_global())
+source(file.path(project_root, "R", "common.R"), local = knitr::knit_global())
+source(file.path(project_root, "R", "cas_variants.R"), local = knitr::knit_global())
+
+load_paper_packages()
+
+paths <- get_analysis_paths(
+  list(results_dir = normalizePath(file.path(project_root, "results"), mustWork = FALSE))
+)
+
+output_dir <- analysis_output_dir(paths, "05_cas_variants_viability")
+tables_dir <- ensure_dir(file.path(output_dir, "tables"))
+plots_dir <- ensure_dir(file.path(output_dir, "plots"))
+```
+
+## Load processed editing tables
+
+```{r}
+gfp_on_path <- file.path(paths$results_dir, "04_cas_variants_overview", "tables", "gfp_on_variants.csv")
+gfp_off_path <- file.path(paths$results_dir, "04_cas_variants_overview", "tables", "gfp_off_variants.csv")
+
+gfp_on <- if (file.exists(gfp_on_path)) read_csv_clean(gfp_on_path) else build_gfp_on_variants(paths)
+gfp_off <- if (file.exists(gfp_off_path)) read_csv_clean(gfp_off_path) else build_gfp_off_variants(paths)$updated
+
+gfp_on <- gfp_on %>%
+  dplyr::mutate(rep = as.character(rep), var = as.character(var))
+
+gfp_off <- gfp_off %>%
+  dplyr::mutate(rep = as.character(rep), var = as.character(var))
+
+write_csv_checked(gfp_on, file.path(tables_dir, "gfp_on_variants.csv"))
+write_csv_checked(gfp_off, file.path(tables_dir, "gfp_off_variants.csv"))
+```
+
+## GFP OFF viability joins
+
+```{r}
+off_counts <- read_csv_clean(file.path(paths$cognate_dr_root, "colony_counts.csv")) %>%
+  tidyr::separate(identifier, into = c("strain", "guide_plasmid"), sep = "_", remove = FALSE) %>%
+  dplyr::mutate(
+    var = dplyr::case_when(
+      strain == "ys85" ~ "enAsCas12a",
+      strain == "ys86" ~ "LbCas12a(CO)",
+      strain == "ys87" ~ "FnCas12a(CO)",
+      strain == "ys88" ~ "FnCas12a",
+      strain == "ys89" ~ "LbCas12a",
+      strain == "ys90" ~ "AsCas12a",
+      strain == "ys91" ~ "MbCas12a",
+      TRUE ~ strain
+    ),
+    rep = as.character(replicate)
+  ) %>%
+  dplyr::filter(guide_plasmid %in% c("p120", "p136"))
+
+off_control_counts <- off_counts %>%
+  dplyr::filter(guide_plasmid == "p120") %>%
+  dplyr::group_by(var) %>%
+  dplyr::summarise(control_count = mean(true_colony_count, na.rm = TRUE), .groups = "drop")
+
+off_target_counts <- off_counts %>%
+  dplyr::filter(guide_plasmid == "p136") %>%
+  dplyr::select(var, rep, true_colony_count)
+
+efficiency_off_data <- gfp_off %>%
+  dplyr::left_join(off_target_counts, by = c("var", "rep")) %>%
+  dplyr::left_join(off_control_counts, by = "var") %>%
+  dplyr::mutate(viability = true_colony_count / control_count)
+
+write_csv_checked(efficiency_off_data, file.path(tables_dir, "efficiency_off_data.csv"))
+
+efficiency_off_data
+```
+
+```{r}
+off_plot <- efficiency_off_data %>%
+  dplyr::filter(timepoint == "scraped") %>%
+  ggplot(aes(x = true_colony_count, y = efficiency, colour = var)) +
+  geom_point(size = 2) +
+  scale_color_manual(values = variant_palette()) +
+  scale_y_continuous(limits = c(0, 100), breaks = seq(0, 100, 20)) +
+  labs(x = "Colony count", y = "Editing efficiency (%)", title = "GFP OFF viability screen") +
+  publication_theme(legend_position = "right", aspect_ratio = 1)
+
+safe_ggsave(
+  off_plot,
+  file.path(plots_dir, "gfp_off_efficiency_vs_colony_count.png"),
+  width = 6,
+  height = 6
+)
+
+off_plot
+```
+
+## GFP ON colony-count joins
+
+```{r}
+on_counts <- read_csv_clean(
+  file.path(paths$cas12a_project_root, "plate_counts", "plate_counts_GFP", "predict5", "colony_counts.csv")
+)
+
+on_annotation <- read_excel_clean(
+  file.path(paths$cas12a_project_root, "plate_counts", "annotate_plate_images.xlsx")
+)
+
+on_counts_annotated <- on_annotation %>%
+  dplyr::mutate(file = paste0(file, ".jpg")) %>%
+  dplyr::left_join(on_counts, by = c("file" = "image_name")) %>%
+  dplyr::filter(!is.na(colonies_cutoff)) %>%
+  dplyr::filter(ys %in% c("ys304", "ys305", "ys306", "ys307", "ys308", "ys309", "ys310")) %>%
+  dplyr::mutate(
+    var = dplyr::case_when(
+      ys == "ys304" ~ "enAsCas12a",
+      ys == "ys305" ~ "LbCas12a(CO)",
+      ys == "ys306" ~ "FnCas12a(CO)",
+      ys == "ys307" ~ "FnCas12a",
+      ys == "ys308" ~ "LbCas12a",
+      ys == "ys309" ~ "AsCas12a",
+      ys == "ys310" ~ "MbCas12a",
+      TRUE ~ ys
+    ),
+    rep = as.character(rep),
+    folder = as.character(folder)
+  ) %>%
+  dplyr::filter(guide == "A15") %>%
+  dplyr::filter(var != "enAsCas12a" | folder == "20240916")
+
+efficiency_on_data <- gfp_on %>%
+  dplyr::filter(prom_cas == "TEF") %>%
+  dplyr::left_join(
+    on_counts_annotated %>% dplyr::select(var, rep, colonies_cutoff),
+    by = c("var", "rep")
+  ) %>%
+  dplyr::filter(!is.na(colonies_cutoff))
+
+write_csv_checked(on_counts_annotated, file.path(tables_dir, "on_counts_annotated.csv"))
+write_csv_checked(efficiency_on_data, file.path(tables_dir, "efficiency_on_data.csv"))
+
+efficiency_on_data
+```
+
+```{r}
+on_plot <- efficiency_on_data %>%
+  dplyr::filter(timepoint == "T01") %>%
+  ggplot(aes(x = colonies_cutoff, y = efficiency, colour = var)) +
+  geom_point(size = 2) +
+  scale_color_manual(values = variant_palette()) +
+  scale_y_continuous(limits = c(0, 100), breaks = seq(0, 100, 20)) +
+  labs(x = "Colony count", y = "Editing efficiency (%)", title = "GFP ON viability screen") +
+  publication_theme(legend_position = "right", aspect_ratio = 1)
+
+safe_ggsave(
+  on_plot,
+  file.path(plots_dir, "gfp_on_efficiency_vs_colony_count.png"),
+  width = 6,
+  height = 6
+)
+
+on_plot
+```

@@ -1,0 +1,5 @@
+"filter_label","total_guides","successful_guides","design_success_rate","design_success_lower","design_success_upper","filter_group","filter_set","baseline_rate","absolute_gain_vs_all"
+"DeepCpf1 top quartile + PAM distance not PAM/18-23 + PAM not TTTG",70,63,0.9,0.807670851514326,0.95071069855746,"3-way combination","optimal_top_deepcpf1|optimal_pam_distance|optimal_non_tttg_pam",0.70188679245283,0.19811320754717
+"DeepCpf1 top quartile + PAM not TTTG + 5' PAM base not C",73,63,0.863013698630137,0.765875725934301,0.923856103906059,"3-way combination","optimal_top_deepcpf1|optimal_non_tttg_pam|optimal_non_c_pam5",0.70188679245283,0.161126906177307
+"PAM distance not PAM/18-23 + PAM not TTTG + 5' PAM base not C",192,164,0.854166666666667,0.797303295974398,0.897135975561651,"3-way combination","optimal_pam_distance|optimal_non_tttg_pam|optimal_non_c_pam5",0.70188679245283,0.152279874213836
+"DeepCpf1 top quartile + PAM distance not PAM/18-23 + 5' PAM base not C",85,72,0.847058823529412,0.75571816323908,0.908386195054696,"3-way combination","optimal_top_deepcpf1|optimal_pam_distance|optimal_non_c_pam5",0.70188679245283,0.145172031076582

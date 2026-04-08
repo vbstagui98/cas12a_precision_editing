@@ -1,0 +1,1244 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.26">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Genome-wide Cas12a Design Rules</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="06_genome_wide_design_rules_files/libs/clipboard/clipboard.min.js"></script>
+<script src="06_genome_wide_design_rules_files/libs/quarto-html/quarto.js" type="module"></script>
+<script src="06_genome_wide_design_rules_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="06_genome_wide_design_rules_files/libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="06_genome_wide_design_rules_files/libs/quarto-html/popper.min.js"></script>
+<script src="06_genome_wide_design_rules_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="06_genome_wide_design_rules_files/libs/quarto-html/anchor.min.js"></script>
+<link href="06_genome_wide_design_rules_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="06_genome_wide_design_rules_files/libs/quarto-html/quarto-syntax-highlighting-587c61ba64f3a5504c4d52d930310e48.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="06_genome_wide_design_rules_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="06_genome_wide_design_rules_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="06_genome_wide_design_rules_files/libs/bootstrap/bootstrap-d6a003b94517c951b2d65075d42fb01b.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="06_genome_wide_design_rules_files/libs/pagedtable-1.1/css/pagedtable.css" rel="stylesheet">
+<script src="06_genome_wide_design_rules_files/libs/pagedtable-1.1/js/pagedtable.js"></script>
+
+
+</head>
+
+<body class="quarto-light">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul class="collapse">
+  <li><a href="#purpose" id="toc-purpose" class="nav-link active" data-scroll-target="#purpose">Purpose</a></li>
+  <li><a href="#setup" id="toc-setup" class="nav-link" data-scroll-target="#setup">Setup</a></li>
+  <li><a href="#build-cleaned-assay-tables" id="toc-build-cleaned-assay-tables" class="nav-link" data-scroll-target="#build-cleaned-assay-tables">Build cleaned assay tables</a></li>
+  <li><a href="#candidate-main-figure-panels" id="toc-candidate-main-figure-panels" class="nav-link" data-scroll-target="#candidate-main-figure-panels">Candidate main-figure panels</a></li>
+  <li><a href="#pam-5-base-and-direct-repeat-folding" id="toc-pam-5-base-and-direct-repeat-folding" class="nav-link" data-scroll-target="#pam-5-base-and-direct-repeat-folding">PAM 5’ base and direct-repeat folding</a></li>
+  <li><a href="#gc-dependencies-across-guide-and-donor" id="toc-gc-dependencies-across-guide-and-donor" class="nav-link" data-scroll-target="#gc-dependencies-across-guide-and-donor">GC dependencies across guide and donor</a></li>
+  <li><a href="#colony-concordance-across-repeated-barcodes" id="toc-colony-concordance-across-repeated-barcodes" class="nav-link" data-scroll-target="#colony-concordance-across-repeated-barcodes">Colony concordance across repeated barcodes</a></li>
+  <li><a href="#non-target-variants-and-score.sv" id="toc-non-target-variants-and-score.sv" class="nav-link" data-scroll-target="#non-target-variants-and-score.sv">Non-target variants and SCORE.SV</a></li>
+  <li><a href="#secondary-filters-and-contextual-checks" id="toc-secondary-filters-and-contextual-checks" class="nav-link" data-scroll-target="#secondary-filters-and-contextual-checks">Secondary filters and contextual checks</a></li>
+  <li><a href="#rule-summary" id="toc-rule-summary" class="nav-link" data-scroll-target="#rule-summary">Rule summary</a></li>
+  <li><a href="#weighted-model-coefficients" id="toc-weighted-model-coefficients" class="nav-link" data-scroll-target="#weighted-model-coefficients">Weighted model coefficients</a></li>
+  <li><a href="#extended-model-coefficients" id="toc-extended-model-coefficients" class="nav-link" data-scroll-target="#extended-model-coefficients">Extended model coefficients</a></li>
+  </ul>
+</nav>
+</div>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Genome-wide Cas12a Design Rules</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="purpose" class="level2">
+<h2 class="anchored" data-anchor-id="purpose">Purpose</h2>
+<p>This notebook rebuilds the genome-wide picked-colony editing screen into a shareable design-rules workflow. It integrates the original Tn5 coverage and normalized-variant logic with workspace guide annotations (<code>DeepCpf1</code>, SV hotspot context, and variant functional annotation) and exports figure-ready panels under <code>results/06_genome_wide_design_rules/</code>.</p>
+</section>
+<section id="setup" class="level2">
+<h2 class="anchored" data-anchor-id="setup">Setup</h2>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>resolve_project_root <span class="ot">&lt;-</span> <span class="cf">function</span>() {</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  rstudio_path <span class="ot">&lt;-</span> <span class="st">""</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">requireNamespace</span>(<span class="st">"rstudioapi"</span>, <span class="at">quietly =</span> <span class="cn">TRUE</span>)) {</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    rstudio_path <span class="ot">&lt;-</span> <span class="fu">tryCatch</span>(rstudioapi<span class="sc">::</span><span class="fu">getSourceEditorContext</span>()<span class="sc">$</span>path, <span class="at">error =</span> <span class="cf">function</span>(e) <span class="st">""</span>)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="sc">!</span><span class="fu">nzchar</span>(rstudio_path)) {</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>      rstudio_path <span class="ot">&lt;-</span> <span class="fu">tryCatch</span>(rstudioapi<span class="sc">::</span><span class="fu">getActiveDocumentContext</span>()<span class="sc">$</span>path, <span class="at">error =</span> <span class="cf">function</span>(e) <span class="st">""</span>)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>  search_roots <span class="ot">&lt;-</span> <span class="fu">unique</span>(<span class="fu">c</span>(</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">Sys.getenv</span>(<span class="st">"CAS12A_NOTEBOOK_PROJECT_ROOT"</span>, <span class="at">unset =</span> <span class="st">""</span>),</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">tryCatch</span>(knitr<span class="sc">::</span><span class="fu">current_input</span>(<span class="at">dir =</span> <span class="cn">TRUE</span>), <span class="at">error =</span> <span class="cf">function</span>(e) <span class="st">""</span>),</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    rstudio_path,</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">getwd</span>(),</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">normalizePath</span>(<span class="fu">file.path</span>(<span class="fu">getwd</span>(), <span class="st">".."</span>), <span class="at">mustWork =</span> <span class="cn">FALSE</span>),</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">normalizePath</span>(<span class="fu">file.path</span>(<span class="fu">getwd</span>(), <span class="st">".."</span>, <span class="st">".."</span>), <span class="at">mustWork =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>  ))</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>  search_roots <span class="ot">&lt;-</span> search_roots[<span class="fu">nzchar</span>(search_roots)]</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (root <span class="cf">in</span> search_roots) {</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>    current <span class="ot">&lt;-</span> <span class="fu">normalizePath</span>(root, <span class="at">mustWork =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="sc">!</span><span class="fu">dir.exists</span>(current)) {</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>      current <span class="ot">&lt;-</span> <span class="fu">dirname</span>(current)</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>    <span class="cf">repeat</span> {</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>      required_paths <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>        <span class="fu">file.path</span>(current, <span class="st">"_quarto.yml"</span>),</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>        <span class="fu">file.path</span>(current, <span class="st">"config"</span>, <span class="st">"paths.R"</span>),</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>        <span class="fu">file.path</span>(current, <span class="st">"R"</span>, <span class="st">"common.R"</span>)</span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>      )</span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> (<span class="fu">all</span>(<span class="fu">file.exists</span>(required_paths))) {</span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>        <span class="fu">return</span>(current)</span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>      parent <span class="ot">&lt;-</span> <span class="fu">dirname</span>(current)</span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> (<span class="fu">identical</span>(parent, current)) {</span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>        <span class="cf">break</span></span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>      current <span class="ot">&lt;-</span> parent</span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a>  <span class="fu">stop</span>(</span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a>    <span class="fu">paste</span>(</span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Could not locate the notebook project root."</span>,</span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Save the notebook and either run it from the project root,"</span>,</span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a>      <span class="st">"or set Sys.setenv(CAS12A_NOTEBOOK_PROJECT_ROOT = '/path/to/New project')."</span></span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a>    <span class="at">call. =</span> <span class="cn">FALSE</span></span>
+<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a>project_root <span class="ot">&lt;-</span> <span class="fu">resolve_project_root</span>()</span>
+<span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-58"><a href="#cb1-58" aria-hidden="true" tabindex="-1"></a><span class="fu">source</span>(<span class="fu">file.path</span>(project_root, <span class="st">"config"</span>, <span class="st">"paths.R"</span>), <span class="at">local =</span> knitr<span class="sc">::</span><span class="fu">knit_global</span>())</span>
+<span id="cb1-59"><a href="#cb1-59" aria-hidden="true" tabindex="-1"></a><span class="fu">source</span>(<span class="fu">file.path</span>(project_root, <span class="st">"R"</span>, <span class="st">"common.R"</span>), <span class="at">local =</span> knitr<span class="sc">::</span><span class="fu">knit_global</span>())</span>
+<span id="cb1-60"><a href="#cb1-60" aria-hidden="true" tabindex="-1"></a><span class="fu">source</span>(<span class="fu">file.path</span>(project_root, <span class="st">"R"</span>, <span class="st">"genome_wide_design_rules.R"</span>), <span class="at">local =</span> knitr<span class="sc">::</span><span class="fu">knit_global</span>())</span>
+<span id="cb1-61"><a href="#cb1-61" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-62"><a href="#cb1-62" aria-hidden="true" tabindex="-1"></a><span class="fu">load_paper_packages</span>(<span class="at">extra =</span> <span class="fu">c</span>(<span class="st">"broom"</span>, <span class="st">"forcats"</span>, <span class="st">"scales"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>Registered S3 methods overwritten by 'ggpp':
+  method                  from   
+  heightDetails.titleGrob ggplot2
+  widthDetails.titleGrob  ggplot2</code></pre>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>paths <span class="ot">&lt;-</span> <span class="fu">get_analysis_paths</span>(</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">list</span>(<span class="at">results_dir =</span> <span class="fu">normalizePath</span>(<span class="fu">file.path</span>(project_root, <span class="st">"results"</span>), <span class="at">mustWork =</span> <span class="cn">FALSE</span>))</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>output_dir <span class="ot">&lt;-</span> <span class="fu">analysis_output_dir</span>(paths, <span class="st">"06_genome_wide_design_rules"</span>)</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>tables_dir <span class="ot">&lt;-</span> <span class="fu">ensure_dir</span>(<span class="fu">file.path</span>(output_dir, <span class="st">"tables"</span>))</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>plots_dir <span class="ot">&lt;-</span> <span class="fu">ensure_dir</span>(<span class="fu">file.path</span>(output_dir, <span class="st">"plots"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+</section>
+<section id="build-cleaned-assay-tables" class="level2">
+<h2 class="anchored" data-anchor-id="build-cleaned-assay-tables">Build cleaned assay tables</h2>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>design_rule_objects <span class="ot">&lt;-</span> <span class="fu">build_genome_wide_design_rule_tables</span>(project_root, paths)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>New names:
+New names:
+• `` -&gt; `...1`</code></pre>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>colony_assays <span class="ot">&lt;-</span> design_rule_objects<span class="sc">$</span>colony_assays</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>design_outcomes <span class="ot">&lt;-</span> design_rule_objects<span class="sc">$</span>design_outcomes</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>stage_summary <span class="ot">&lt;-</span> <span class="fu">build_genome_wide_stage_summary</span>(design_outcomes)</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>pam_summary <span class="ot">&lt;-</span> <span class="fu">summarise_edit_rates</span>(design_outcomes, <span class="st">"pam"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">pam =</span> <span class="fu">factor</span>(pam, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"TTTC"</span>, <span class="st">"TTTA"</span>, <span class="st">"TTTG"</span>)))</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>pam_distance_summary <span class="ot">&lt;-</span> <span class="fu">summarise_edit_rates</span>(design_outcomes, <span class="st">"pam_dist_bin"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">pam_dist_bin =</span> <span class="fu">factor</span>(pam_dist_bin, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"1-6"</span>, <span class="st">"7-11"</span>, <span class="st">"12-17"</span>, <span class="st">"18-23"</span>, <span class="st">"PAM"</span>)))</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>pam_heatmap_summary <span class="ot">&lt;-</span> <span class="fu">summarise_edit_rates</span>(design_outcomes, <span class="fu">c</span>(<span class="st">"pam"</span>, <span class="st">"pam_dist_bin"</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(pam_dist_bin), pam_dist_bin <span class="sc">!=</span> <span class="st">"&gt;23"</span>)</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>deepcpf1_summary <span class="ot">&lt;-</span> <span class="fu">summarise_edit_rates</span>(design_outcomes, <span class="st">"deepcpf1_quartile"</span>)</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>pam_upstream_summary <span class="ot">&lt;-</span> <span class="fu">summarise_edit_rates</span>(design_outcomes, <span class="st">"pam_upstream_nt"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">pam_upstream_nt =</span> <span class="fu">factor</span>(pam_upstream_nt, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"C"</span>, <span class="st">"A"</span>, <span class="st">"G"</span>, <span class="st">"T"</span>)))</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>full_pam_5mer_summary <span class="ot">&lt;-</span> <span class="fu">summarise_edit_rates</span>(design_outcomes, <span class="st">"full_pam_5mer"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(full_pam_5mer)</span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>ntttv_pattern_summary <span class="ot">&lt;-</span> <span class="fu">summarise_edit_rates</span>(design_outcomes, <span class="st">"ntttv_pattern"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(dplyr<span class="sc">::</span><span class="fu">desc</span>(total_guides), ntttv_pattern)</span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>rule_count_summary <span class="ot">&lt;-</span> <span class="fu">summarise_edit_rates</span>(design_outcomes, <span class="st">"preferred_rule_count"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">preferred_rule_count =</span> <span class="fu">factor</span>(preferred_rule_count, <span class="at">levels =</span> <span class="dv">0</span><span class="sc">:</span><span class="dv">3</span>))</span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>dr_perturbed_summary <span class="ot">&lt;-</span> design_outcomes <span class="sc">%&gt;%</span></span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>    <span class="at">dr_perturbed_flag =</span> dplyr<span class="sc">::</span><span class="fu">if_else</span>(.data<span class="sc">$</span>dr_perturbed, <span class="st">"Perturbed"</span>, <span class="st">"Not perturbed"</span>),</span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>    <span class="at">dr_perturbed_flag =</span> <span class="fu">factor</span>(dr_perturbed_flag, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"Not perturbed"</span>, <span class="st">"Perturbed"</span>))</span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise_edit_rates</span>(<span class="st">"dr_perturbed_flag"</span>)</span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>dr_canonical_summary <span class="ot">&lt;-</span> design_outcomes <span class="sc">%&gt;%</span></span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a>    <span class="at">dr_canonical_flag =</span> dplyr<span class="sc">::</span><span class="fu">if_else</span>(.data<span class="sc">$</span>dr_canonical_structure, <span class="st">"Canonical"</span>, <span class="st">"Non-canonical"</span>),</span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a>    <span class="at">dr_canonical_flag =</span> <span class="fu">factor</span>(dr_canonical_flag, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"Canonical"</span>, <span class="st">"Non-canonical"</span>))</span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise_edit_rates</span>(<span class="st">"dr_canonical_flag"</span>)</span>
+<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a>dr_spacer_pair_summary <span class="ot">&lt;-</span> design_outcomes <span class="sc">%&gt;%</span></span>
+<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a>    <span class="at">dr_spacer_pair_flag =</span> dplyr<span class="sc">::</span><span class="fu">if_else</span>(.data<span class="sc">$</span>dr_spacer_pair_any, <span class="st">"Any DR-spacer pairing"</span>, <span class="st">"No DR-spacer pairing"</span>),</span>
+<span id="cb6-35"><a href="#cb6-35" aria-hidden="true" tabindex="-1"></a>    <span class="at">dr_spacer_pair_flag =</span> <span class="fu">factor</span>(</span>
+<span id="cb6-36"><a href="#cb6-36" aria-hidden="true" tabindex="-1"></a>      dr_spacer_pair_flag,</span>
+<span id="cb6-37"><a href="#cb6-37" aria-hidden="true" tabindex="-1"></a>      <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"No DR-spacer pairing"</span>, <span class="st">"Any DR-spacer pairing"</span>)</span>
+<span id="cb6-38"><a href="#cb6-38" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb6-39"><a href="#cb6-39" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb6-40"><a href="#cb6-40" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise_edit_rates</span>(<span class="st">"dr_spacer_pair_flag"</span>)</span>
+<span id="cb6-41"><a href="#cb6-41" aria-hidden="true" tabindex="-1"></a>guide_gc_23_summary <span class="ot">&lt;-</span> <span class="fu">summarise_edit_rates</span>(design_outcomes, <span class="st">"guide_gc_23_bin"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb6-42"><a href="#cb6-42" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">guide_gc_23_bin =</span> <span class="fu">factor</span>(guide_gc_23_bin, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"&lt;30%"</span>, <span class="st">"30-39%"</span>, <span class="st">"40-49%"</span>, <span class="st">"50-59%"</span>, <span class="st">"&gt;=60%"</span>)))</span>
+<span id="cb6-43"><a href="#cb6-43" aria-hidden="true" tabindex="-1"></a>guide_gc_20_summary <span class="ot">&lt;-</span> <span class="fu">summarise_edit_rates</span>(design_outcomes, <span class="st">"guide_gc_20_bin"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb6-44"><a href="#cb6-44" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">guide_gc_20_bin =</span> <span class="fu">factor</span>(guide_gc_20_bin, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"&lt;30%"</span>, <span class="st">"30-39%"</span>, <span class="st">"40-49%"</span>, <span class="st">"50-59%"</span>, <span class="st">"&gt;=60%"</span>)))</span>
+<span id="cb6-45"><a href="#cb6-45" aria-hidden="true" tabindex="-1"></a>guide_gc_18_summary <span class="ot">&lt;-</span> <span class="fu">summarise_edit_rates</span>(design_outcomes, <span class="st">"guide_gc_18_bin"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb6-46"><a href="#cb6-46" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">guide_gc_18_bin =</span> <span class="fu">factor</span>(guide_gc_18_bin, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"&lt;30%"</span>, <span class="st">"30-39%"</span>, <span class="st">"40-49%"</span>, <span class="st">"50-59%"</span>, <span class="st">"&gt;=60%"</span>)))</span>
+<span id="cb6-47"><a href="#cb6-47" aria-hidden="true" tabindex="-1"></a>donor_wt_gc_summary <span class="ot">&lt;-</span> <span class="fu">summarise_edit_rates</span>(design_outcomes, <span class="st">"donor_wt_gc_bin"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb6-48"><a href="#cb6-48" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">donor_wt_gc_bin =</span> <span class="fu">factor</span>(donor_wt_gc_bin, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"&lt;30%"</span>, <span class="st">"30-39%"</span>, <span class="st">"40-49%"</span>, <span class="st">"50-59%"</span>, <span class="st">"&gt;=60%"</span>)))</span>
+<span id="cb6-49"><a href="#cb6-49" aria-hidden="true" tabindex="-1"></a>max_a_summary <span class="ot">&lt;-</span> <span class="fu">summarise_edit_rates</span>(design_outcomes, <span class="st">"max_a"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb6-50"><a href="#cb6-50" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">max_a =</span> <span class="fu">factor</span>(max_a, <span class="at">levels =</span> <span class="fu">sort</span>(<span class="fu">unique</span>(max_a))))</span>
+<span id="cb6-51"><a href="#cb6-51" aria-hidden="true" tabindex="-1"></a>max_t_summary <span class="ot">&lt;-</span> <span class="fu">summarise_edit_rates</span>(design_outcomes, <span class="st">"max_t"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb6-52"><a href="#cb6-52" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">max_t =</span> <span class="fu">factor</span>(max_t, <span class="at">levels =</span> <span class="fu">sort</span>(<span class="fu">unique</span>(max_t))))</span>
+<span id="cb6-53"><a href="#cb6-53" aria-hidden="true" tabindex="-1"></a>region_class_summary <span class="ot">&lt;-</span> design_outcomes <span class="sc">%&gt;%</span></span>
+<span id="cb6-54"><a href="#cb6-54" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">region_class =</span> tidyr<span class="sc">::</span><span class="fu">replace_na</span>(region_class, <span class="st">"unknown"</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb6-55"><a href="#cb6-55" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise_edit_rates</span>(<span class="st">"region_class"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb6-56"><a href="#cb6-56" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">region_class =</span> <span class="fu">factor</span>(region_class, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"coding"</span>, <span class="st">"promoter"</span>, <span class="st">"intergenic"</span>, <span class="st">"unknown"</span>)))</span>
+<span id="cb6-57"><a href="#cb6-57" aria-hidden="true" tabindex="-1"></a>hotspot_summary <span class="ot">&lt;-</span> design_outcomes <span class="sc">%&gt;%</span></span>
+<span id="cb6-58"><a href="#cb6-58" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb6-59"><a href="#cb6-59" aria-hidden="true" tabindex="-1"></a>    <span class="at">hotspot_flag =</span> dplyr<span class="sc">::</span><span class="fu">if_else</span>(</span>
+<span id="cb6-60"><a href="#cb6-60" aria-hidden="true" tabindex="-1"></a>      dplyr<span class="sc">::</span><span class="fu">coalesce</span>(.data<span class="sc">$</span>in_sv_hotspot, <span class="cn">FALSE</span>),</span>
+<span id="cb6-61"><a href="#cb6-61" aria-hidden="true" tabindex="-1"></a>      <span class="st">"SV hotspot"</span>,</span>
+<span id="cb6-62"><a href="#cb6-62" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Not hotspot"</span></span>
+<span id="cb6-63"><a href="#cb6-63" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb6-64"><a href="#cb6-64" aria-hidden="true" tabindex="-1"></a>    <span class="at">hotspot_flag =</span> <span class="fu">factor</span>(hotspot_flag, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"Not hotspot"</span>, <span class="st">"SV hotspot"</span>))</span>
+<span id="cb6-65"><a href="#cb6-65" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb6-66"><a href="#cb6-66" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise_edit_rates</span>(<span class="st">"hotspot_flag"</span>)</span>
+<span id="cb6-67"><a href="#cb6-67" aria-hidden="true" tabindex="-1"></a>multi_colony_consistency_summary <span class="ot">&lt;-</span> <span class="fu">build_multi_colony_consistency_summary</span>(design_outcomes)</span>
+<span id="cb6-68"><a href="#cb6-68" aria-hidden="true" tabindex="-1"></a>design_rule_summary <span class="ot">&lt;-</span> <span class="fu">build_genome_wide_design_rule_summary</span>(design_outcomes)</span>
+<span id="cb6-69"><a href="#cb6-69" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-70"><a href="#cb6-70" aria-hidden="true" tabindex="-1"></a>background_variant_tables <span class="ot">&lt;-</span> <span class="fu">build_genome_wide_background_variant_tables</span>(</span>
+<span id="cb6-71"><a href="#cb6-71" aria-hidden="true" tabindex="-1"></a>  design_rule_objects<span class="sc">$</span>files,</span>
+<span id="cb6-72"><a href="#cb6-72" aria-hidden="true" tabindex="-1"></a>  colony_assays,</span>
+<span id="cb6-73"><a href="#cb6-73" aria-hidden="true" tabindex="-1"></a>  <span class="at">qual_min =</span> <span class="dv">20</span>,</span>
+<span id="cb6-74"><a href="#cb6-74" aria-hidden="true" tabindex="-1"></a>  <span class="at">af_min =</span> <span class="dv">50</span>,</span>
+<span id="cb6-75"><a href="#cb6-75" aria-hidden="true" tabindex="-1"></a>  <span class="at">dp_min =</span> <span class="dv">4</span></span>
+<span id="cb6-76"><a href="#cb6-76" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>New names:
+New names:
+• `` -&gt; `...1`</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Use of .data in tidyselect expressions was deprecated in tidyselect 1.2.0.
+ℹ Please use `"intended_sample_variant_id"` instead of
+  `.data$intended_sample_variant_id`</code></pre>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>background_colony_summary <span class="ot">&lt;-</span> background_variant_tables<span class="sc">$</span>colony_background_summary</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>background_edit_status_summary <span class="ot">&lt;-</span> background_colony_summary <span class="sc">%&gt;%</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">target_edit_status =</span> dplyr<span class="sc">::</span><span class="fu">if_else</span>(.data<span class="sc">$</span>edited_colony, <span class="st">"Edited target"</span>, <span class="st">"Unedited target"</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(.data<span class="sc">$</span>target_edit_status) <span class="sc">%&gt;%</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">summarise</span>(</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">colony_count =</span> dplyr<span class="sc">::</span><span class="fu">n</span>(),</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">mean_high_conf_non_target_count =</span> <span class="fu">mean</span>(.data<span class="sc">$</span>high_conf_non_target_count, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">median_high_conf_non_target_count =</span> <span class="fu">median</span>(.data<span class="sc">$</span>high_conf_non_target_count, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">frac_with_any_high_conf_non_target =</span> <span class="fu">mean</span>(.data<span class="sc">$</span>high_conf_non_target_count <span class="sc">&gt;</span> <span class="dv">0</span>, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">mean_max_non_target_score_sv =</span> <span class="fu">mean</span>(.data<span class="sc">$</span>max_non_target_score_sv, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">.groups =</span> <span class="st">"drop"</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>recurrent_background_variants <span class="ot">&lt;-</span> background_variant_tables<span class="sc">$</span>recurrent_high_conf_variants <span class="sc">%&gt;%</span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(.data<span class="sc">$</span>sample_count <span class="sc">&gt;=</span> <span class="dv">2</span>)</span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>weighted_model <span class="ot">&lt;-</span> <span class="fu">fit_genome_wide_weighted_model</span>(design_outcomes)</span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>weighted_model_table <span class="ot">&lt;-</span> <span class="fu">tidy_genome_wide_weighted_model</span>(weighted_model)</span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>extended_weighted_model <span class="ot">&lt;-</span> <span class="fu">fit_genome_wide_extended_weighted_model</span>(design_outcomes)</span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>extended_weighted_model_table <span class="ot">&lt;-</span> <span class="fu">tidy_genome_wide_extended_weighted_model</span>(extended_weighted_model)</span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a><span class="fu">write_csv_checked</span>(colony_assays, <span class="fu">file.path</span>(tables_dir, <span class="st">"colony_assays.csv"</span>))</span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a><span class="fu">write_csv_checked</span>(design_outcomes, <span class="fu">file.path</span>(tables_dir, <span class="st">"design_outcomes.csv"</span>))</span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a><span class="fu">write_csv_checked</span>(stage_summary, <span class="fu">file.path</span>(tables_dir, <span class="st">"stage_summary.csv"</span>))</span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a><span class="fu">write_csv_checked</span>(pam_summary, <span class="fu">file.path</span>(tables_dir, <span class="st">"pam_summary.csv"</span>))</span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a><span class="fu">write_csv_checked</span>(pam_distance_summary, <span class="fu">file.path</span>(tables_dir, <span class="st">"pam_distance_summary.csv"</span>))</span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a><span class="fu">write_csv_checked</span>(pam_heatmap_summary, <span class="fu">file.path</span>(tables_dir, <span class="st">"pam_distance_heatmap_summary.csv"</span>))</span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a><span class="fu">write_csv_checked</span>(deepcpf1_summary, <span class="fu">file.path</span>(tables_dir, <span class="st">"deepcpf1_summary.csv"</span>))</span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a><span class="fu">write_csv_checked</span>(pam_upstream_summary, <span class="fu">file.path</span>(tables_dir, <span class="st">"pam_upstream_summary.csv"</span>))</span>
+<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a><span class="fu">write_csv_checked</span>(full_pam_5mer_summary, <span class="fu">file.path</span>(tables_dir, <span class="st">"full_pam_5mer_summary.csv"</span>))</span>
+<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a><span class="fu">write_csv_checked</span>(ntttv_pattern_summary, <span class="fu">file.path</span>(tables_dir, <span class="st">"ntttv_pattern_summary.csv"</span>))</span>
+<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a><span class="fu">write_csv_checked</span>(rule_count_summary, <span class="fu">file.path</span>(tables_dir, <span class="st">"preferred_rule_count_summary.csv"</span>))</span>
+<span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a><span class="fu">write_csv_checked</span>(dr_perturbed_summary, <span class="fu">file.path</span>(tables_dir, <span class="st">"dr_perturbed_summary.csv"</span>))</span>
+<span id="cb9-34"><a href="#cb9-34" aria-hidden="true" tabindex="-1"></a><span class="fu">write_csv_checked</span>(dr_canonical_summary, <span class="fu">file.path</span>(tables_dir, <span class="st">"dr_canonical_summary.csv"</span>))</span>
+<span id="cb9-35"><a href="#cb9-35" aria-hidden="true" tabindex="-1"></a><span class="fu">write_csv_checked</span>(dr_spacer_pair_summary, <span class="fu">file.path</span>(tables_dir, <span class="st">"dr_spacer_pair_summary.csv"</span>))</span>
+<span id="cb9-36"><a href="#cb9-36" aria-hidden="true" tabindex="-1"></a><span class="fu">write_csv_checked</span>(guide_gc_23_summary, <span class="fu">file.path</span>(tables_dir, <span class="st">"guide_gc_23_summary.csv"</span>))</span>
+<span id="cb9-37"><a href="#cb9-37" aria-hidden="true" tabindex="-1"></a><span class="fu">write_csv_checked</span>(guide_gc_20_summary, <span class="fu">file.path</span>(tables_dir, <span class="st">"guide_gc_20_summary.csv"</span>))</span>
+<span id="cb9-38"><a href="#cb9-38" aria-hidden="true" tabindex="-1"></a><span class="fu">write_csv_checked</span>(guide_gc_18_summary, <span class="fu">file.path</span>(tables_dir, <span class="st">"guide_gc_18_summary.csv"</span>))</span>
+<span id="cb9-39"><a href="#cb9-39" aria-hidden="true" tabindex="-1"></a><span class="fu">write_csv_checked</span>(donor_wt_gc_summary, <span class="fu">file.path</span>(tables_dir, <span class="st">"donor_wt_gc_summary.csv"</span>))</span>
+<span id="cb9-40"><a href="#cb9-40" aria-hidden="true" tabindex="-1"></a><span class="fu">write_csv_checked</span>(max_a_summary, <span class="fu">file.path</span>(tables_dir, <span class="st">"max_a_summary.csv"</span>))</span>
+<span id="cb9-41"><a href="#cb9-41" aria-hidden="true" tabindex="-1"></a><span class="fu">write_csv_checked</span>(max_t_summary, <span class="fu">file.path</span>(tables_dir, <span class="st">"max_t_summary.csv"</span>))</span>
+<span id="cb9-42"><a href="#cb9-42" aria-hidden="true" tabindex="-1"></a><span class="fu">write_csv_checked</span>(region_class_summary, <span class="fu">file.path</span>(tables_dir, <span class="st">"region_class_summary.csv"</span>))</span>
+<span id="cb9-43"><a href="#cb9-43" aria-hidden="true" tabindex="-1"></a><span class="fu">write_csv_checked</span>(hotspot_summary, <span class="fu">file.path</span>(tables_dir, <span class="st">"hotspot_summary.csv"</span>))</span>
+<span id="cb9-44"><a href="#cb9-44" aria-hidden="true" tabindex="-1"></a><span class="fu">write_csv_checked</span>(multi_colony_consistency_summary, <span class="fu">file.path</span>(tables_dir, <span class="st">"multi_colony_consistency_summary.csv"</span>))</span>
+<span id="cb9-45"><a href="#cb9-45" aria-hidden="true" tabindex="-1"></a><span class="fu">write_csv_checked</span>(design_rule_summary, <span class="fu">file.path</span>(tables_dir, <span class="st">"design_rule_summary.csv"</span>))</span>
+<span id="cb9-46"><a href="#cb9-46" aria-hidden="true" tabindex="-1"></a><span class="fu">write_csv_checked</span>(background_variant_tables<span class="sc">$</span>all_variants, <span class="fu">file.path</span>(tables_dir, <span class="st">"all_variants_with_score_sv.csv"</span>))</span>
+<span id="cb9-47"><a href="#cb9-47" aria-hidden="true" tabindex="-1"></a><span class="fu">write_csv_checked</span>(</span>
+<span id="cb9-48"><a href="#cb9-48" aria-hidden="true" tabindex="-1"></a>  background_variant_tables<span class="sc">$</span>high_conf_non_target_variants,</span>
+<span id="cb9-49"><a href="#cb9-49" aria-hidden="true" tabindex="-1"></a>  <span class="fu">file.path</span>(tables_dir, <span class="st">"high_conf_non_target_variants.csv"</span>)</span>
+<span id="cb9-50"><a href="#cb9-50" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb9-51"><a href="#cb9-51" aria-hidden="true" tabindex="-1"></a><span class="fu">write_csv_checked</span>(background_colony_summary, <span class="fu">file.path</span>(tables_dir, <span class="st">"background_colony_summary.csv"</span>))</span>
+<span id="cb9-52"><a href="#cb9-52" aria-hidden="true" tabindex="-1"></a><span class="fu">write_csv_checked</span>(background_edit_status_summary, <span class="fu">file.path</span>(tables_dir, <span class="st">"background_edit_status_summary.csv"</span>))</span>
+<span id="cb9-53"><a href="#cb9-53" aria-hidden="true" tabindex="-1"></a><span class="fu">write_csv_checked</span>(recurrent_background_variants, <span class="fu">file.path</span>(tables_dir, <span class="st">"recurrent_background_variants.csv"</span>))</span>
+<span id="cb9-54"><a href="#cb9-54" aria-hidden="true" tabindex="-1"></a><span class="fu">write_csv_checked</span>(weighted_model_table, <span class="fu">file.path</span>(tables_dir, <span class="st">"weighted_model_coefficients.csv"</span>))</span>
+<span id="cb9-55"><a href="#cb9-55" aria-hidden="true" tabindex="-1"></a><span class="fu">write_csv_checked</span>(extended_weighted_model_table, <span class="fu">file.path</span>(tables_dir, <span class="st">"extended_weighted_model_coefficients.csv"</span>))</span>
+<span id="cb9-56"><a href="#cb9-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-57"><a href="#cb9-57" aria-hidden="true" tabindex="-1"></a>tibble<span class="sc">::</span><span class="fu">tibble</span>(</span>
+<span id="cb9-58"><a href="#cb9-58" aria-hidden="true" tabindex="-1"></a>  <span class="at">metric =</span> <span class="fu">c</span>(</span>
+<span id="cb9-59"><a href="#cb9-59" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Picked colonies"</span>,</span>
+<span id="cb9-60"><a href="#cb9-60" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Assayed colonies"</span>,</span>
+<span id="cb9-61"><a href="#cb9-61" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Edited colonies"</span>,</span>
+<span id="cb9-62"><a href="#cb9-62" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Unique picked designs"</span>,</span>
+<span id="cb9-63"><a href="#cb9-63" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Assayed designs"</span>,</span>
+<span id="cb9-64"><a href="#cb9-64" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Successful designs"</span>,</span>
+<span id="cb9-65"><a href="#cb9-65" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Direct-repeat sequence"</span>,</span>
+<span id="cb9-66"><a href="#cb9-66" aria-hidden="true" tabindex="-1"></a>    <span class="st">"High-confidence non-target variants"</span></span>
+<span id="cb9-67"><a href="#cb9-67" aria-hidden="true" tabindex="-1"></a>  ),</span>
+<span id="cb9-68"><a href="#cb9-68" aria-hidden="true" tabindex="-1"></a>  <span class="at">value =</span> <span class="fu">c</span>(</span>
+<span id="cb9-69"><a href="#cb9-69" aria-hidden="true" tabindex="-1"></a>    <span class="fu">nrow</span>(colony_assays),</span>
+<span id="cb9-70"><a href="#cb9-70" aria-hidden="true" tabindex="-1"></a>    <span class="fu">sum</span>(colony_assays<span class="sc">$</span>assayed_colony),</span>
+<span id="cb9-71"><a href="#cb9-71" aria-hidden="true" tabindex="-1"></a>    <span class="fu">sum</span>(colony_assays<span class="sc">$</span>edited_colony),</span>
+<span id="cb9-72"><a href="#cb9-72" aria-hidden="true" tabindex="-1"></a>    <span class="fu">nrow</span>(design_outcomes),</span>
+<span id="cb9-73"><a href="#cb9-73" aria-hidden="true" tabindex="-1"></a>    <span class="fu">sum</span>(design_outcomes<span class="sc">$</span>assayed_design),</span>
+<span id="cb9-74"><a href="#cb9-74" aria-hidden="true" tabindex="-1"></a>    <span class="fu">sum</span>(design_outcomes<span class="sc">$</span>edited_design),</span>
+<span id="cb9-75"><a href="#cb9-75" aria-hidden="true" tabindex="-1"></a>    <span class="fu">genome_wide_dr_sequence</span>(),</span>
+<span id="cb9-76"><a href="#cb9-76" aria-hidden="true" tabindex="-1"></a>    <span class="fu">nrow</span>(background_variant_tables<span class="sc">$</span>high_conf_non_target_variants)</span>
+<span id="cb9-77"><a href="#cb9-77" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb9-78"><a href="#cb9-78" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div data-pagedtable="false">
+  <script data-pagedtable-source="" type="application/json">
+{"columns":[{"label":["metric"],"name":[1],"type":["chr"],"align":["left"]},{"label":["value"],"name":[2],"type":["chr"],"align":["left"]}],"data":[{"1":"Picked colonies","2":"1152"},{"1":"Assayed colonies","2":"833"},{"1":"Edited colonies","2":"516"},{"1":"Unique picked designs","2":"577"},{"1":"Assayed designs","2":"530"},{"1":"Successful designs","2":"372"},{"1":"Direct-repeat sequence","2":"TAATTTCTACTCTTGTAGAT"},{"1":"High-confidence non-target variants","2":"23"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+</div>
+</div>
+</section>
+<section id="candidate-main-figure-panels" class="level2">
+<h2 class="anchored" data-anchor-id="candidate-main-figure-panels">Candidate main-figure panels</h2>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>pam_distance_heatmap <span class="ot">&lt;-</span> <span class="fu">plot_genome_wide_pam_distance_heatmap</span>(pam_heatmap_summary)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>deepcpf1_plot <span class="ot">&lt;-</span> <span class="fu">plot_genome_wide_rate_bars</span>(</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  deepcpf1_summary,</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">x_col =</span> <span class="st">"deepcpf1_quartile"</span>,</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">x_label =</span> <span class="st">"DeepCpf1 quartile"</span>,</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">title =</span> <span class="st">"Higher DeepCpf1 scores enrich successful designs"</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>pam_upstream_plot <span class="ot">&lt;-</span> <span class="fu">plot_genome_wide_rate_bars</span>(</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>  pam_upstream_summary,</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">x_col =</span> <span class="st">"pam_upstream_nt"</span>,</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">x_label =</span> <span class="st">"5' PAM base (N in NTTTV)"</span>,</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">title =</span> <span class="st">"The upstream PAM base adds additional design signal"</span></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>rule_count_plot <span class="ot">&lt;-</span> <span class="fu">plot_genome_wide_rate_bars</span>(</span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>  rule_count_summary,</span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">x_col =</span> <span class="st">"preferred_rule_count"</span>,</span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">x_label =</span> <span class="st">"Preferred-rule count"</span>,</span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">title =</span> <span class="st">"Simple rule bundles separate strong from weak designs"</span></span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>multi_colony_consistency_plot <span class="ot">&lt;-</span> <span class="fu">plot_multi_colony_consistency</span>(multi_colony_consistency_summary)</span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>extended_model_plot <span class="ot">&lt;-</span> <span class="fu">plot_genome_wide_weighted_model</span>(extended_weighted_model_table)</span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a><span class="fu">safe_ggsave</span>(pam_distance_heatmap, <span class="fu">file.path</span>(plots_dir, <span class="st">"pam_distance_heatmap.pdf"</span>), <span class="at">width =</span> <span class="fl">6.5</span>, <span class="at">height =</span> <span class="fl">4.5</span>)</span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a><span class="fu">safe_ggsave</span>(deepcpf1_plot, <span class="fu">file.path</span>(plots_dir, <span class="st">"deepcpf1_quartiles.pdf"</span>), <span class="at">width =</span> <span class="fl">5.2</span>, <span class="at">height =</span> <span class="fl">4.8</span>)</span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a><span class="fu">safe_ggsave</span>(pam_upstream_plot, <span class="fu">file.path</span>(plots_dir, <span class="st">"pam_upstream_nt.pdf"</span>), <span class="at">width =</span> <span class="fl">5.2</span>, <span class="at">height =</span> <span class="fl">4.8</span>)</span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a><span class="fu">safe_ggsave</span>(rule_count_plot, <span class="fu">file.path</span>(plots_dir, <span class="st">"preferred_rule_count.pdf"</span>), <span class="at">width =</span> <span class="fl">5.2</span>, <span class="at">height =</span> <span class="fl">4.8</span>)</span>
+<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a><span class="fu">safe_ggsave</span>(multi_colony_consistency_plot, <span class="fu">file.path</span>(plots_dir, <span class="st">"multi_colony_consistency.pdf"</span>), <span class="at">width =</span> <span class="fl">5.5</span>, <span class="at">height =</span> <span class="dv">5</span>)</span>
+<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a><span class="fu">safe_ggsave</span>(extended_model_plot, <span class="fu">file.path</span>(plots_dir, <span class="st">"extended_weighted_model_odds_ratios.pdf"</span>), <span class="at">width =</span> <span class="fl">8.5</span>, <span class="at">height =</span> <span class="fl">5.5</span>)</span>
+<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a>candidate_main_figure <span class="ot">&lt;-</span> (</span>
+<span id="cb10-31"><a href="#cb10-31" aria-hidden="true" tabindex="-1"></a>  (pam_distance_heatmap <span class="sc">|</span> deepcpf1_plot) <span class="sc">/</span></span>
+<span id="cb10-32"><a href="#cb10-32" aria-hidden="true" tabindex="-1"></a>  (pam_upstream_plot <span class="sc">|</span> multi_colony_consistency_plot)</span>
+<span id="cb10-33"><a href="#cb10-33" aria-hidden="true" tabindex="-1"></a>) <span class="sc">+</span></span>
+<span id="cb10-34"><a href="#cb10-34" aria-hidden="true" tabindex="-1"></a>  patchwork<span class="sc">::</span><span class="fu">plot_annotation</span>(<span class="at">tag_levels =</span> <span class="st">"A"</span>)</span>
+<span id="cb10-35"><a href="#cb10-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-36"><a href="#cb10-36" aria-hidden="true" tabindex="-1"></a><span class="fu">safe_ggsave</span>(</span>
+<span id="cb10-37"><a href="#cb10-37" aria-hidden="true" tabindex="-1"></a>  candidate_main_figure,</span>
+<span id="cb10-38"><a href="#cb10-38" aria-hidden="true" tabindex="-1"></a>  <span class="fu">file.path</span>(plots_dir, <span class="st">"candidate_main_figure_design_rules.pdf"</span>),</span>
+<span id="cb10-39"><a href="#cb10-39" aria-hidden="true" tabindex="-1"></a>  <span class="at">width =</span> <span class="dv">11</span>,</span>
+<span id="cb10-40"><a href="#cb10-40" aria-hidden="true" tabindex="-1"></a>  <span class="at">height =</span> <span class="dv">10</span></span>
+<span id="cb10-41"><a href="#cb10-41" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb10-42"><a href="#cb10-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-43"><a href="#cb10-43" aria-hidden="true" tabindex="-1"></a>candidate_main_figure</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="06_genome_wide_design_rules_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="pam-5-base-and-direct-repeat-folding" class="level2">
+<h2 class="anchored" data-anchor-id="pam-5-base-and-direct-repeat-folding">PAM 5’ base and direct-repeat folding</h2>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>dr_perturbed_plot <span class="ot">&lt;-</span> <span class="fu">plot_genome_wide_rate_bars</span>(</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  dr_perturbed_summary,</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">x_col =</span> <span class="st">"dr_perturbed_flag"</span>,</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">x_label =</span> <span class="st">"DR folding call"</span>,</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">title =</span> <span class="st">"Perturbed DR folding alone was not a major failure mode"</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>dr_canonical_plot <span class="ot">&lt;-</span> <span class="fu">plot_genome_wide_rate_bars</span>(</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>  dr_canonical_summary,</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">x_col =</span> <span class="st">"dr_canonical_flag"</span>,</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">x_label =</span> <span class="st">"DR structure class"</span>,</span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">title =</span> <span class="st">"Canonical DR structures were not strongly enriched"</span></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>dr_spacer_pair_plot <span class="ot">&lt;-</span> <span class="fu">plot_genome_wide_rate_bars</span>(</span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>  dr_spacer_pair_summary,</span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">x_col =</span> <span class="st">"dr_spacer_pair_flag"</span>,</span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">x_label =</span> <span class="st">"DR-spacer pairing"</span>,</span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">title =</span> <span class="st">"Any DR-spacer pairing had only a weak marginal effect"</span></span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a><span class="fu">safe_ggsave</span>(dr_perturbed_plot, <span class="fu">file.path</span>(plots_dir, <span class="st">"dr_perturbed_summary.pdf"</span>), <span class="at">width =</span> <span class="fl">5.4</span>, <span class="at">height =</span> <span class="fl">4.8</span>)</span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a><span class="fu">safe_ggsave</span>(dr_canonical_plot, <span class="fu">file.path</span>(plots_dir, <span class="st">"dr_canonical_summary.pdf"</span>), <span class="at">width =</span> <span class="fl">5.4</span>, <span class="at">height =</span> <span class="fl">4.8</span>)</span>
+<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a><span class="fu">safe_ggsave</span>(dr_spacer_pair_plot, <span class="fu">file.path</span>(plots_dir, <span class="st">"dr_spacer_pair_summary.pdf"</span>), <span class="at">width =</span> <span class="fl">5.4</span>, <span class="at">height =</span> <span class="fl">4.8</span>)</span>
+<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a>dr_support_figure <span class="ot">&lt;-</span> (</span>
+<span id="cb11-25"><a href="#cb11-25" aria-hidden="true" tabindex="-1"></a>  pam_upstream_plot <span class="sc">|</span> dr_perturbed_plot <span class="sc">|</span> dr_spacer_pair_plot</span>
+<span id="cb11-26"><a href="#cb11-26" aria-hidden="true" tabindex="-1"></a>) <span class="sc">+</span></span>
+<span id="cb11-27"><a href="#cb11-27" aria-hidden="true" tabindex="-1"></a>  patchwork<span class="sc">::</span><span class="fu">plot_annotation</span>(<span class="at">tag_levels =</span> <span class="st">"A"</span>)</span>
+<span id="cb11-28"><a href="#cb11-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-29"><a href="#cb11-29" aria-hidden="true" tabindex="-1"></a><span class="fu">safe_ggsave</span>(</span>
+<span id="cb11-30"><a href="#cb11-30" aria-hidden="true" tabindex="-1"></a>  dr_support_figure,</span>
+<span id="cb11-31"><a href="#cb11-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">file.path</span>(plots_dir, <span class="st">"pam_upstream_and_dr_folding.pdf"</span>),</span>
+<span id="cb11-32"><a href="#cb11-32" aria-hidden="true" tabindex="-1"></a>  <span class="at">width =</span> <span class="dv">15</span>,</span>
+<span id="cb11-33"><a href="#cb11-33" aria-hidden="true" tabindex="-1"></a>  <span class="at">height =</span> <span class="fl">4.8</span></span>
+<span id="cb11-34"><a href="#cb11-34" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb11-35"><a href="#cb11-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-36"><a href="#cb11-36" aria-hidden="true" tabindex="-1"></a>dr_support_figure</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="06_genome_wide_design_rules_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>ntttv_pattern_summary <span class="sc">%&gt;%</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">design_success_rate =</span> scales<span class="sc">::</span><span class="fu">percent</span>(design_success_rate, <span class="at">accuracy =</span> <span class="fl">0.1</span>),</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">colony_edit_rate =</span> scales<span class="sc">::</span><span class="fu">percent</span>(colony_edit_rate, <span class="at">accuracy =</span> <span class="fl">0.1</span>)</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(ntttv_pattern, total_guides, design_success_rate, colony_edit_rate) <span class="sc">%&gt;%</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">slice_head</span>(<span class="at">n =</span> <span class="dv">12</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div data-pagedtable="false">
+  <script data-pagedtable-source="" type="application/json">
+{"columns":[{"label":["ntttv_pattern"],"name":[1],"type":["chr"],"align":["left"]},{"label":["total_guides"],"name":[2],"type":["int"],"align":["right"]},{"label":["design_success_rate"],"name":[3],"type":["chr"],"align":["left"]},{"label":["colony_edit_rate"],"name":[4],"type":["chr"],"align":["left"]}],"data":[{"1":"TTTTG","2":"89","3":"65.2%","4":"55.3%"},{"1":"TTTTC","2":"60","3":"88.3%","4":"79.6%"},{"1":"TTTTA","2":"57","3":"78.9%","4":"70.5%"},{"1":"ATTTG","2":"54","3":"55.6%","4":"45.0%"},{"1":"ATTTA","2":"44","3":"79.5%","4":"69.7%"},{"1":"CTTTG","2":"41","3":"41.5%","4":"36.8%"},{"1":"CTTTA","2":"38","3":"60.5%","4":"50.8%"},{"1":"ATTTC","2":"36","3":"75.0%","4":"67.9%"},{"1":"CTTTC","2":"34","3":"79.4%","4":"74.1%"},{"1":"GTTTA","2":"28","3":"64.3%","4":"66.7%"},{"1":"GTTTC","2":"27","3":"88.9%","4":"83.7%"},{"1":"GTTTG","2":"22","3":"68.2%","4":"52.6%"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+</div>
+</div>
+</section>
+<section id="gc-dependencies-across-guide-and-donor" class="level2">
+<h2 class="anchored" data-anchor-id="gc-dependencies-across-guide-and-donor">GC dependencies across guide and donor</h2>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>guide_gc_23_plot <span class="ot">&lt;-</span> <span class="fu">plot_genome_wide_rate_bars</span>(</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  guide_gc_23_summary,</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">x_col =</span> <span class="st">"guide_gc_23_bin"</span>,</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">x_label =</span> <span class="st">"Guide GC (23 nt)"</span>,</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">title =</span> <span class="st">"Full spacer GC content"</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>guide_gc_20_plot <span class="ot">&lt;-</span> <span class="fu">plot_genome_wide_rate_bars</span>(</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>  guide_gc_20_summary,</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">x_col =</span> <span class="st">"guide_gc_20_bin"</span>,</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">x_label =</span> <span class="st">"Guide GC (first 20 nt)"</span>,</span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">title =</span> <span class="st">"Guide GC, first 20 nt"</span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>guide_gc_18_plot <span class="ot">&lt;-</span> <span class="fu">plot_genome_wide_rate_bars</span>(</span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>  guide_gc_18_summary,</span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">x_col =</span> <span class="st">"guide_gc_18_bin"</span>,</span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">x_label =</span> <span class="st">"Guide GC (first 18 nt)"</span>,</span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">title =</span> <span class="st">"Guide GC, first 18 nt"</span></span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>donor_wt_gc_plot <span class="ot">&lt;-</span> <span class="fu">plot_genome_wide_rate_bars</span>(</span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>  donor_wt_gc_summary,</span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>  <span class="at">x_col =</span> <span class="st">"donor_wt_gc_bin"</span>,</span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>  <span class="at">x_label =</span> <span class="st">"WT donor GC"</span>,</span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a>  <span class="at">title =</span> <span class="st">"WT donor GC content"</span></span>
+<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a><span class="fu">safe_ggsave</span>(guide_gc_23_plot, <span class="fu">file.path</span>(plots_dir, <span class="st">"guide_gc_23_summary.pdf"</span>), <span class="at">width =</span> <span class="fl">5.2</span>, <span class="at">height =</span> <span class="fl">4.8</span>)</span>
+<span id="cb13-27"><a href="#cb13-27" aria-hidden="true" tabindex="-1"></a><span class="fu">safe_ggsave</span>(guide_gc_20_plot, <span class="fu">file.path</span>(plots_dir, <span class="st">"guide_gc_20_summary.pdf"</span>), <span class="at">width =</span> <span class="fl">5.2</span>, <span class="at">height =</span> <span class="fl">4.8</span>)</span>
+<span id="cb13-28"><a href="#cb13-28" aria-hidden="true" tabindex="-1"></a><span class="fu">safe_ggsave</span>(guide_gc_18_plot, <span class="fu">file.path</span>(plots_dir, <span class="st">"guide_gc_18_summary.pdf"</span>), <span class="at">width =</span> <span class="fl">5.2</span>, <span class="at">height =</span> <span class="fl">4.8</span>)</span>
+<span id="cb13-29"><a href="#cb13-29" aria-hidden="true" tabindex="-1"></a><span class="fu">safe_ggsave</span>(donor_wt_gc_plot, <span class="fu">file.path</span>(plots_dir, <span class="st">"donor_wt_gc_summary.pdf"</span>), <span class="at">width =</span> <span class="fl">5.2</span>, <span class="at">height =</span> <span class="fl">4.8</span>)</span>
+<span id="cb13-30"><a href="#cb13-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-31"><a href="#cb13-31" aria-hidden="true" tabindex="-1"></a>gc_dependency_figure <span class="ot">&lt;-</span> (</span>
+<span id="cb13-32"><a href="#cb13-32" aria-hidden="true" tabindex="-1"></a>  (guide_gc_23_plot <span class="sc">|</span> guide_gc_20_plot) <span class="sc">/</span></span>
+<span id="cb13-33"><a href="#cb13-33" aria-hidden="true" tabindex="-1"></a>  (guide_gc_18_plot <span class="sc">|</span> donor_wt_gc_plot)</span>
+<span id="cb13-34"><a href="#cb13-34" aria-hidden="true" tabindex="-1"></a>) <span class="sc">+</span></span>
+<span id="cb13-35"><a href="#cb13-35" aria-hidden="true" tabindex="-1"></a>  patchwork<span class="sc">::</span><span class="fu">plot_annotation</span>(<span class="at">tag_levels =</span> <span class="st">"A"</span>)</span>
+<span id="cb13-36"><a href="#cb13-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-37"><a href="#cb13-37" aria-hidden="true" tabindex="-1"></a><span class="fu">safe_ggsave</span>(</span>
+<span id="cb13-38"><a href="#cb13-38" aria-hidden="true" tabindex="-1"></a>  gc_dependency_figure,</span>
+<span id="cb13-39"><a href="#cb13-39" aria-hidden="true" tabindex="-1"></a>  <span class="fu">file.path</span>(plots_dir, <span class="st">"gc_dependency_panels.pdf"</span>),</span>
+<span id="cb13-40"><a href="#cb13-40" aria-hidden="true" tabindex="-1"></a>  <span class="at">width =</span> <span class="dv">11</span>,</span>
+<span id="cb13-41"><a href="#cb13-41" aria-hidden="true" tabindex="-1"></a>  <span class="at">height =</span> <span class="fl">9.5</span></span>
+<span id="cb13-42"><a href="#cb13-42" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb13-43"><a href="#cb13-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-44"><a href="#cb13-44" aria-hidden="true" tabindex="-1"></a>gc_dependency_figure</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="06_genome_wide_design_rules_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="colony-concordance-across-repeated-barcodes" class="level2">
+<h2 class="anchored" data-anchor-id="colony-concordance-across-repeated-barcodes">Colony concordance across repeated barcodes</h2>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>multi_colony_consistency_summary</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div data-pagedtable="false">
+  <script data-pagedtable-source="" type="application/json">
+{"columns":[{"label":["assayed_colonies"],"name":[1],"type":["int"],"align":["right"]},{"label":["consistency"],"name":[2],"type":["fct"],"align":["left"]},{"label":["design_count"],"name":[3],"type":["int"],"align":["right"]},{"label":["total_designs"],"name":[4],"type":["int"],"align":["right"]},{"label":["fraction"],"name":[5],"type":["dbl"],"align":["right"]}],"data":[{"1":"2","2":"All edited","3":"106","4":"211","5":"0.5023697"},{"1":"2","2":"Mixed","3":"53","4":"211","5":"0.2511848"},{"1":"2","2":"None edited","3":"52","4":"211","5":"0.2464455"},{"1":"3","2":"All edited","3":"16","4":"46","5":"0.3478261"},{"1":"3","2":"Mixed","3":"13","4":"46","5":"0.2826087"},{"1":"3","2":"None edited","3":"17","4":"46","5":"0.3695652"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+</div>
+</div>
+</section>
+<section id="non-target-variants-and-score.sv" class="level2">
+<h2 class="anchored" data-anchor-id="non-target-variants-and-score.sv">Non-target variants and SCORE.SV</h2>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>background_variant_burden_plot <span class="ot">&lt;-</span> <span class="fu">plot_background_variant_burden</span>(background_colony_summary)</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="fu">safe_ggsave</span>(</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>  background_variant_burden_plot,</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">file.path</span>(plots_dir, <span class="st">"background_variant_burden.pdf"</span>),</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">width =</span> <span class="fl">5.5</span>,</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">height =</span> <span class="dv">5</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 597 rows containing missing values or values outside the scale range
+(`geom_point()`).</code></pre>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>background_variant_burden_plot</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 561 rows containing missing values or values outside the scale range
+(`geom_point()`).</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="06_genome_wide_design_rules_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>background_edit_status_summary <span class="sc">%&gt;%</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">mean_high_conf_non_target_count =</span> <span class="fu">round</span>(mean_high_conf_non_target_count, <span class="dv">3</span>),</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">median_high_conf_non_target_count =</span> <span class="fu">round</span>(median_high_conf_non_target_count, <span class="dv">3</span>),</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">frac_with_any_high_conf_non_target =</span> scales<span class="sc">::</span><span class="fu">percent</span>(frac_with_any_high_conf_non_target, <span class="at">accuracy =</span> <span class="fl">0.1</span>),</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">mean_max_non_target_score_sv =</span> <span class="fu">round</span>(mean_max_non_target_score_sv, <span class="dv">3</span>)</span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div data-pagedtable="false">
+  <script data-pagedtable-source="" type="application/json">
+{"columns":[{"label":["target_edit_status"],"name":[1],"type":["chr"],"align":["left"]},{"label":["colony_count"],"name":[2],"type":["int"],"align":["right"]},{"label":["mean_high_conf_non_target_count"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["median_high_conf_non_target_count"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["frac_with_any_high_conf_non_target"],"name":[5],"type":["chr"],"align":["left"]},{"label":["mean_max_non_target_score_sv"],"name":[6],"type":["dbl"],"align":["right"]}],"data":[{"1":"Edited target","2":"516","3":"0.021","4":"0","5":"1.9%","6":"0.175"},{"1":"Unedited target","2":"636","3":"0.019","4":"0","5":"1.9%","6":"0.312"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+</div>
+</div>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>recurrent_background_variants</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div data-pagedtable="false">
+  <script data-pagedtable-source="" type="application/json">
+{"columns":[{"label":["variant_id"],"name":[1],"type":["chr"],"align":["left"]},{"label":["chr"],"name":[2],"type":["chr"],"align":["left"]},{"label":["pos"],"name":[3],"type":["int"],"align":["right"]},{"label":["ref"],"name":[4],"type":["chr"],"align":["left"]},{"label":["alt"],"name":[5],"type":["chr"],"align":["left"]},{"label":["nearest_score_sv"],"name":[6],"type":["dbl"],"align":["right"]},{"label":["sample_count"],"name":[7],"type":["int"],"align":["right"]}],"data":[{"1":"chrII:389426:CTTCG:TGC","2":"chrII","3":"389426","4":"CTTCG","5":"TGC","6":"0.001111745","7":"2"},{"1":"chrIV:1524974:A:G","2":"chrIV","3":"1524974","4":"A","5":"G","6":"0.925348667","7":"2"},{"1":"chrVI:100381:AGTGACAG:A","2":"chrVI","3":"100381","4":"AGTGACAG","5":"A","6":"0.020490725","7":"2"},{"1":"chrXIV:312328:AACG:A","2":"chrXIV","3":"312328","4":"AACG","5":"A","6":"0.004678962","7":"2"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+</div>
+</div>
+</section>
+<section id="secondary-filters-and-contextual-checks" class="level2">
+<h2 class="anchored" data-anchor-id="secondary-filters-and-contextual-checks">Secondary filters and contextual checks</h2>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>attrition_plot <span class="ot">&lt;-</span> <span class="fu">plot_genome_wide_stage_attrition</span>(stage_summary)</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>coverage_qc_plot <span class="ot">&lt;-</span> <span class="fu">plot_genome_wide_coverage_qc</span>(colony_assays)</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>max_a_plot <span class="ot">&lt;-</span> <span class="fu">plot_genome_wide_rate_bars</span>(</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>  max_a_summary,</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">x_col =</span> <span class="st">"max_a"</span>,</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">x_label =</span> <span class="st">"max A run"</span>,</span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">title =</span> <span class="st">"Long A-runs are at most a secondary filter"</span></span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>max_t_plot <span class="ot">&lt;-</span> <span class="fu">plot_genome_wide_rate_bars</span>(</span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>  max_t_summary,</span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">x_col =</span> <span class="st">"max_t"</span>,</span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">x_label =</span> <span class="st">"max T run"</span>,</span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">title =</span> <span class="st">"T-runs were not a clean marginal failure mode"</span></span>
+<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a>region_class_plot <span class="ot">&lt;-</span> <span class="fu">plot_genome_wide_rate_bars</span>(</span>
+<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a>  region_class_summary,</span>
+<span id="cb21-17"><a href="#cb21-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">x_col =</span> <span class="st">"region_class"</span>,</span>
+<span id="cb21-18"><a href="#cb21-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">x_label =</span> <span class="st">"Variant region class"</span>,</span>
+<span id="cb21-19"><a href="#cb21-19" aria-hidden="true" tabindex="-1"></a>  <span class="at">title =</span> <span class="st">"Locus context affects editability but is not a cassette rule"</span></span>
+<span id="cb21-20"><a href="#cb21-20" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb21-21"><a href="#cb21-21" aria-hidden="true" tabindex="-1"></a>hotspot_plot <span class="ot">&lt;-</span> <span class="fu">plot_genome_wide_rate_bars</span>(</span>
+<span id="cb21-22"><a href="#cb21-22" aria-hidden="true" tabindex="-1"></a>  hotspot_summary,</span>
+<span id="cb21-23"><a href="#cb21-23" aria-hidden="true" tabindex="-1"></a>  <span class="at">x_col =</span> <span class="st">"hotspot_flag"</span>,</span>
+<span id="cb21-24"><a href="#cb21-24" aria-hidden="true" tabindex="-1"></a>  <span class="at">x_label =</span> <span class="st">"SV hotspot annotation"</span>,</span>
+<span id="cb21-25"><a href="#cb21-25" aria-hidden="true" tabindex="-1"></a>  <span class="at">title =</span> <span class="st">"SV hotspots are a contextual caution flag"</span></span>
+<span id="cb21-26"><a href="#cb21-26" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb21-27"><a href="#cb21-27" aria-hidden="true" tabindex="-1"></a>weighted_model_plot <span class="ot">&lt;-</span> <span class="fu">plot_genome_wide_weighted_model</span>(weighted_model_table)</span>
+<span id="cb21-28"><a href="#cb21-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-29"><a href="#cb21-29" aria-hidden="true" tabindex="-1"></a><span class="fu">safe_ggsave</span>(attrition_plot, <span class="fu">file.path</span>(plots_dir, <span class="st">"attrition_plot.pdf"</span>), <span class="at">width =</span> <span class="dv">8</span>, <span class="at">height =</span> <span class="fl">4.5</span>)</span>
+<span id="cb21-30"><a href="#cb21-30" aria-hidden="true" tabindex="-1"></a><span class="fu">safe_ggsave</span>(coverage_qc_plot, <span class="fu">file.path</span>(plots_dir, <span class="st">"coverage_qc.pdf"</span>), <span class="at">width =</span> <span class="fl">5.5</span>, <span class="at">height =</span> <span class="fl">5.5</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>`geom_smooth()` using formula = 'y ~ x'</code></pre>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">safe_ggsave</span>(max_a_plot, <span class="fu">file.path</span>(plots_dir, <span class="st">"max_a_summary.pdf"</span>), <span class="at">width =</span> <span class="fl">5.2</span>, <span class="at">height =</span> <span class="fl">4.8</span>)</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="fu">safe_ggsave</span>(max_t_plot, <span class="fu">file.path</span>(plots_dir, <span class="st">"max_t_summary.pdf"</span>), <span class="at">width =</span> <span class="fl">5.2</span>, <span class="at">height =</span> <span class="fl">4.8</span>)</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a><span class="fu">safe_ggsave</span>(region_class_plot, <span class="fu">file.path</span>(plots_dir, <span class="st">"region_class_summary.pdf"</span>), <span class="at">width =</span> <span class="fl">5.6</span>, <span class="at">height =</span> <span class="fl">4.8</span>)</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a><span class="fu">safe_ggsave</span>(hotspot_plot, <span class="fu">file.path</span>(plots_dir, <span class="st">"hotspot_summary.pdf"</span>), <span class="at">width =</span> <span class="fl">5.2</span>, <span class="at">height =</span> <span class="fl">4.8</span>)</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a><span class="fu">safe_ggsave</span>(weighted_model_plot, <span class="fu">file.path</span>(plots_dir, <span class="st">"weighted_model_odds_ratios.pdf"</span>), <span class="at">width =</span> <span class="fl">8.5</span>, <span class="at">height =</span> <span class="fl">4.8</span>)</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>supplementary_figure <span class="ot">&lt;-</span> (</span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>  (attrition_plot <span class="sc">|</span> coverage_qc_plot) <span class="sc">/</span></span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>  (max_a_plot <span class="sc">|</span> max_t_plot) <span class="sc">/</span></span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a>  (region_class_plot <span class="sc">|</span> hotspot_plot)</span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a>) <span class="sc">+</span></span>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a>  patchwork<span class="sc">::</span><span class="fu">plot_annotation</span>(<span class="at">tag_levels =</span> <span class="st">"A"</span>)</span>
+<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a><span class="fu">safe_ggsave</span>(</span>
+<span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a>  supplementary_figure,</span>
+<span id="cb23-16"><a href="#cb23-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">file.path</span>(plots_dir, <span class="st">"supplementary_design_rule_context.pdf"</span>),</span>
+<span id="cb23-17"><a href="#cb23-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">width =</span> <span class="dv">11</span>,</span>
+<span id="cb23-18"><a href="#cb23-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">height =</span> <span class="dv">13</span></span>
+<span id="cb23-19"><a href="#cb23-19" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>`geom_smooth()` using formula = 'y ~ x'</code></pre>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>supplementary_figure</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>`geom_smooth()` using formula = 'y ~ x'</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="06_genome_wide_design_rules_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="rule-summary" class="level2">
+<h2 class="anchored" data-anchor-id="rule-summary">Rule summary</h2>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>design_rule_summary <span class="sc">%&gt;%</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">preferred_design_success_rate =</span> scales<span class="sc">::</span><span class="fu">percent</span>(preferred_design_success_rate, <span class="at">accuracy =</span> <span class="fl">0.1</span>),</span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">other_design_success_rate =</span> scales<span class="sc">::</span><span class="fu">percent</span>(other_design_success_rate, <span class="at">accuracy =</span> <span class="fl">0.1</span>),</span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">preferred_colony_edit_rate =</span> scales<span class="sc">::</span><span class="fu">percent</span>(preferred_colony_edit_rate, <span class="at">accuracy =</span> <span class="fl">0.1</span>),</span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">other_colony_edit_rate =</span> scales<span class="sc">::</span><span class="fu">percent</span>(other_colony_edit_rate, <span class="at">accuracy =</span> <span class="fl">0.1</span>)</span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div data-pagedtable="false">
+  <script data-pagedtable-source="" type="application/json">
+{"columns":[{"label":["priority"],"name":[1],"type":["chr"],"align":["left"]},{"label":["rule"],"name":[2],"type":["chr"],"align":["left"]},{"label":["preferred_group"],"name":[3],"type":["chr"],"align":["left"]},{"label":["other_group"],"name":[4],"type":["chr"],"align":["left"]},{"label":["preferred_designs"],"name":[5],"type":["int"],"align":["right"]},{"label":["other_designs"],"name":[6],"type":["int"],"align":["right"]},{"label":["preferred_design_success_rate"],"name":[7],"type":["chr"],"align":["left"]},{"label":["other_design_success_rate"],"name":[8],"type":["chr"],"align":["left"]},{"label":["preferred_colony_edit_rate"],"name":[9],"type":["chr"],"align":["left"]},{"label":["other_colony_edit_rate"],"name":[10],"type":["chr"],"align":["left"]},{"label":["note"],"name":[11],"type":["chr"],"align":["left"]}],"data":[{"1":"Primary","2":"Prefer TTTA or TTTC PAMs over TTTG","3":"TTTA or TTTC","4":"TTTG","5":"324","6":"206","7":"77.8%","8":"58.3%","9":"70.6%","10":"48.6%","11":"Consistent in both marginal summaries and the weighted model."},{"1":"Primary","2":"Place the edit 1-17 nt from the PAM","3":"1-17 nt from PAM","4":"PAM-overlapping or 18-23 nt","5":"401","6":"129","7":"75.6%","8":"53.5%","9":"67.2%","10":"44.9%","11":"PAM-overlapping and 18-23 nt designs were the main distance failures."},{"1":"Primary","2":"Prioritize guides with higher DeepCpf1 scores","3":"DeepCpf1 Q4","4":"DeepCpf1 Q1","5":"125","6":"137","7":"77.6%","8":"60.6%","9":"75.4%","10":"53.5%","11":"Treat the model score as a prioritization signal, not an absolute cutoff."},{"1":"Primary","2":"Best simple bundle: preferred PAM + 1-17 nt distance + DeepCpf1 above the median","3":"All 3 preferred rules","4":"Anything else","5":"135","6":"395","7":"85.9%","8":"64.8%","9":"80.4%","10":"55.8%","11":"This is the cleanest simple design bundle in the dataset."},{"1":"Secondary","2":"Use long A-runs only as a tie-breaker filter","3":"max_A < 5","4":"max_A >= 5","5":"499","6":"31","7":"70.9%","8":"58.1%","9":"62.4%","10":"55.1%","11":"The drop for long A-runs was visible only in a small subset."},{"1":"Context","2":"Avoid SV hotspot loci if you have equivalent alternatives","3":"Not in SV hotspot","4":"SV hotspot","5":"510","6":"20","7":"70.8%","8":"55.0%","9":"62.1%","10":"57.1%","11":"Small sample size; useful as a contextual filter, not a primary rule."}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+</div>
+</div>
+</section>
+<section id="weighted-model-coefficients" class="level2">
+<h2 class="anchored" data-anchor-id="weighted-model-coefficients">Weighted model coefficients</h2>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>weighted_model_table <span class="sc">%&gt;%</span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(</span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>    feature_group,</span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>    term_label,</span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>    odds_ratio,</span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>    odds_ratio_low,</span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a>    odds_ratio_high,</span>
+<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a>    p.value</span>
+<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb28-11"><a href="#cb28-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">odds_ratio =</span> <span class="fu">round</span>(odds_ratio, <span class="dv">3</span>),</span>
+<span id="cb28-12"><a href="#cb28-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">odds_ratio_low =</span> <span class="fu">round</span>(odds_ratio_low, <span class="dv">3</span>),</span>
+<span id="cb28-13"><a href="#cb28-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">odds_ratio_high =</span> <span class="fu">round</span>(odds_ratio_high, <span class="dv">3</span>),</span>
+<span id="cb28-14"><a href="#cb28-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">p.value =</span> <span class="fu">signif</span>(p.value, <span class="dv">3</span>)</span>
+<span id="cb28-15"><a href="#cb28-15" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div data-pagedtable="false">
+  <script data-pagedtable-source="" type="application/json">
+{"columns":[{"label":["feature_group"],"name":[1],"type":["chr"],"align":["left"]},{"label":["term_label"],"name":[2],"type":["chr"],"align":["left"]},{"label":["odds_ratio"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["odds_ratio_low"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["odds_ratio_high"],"name":[5],"type":["dbl"],"align":["right"]},{"label":["p.value"],"name":[6],"type":["dbl"],"align":["right"]}],"data":[{"1":"Round","2":"Round 2 vs Round 1","3":"1.076","4":"0.747","5":"1.558","6":"6.98e-01"},{"1":"PAM","2":"TTTC vs TTTA","3":"1.675","4":"1.119","5":"2.521","6":"1.26e-02"},{"1":"PAM","2":"TTTG vs TTTA","3":"0.555","4":"0.389","5":"0.791","6":"1.17e-03"},{"1":"PAM","2":"7-11 nt vs 1-6 nt","3":"1.112","4":"0.713","5":"1.745","6":"6.41e-01"},{"1":"PAM","2":"12-17 nt vs 1-6 nt","3":"0.940","4":"0.631","5":"1.402","6":"7.60e-01"},{"1":"PAM","2":"18-23 nt vs 1-6 nt","3":"0.351","4":"0.212","5":"0.576","6":"3.89e-05"},{"1":"PAM","2":"PAM-overlap vs 1-6 nt","3":"0.442","4":"0.263","5":"0.740","6":"1.92e-03"},{"1":"Guide score","2":"DeepCpf1 score","3":"5.929","4":"2.693","5":"13.208","6":"1.13e-05"},{"1":"Homopolymers","2":"max A run","3":"1.095","4":"0.951","5":"1.264","6":"2.10e-01"},{"1":"Homopolymers","2":"max T run","3":"1.406","4":"1.108","5":"1.791","6":"5.35e-03"},{"1":"Variant size","2":"Variant length difference","3":"1.052","4":"0.964","5":"1.189","6":"3.16e-01"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+</div>
+</div>
+</section>
+<section id="extended-model-coefficients" class="level2">
+<h2 class="anchored" data-anchor-id="extended-model-coefficients">Extended model coefficients</h2>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>extended_weighted_model_table <span class="sc">%&gt;%</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>    feature_group,</span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>    term_label,</span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>    odds_ratio,</span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>    odds_ratio_low,</span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>    odds_ratio_high,</span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a>    p.value</span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">odds_ratio =</span> <span class="fu">round</span>(odds_ratio, <span class="dv">3</span>),</span>
+<span id="cb29-12"><a href="#cb29-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">odds_ratio_low =</span> <span class="fu">round</span>(odds_ratio_low, <span class="dv">3</span>),</span>
+<span id="cb29-13"><a href="#cb29-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">odds_ratio_high =</span> <span class="fu">round</span>(odds_ratio_high, <span class="dv">3</span>),</span>
+<span id="cb29-14"><a href="#cb29-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">p.value =</span> <span class="fu">signif</span>(p.value, <span class="dv">3</span>)</span>
+<span id="cb29-15"><a href="#cb29-15" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div data-pagedtable="false">
+  <script data-pagedtable-source="" type="application/json">
+{"columns":[{"label":["feature_group"],"name":[1],"type":["chr"],"align":["left"]},{"label":["term_label"],"name":[2],"type":["chr"],"align":["left"]},{"label":["odds_ratio"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["odds_ratio_low"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["odds_ratio_high"],"name":[5],"type":["dbl"],"align":["right"]},{"label":["p.value"],"name":[6],"type":["dbl"],"align":["right"]}],"data":[{"1":"PAM","2":"TTTC vs TTTA","3":"1.859","4":"1.228","5":"2.832","6":"3.57e-03"},{"1":"PAM","2":"TTTG vs TTTA","3":"0.568","4":"0.394","5":"0.815","6":"2.26e-03"},{"1":"PAM","2":"7-11 nt vs 1-6 nt","3":"1.036","4":"0.659","5":"1.640","6":"8.77e-01"},{"1":"PAM","2":"12-17 nt vs 1-6 nt","3":"0.929","4":"0.617","5":"1.399","6":"7.23e-01"},{"1":"PAM","2":"18-23 nt vs 1-6 nt","3":"0.347","4":"0.210","5":"0.569","6":"3.21e-05"},{"1":"PAM","2":"PAM-overlap vs 1-6 nt","3":"0.421","4":"0.250","5":"0.705","6":"1.04e-03"},{"1":"Guide score","2":"DeepCpf1 score","3":"4.785","4":"2.193","5":"10.536","6":"9.10e-05"},{"1":"PAM upstream base","2":"PAM 5' A vs C","3":"1.432","4":"0.924","5":"2.223","6":"1.09e-01"},{"1":"PAM upstream base","2":"PAM 5' G vs C","3":"1.938","4":"1.172","5":"3.236","6":"1.05e-02"},{"1":"PAM upstream base","2":"PAM 5' T vs C","3":"1.825","4":"1.218","5":"2.739","6":"3.57e-03"},{"1":"GC content","2":"Guide GC (first 20 nt)","3":"0.314","4":"0.057","5":"1.701","6":"1.80e-01"},{"1":"GC content","2":"WT donor GC","3":"0.029","4":"0.001","5":"0.843","6":"3.99e-02"},{"1":"DR folding","2":"Any DR-spacer pairing","3":"0.819","4":"0.583","5":"1.152","6":"2.50e-01"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+</div>
+</div>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

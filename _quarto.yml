@@ -1,0 +1,16 @@
+project:
+  type: default
+  output-dir: results/site
+
+execute:
+  echo: true
+  warning: true
+  message: false
+  freeze: auto
+
+format:
+  html:
+    toc: true
+    toc-depth: 2
+    code-fold: show
+    df-print: paged

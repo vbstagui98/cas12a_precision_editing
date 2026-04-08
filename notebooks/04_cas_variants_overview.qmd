@@ -1,0 +1,252 @@
+---
+title: "Robust Cas Variant Overview"
+format: html
+editor: visual
+---
+
+## Purpose
+
+This notebook replaces the mixed GFP ON/OFF Cas-variant notebook with a structured workflow that rebuilds processed tables from raw inputs and exports the main panels under `results/04_cas_variants_overview/`.
+
+## Setup
+
+```{r}
+resolve_project_root <- function() {
+  rstudio_path <- ""
+  if (requireNamespace("rstudioapi", quietly = TRUE)) {
+    rstudio_path <- tryCatch(rstudioapi::getSourceEditorContext()$path, error = function(e) "")
+    if (!nzchar(rstudio_path)) {
+      rstudio_path <- tryCatch(rstudioapi::getActiveDocumentContext()$path, error = function(e) "")
+    }
+  }
+
+  search_roots <- unique(c(
+    Sys.getenv("CAS12A_NOTEBOOK_PROJECT_ROOT", unset = ""),
+    tryCatch(knitr::current_input(dir = TRUE), error = function(e) ""),
+    rstudio_path,
+    getwd(),
+    normalizePath(file.path(getwd(), ".."), mustWork = FALSE),
+    normalizePath(file.path(getwd(), "..", ".."), mustWork = FALSE)
+  ))
+  search_roots <- search_roots[nzchar(search_roots)]
+
+  for (root in search_roots) {
+    current <- normalizePath(root, mustWork = FALSE)
+    if (!dir.exists(current)) {
+      current <- dirname(current)
+    }
+
+    repeat {
+      required_paths <- c(
+        file.path(current, "_quarto.yml"),
+        file.path(current, "config", "paths.R"),
+        file.path(current, "R", "common.R")
+      )
+
+      if (all(file.exists(required_paths))) {
+        return(current)
+      }
+
+      parent <- dirname(current)
+      if (identical(parent, current)) {
+        break
+      }
+
+      current <- parent
+    }
+  }
+
+  stop(
+    paste(
+      "Could not locate the notebook project root.",
+      "Save the notebook and either run it from the project root,",
+      "or set Sys.setenv(CAS12A_NOTEBOOK_PROJECT_ROOT = '/path/to/New project')."
+    ),
+    call. = FALSE
+  )
+}
+
+project_root <- resolve_project_root()
+
+source(file.path(project_root, "config", "paths.R"), local = knitr::knit_global())
+source(file.path(project_root, "R", "common.R"), local = knitr::knit_global())
+source(file.path(project_root, "R", "cas_variants.R"), local = knitr::knit_global())
+
+load_paper_packages()
+
+paths <- get_analysis_paths(
+  list(results_dir = normalizePath(file.path(project_root, "results"), mustWork = FALSE))
+)
+
+output_dir <- analysis_output_dir(paths, "04_cas_variants_overview")
+tables_dir <- ensure_dir(file.path(output_dir, "tables"))
+plots_dir <- ensure_dir(file.path(output_dir, "plots"))
+```
+
+## Build processed tables
+
+```{r}
+gfp_on <- build_gfp_on_variants(paths)
+gfp_off_list <- build_gfp_off_variants(paths)
+direct_repeat_tables <- build_direct_repeat_final_tables(paths)
+guide_promoter_tables <- build_guide_promoter_final_tables(paths)
+gfp_off <- gfp_off_list$updated
+
+write_csv_checked(gfp_on, file.path(tables_dir, "gfp_on_variants.csv"))
+write_csv_checked(gfp_off, file.path(tables_dir, "gfp_off_variants.csv"))
+write_csv_checked(direct_repeat_tables$with_colony_counts, file.path(tables_dir, "gfp_off_direct_repeat.csv"))
+write_csv_checked(direct_repeat_tables$syn1, file.path(tables_dir, "gfp_off_direct_repeat_syn1.csv"))
+write_csv_checked(guide_promoter_tables$base, file.path(tables_dir, "guide_promoter_data.csv"))
+write_csv_checked(
+  guide_promoter_tables$plate_counts,
+  file.path(tables_dir, "guide_promoter_plate_counts_20240916.csv")
+)
+write_csv_checked(
+  guide_promoter_tables$with_colony_counts,
+  file.path(tables_dir, "guide_promoter_data_with_colony_counts.csv")
+)
+
+gfp_on
+```
+
+## Main GFP ON panels
+
+```{r}
+tef_on_plot <- plot_variant_timecourse(
+  gfp_on,
+  cas_promoter = "TEF",
+  exclude = c("enAsCas12a_less_NLS", "FnCas12a(CO)", "LbCas12a(CO)"),
+  facet = TRUE,
+  nrows = 1
+)
+
+pgk1_on_plot <- plot_variant_timecourse(
+  gfp_on,
+  cas_promoter = "PGK1",
+  exclude = c("FnCas12a(CO)", "LbCas12a(CO)"),
+  facet = TRUE,
+  nrows = 1
+)
+
+safe_ggsave(
+  tef_on_plot,
+  file.path(plots_dir, "tef_variants_on.pdf"),
+  width = 7,
+  height = 4
+)
+
+safe_ggsave(
+  pgk1_on_plot,
+  file.path(plots_dir, "pgk1_variants_on.pdf"),
+  width = 7,
+  height = 4
+)
+
+tef_on_plot
+```
+
+## Main GFP OFF panels
+
+```{r}
+tef_off_plot <- plot_variant_timecourse(
+  gfp_off,
+  cas_promoter = "TEF",
+  exclude = c("FnCas12a(CO)", "LbCas12a(CO)"),
+  facet = TRUE,
+  nrows = 1
+)
+
+pgk1_off_plot <- plot_variant_timecourse(
+  gfp_off,
+  cas_promoter = "PGK1",
+  exclude = c("enAsCas12a_less_NLS", "FnCas12a(CO)", "LbCas12a(CO)"),
+  facet = TRUE,
+  nrows = 1
+)
+
+safe_ggsave(
+  tef_off_plot,
+  file.path(plots_dir, "tef_variants_off.pdf"),
+  width = 7,
+  height = 4
+)
+
+safe_ggsave(
+  pgk1_off_plot,
+  file.path(plots_dir, "pgk1_variants_off.pdf"),
+  width = 7,
+  height = 4
+)
+
+tef_off_plot
+```
+
+## Direct repeat comparison
+
+```{r}
+direct_repeat_plot <- plot_direct_repeat_by_guide_promoter(
+  direct_repeat_tables$with_colony_counts,
+  cas_promoter = "TEF",
+  exclude = c("enAsCas12a_less_NLS", "FnCas12a(CO)", "LbCas12a(CO)"),
+  nrows = 1
+)
+
+safe_ggsave(
+  direct_repeat_plot,
+  file.path(plots_dir, "direct_repeat_tef.pdf"),
+  width = 8,
+  height = 4
+)
+
+direct_repeat_plot
+```
+
+## Codon-optimized supplementary panel
+
+```{r}
+co_data <- gfp_on %>%
+  dplyr::filter(var %in% c("FnCas12a", "LbCas12a", "FnCas12a(CO)", "LbCas12a(CO)")) %>%
+  dplyr::mutate(parent_var = dplyr::if_else(stringr::str_detect(var, "Fn"), "Fn", "Lb"))
+
+co_tef_plot <- plot_codon_optimized_comparison(co_data, "TEF")
+co_pgk1_plot <- plot_codon_optimized_comparison(co_data, "PGK1")
+
+safe_ggsave(
+  co_tef_plot,
+  file.path(plots_dir, "codon_optimized_tef.pdf"),
+  width = 7,
+  height = 4
+)
+
+safe_ggsave(
+  co_pgk1_plot,
+  file.path(plots_dir, "codon_optimized_pgk1.pdf"),
+  width = 7,
+  height = 4
+)
+
+co_tef_plot
+```
+
+## Guide promoter exploration
+
+```{r}
+guide_promoter_on_plot <- plot_guide_promoter_timecourse(guide_promoter_tables$with_colony_counts, "ON")
+guide_promoter_off_plot <- plot_guide_promoter_timecourse(guide_promoter_tables$with_colony_counts, "OFF")
+
+safe_ggsave(
+  guide_promoter_on_plot,
+  file.path(plots_dir, "guide_promoter_on.pdf"),
+  width = 8,
+  height = 4
+)
+
+safe_ggsave(
+  guide_promoter_off_plot,
+  file.path(plots_dir, "guide_promoter_off.pdf"),
+  width = 8,
+  height = 4
+)
+
+guide_promoter_on_plot
+```

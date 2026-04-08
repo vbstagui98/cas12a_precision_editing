@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.26">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Robust Cas Variant Overview</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="04_cas_variants_overview_files/libs/clipboard/clipboard.min.js"></script>
+<script src="04_cas_variants_overview_files/libs/quarto-html/quarto.js" type="module"></script>
+<script src="04_cas_variants_overview_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="04_cas_variants_overview_files/libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="04_cas_variants_overview_files/libs/quarto-html/popper.min.js"></script>
+<script src="04_cas_variants_overview_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="04_cas_variants_overview_files/libs/quarto-html/anchor.min.js"></script>
+<link href="04_cas_variants_overview_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="04_cas_variants_overview_files/libs/quarto-html/quarto-syntax-highlighting-587c61ba64f3a5504c4d52d930310e48.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="04_cas_variants_overview_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="04_cas_variants_overview_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="04_cas_variants_overview_files/libs/bootstrap/bootstrap-d6a003b94517c951b2d65075d42fb01b.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="04_cas_variants_overview_files/libs/pagedtable-1.1/css/pagedtable.css" rel="stylesheet">
+<script src="04_cas_variants_overview_files/libs/pagedtable-1.1/js/pagedtable.js"></script>
+
+
+</head>
+
+<body class="quarto-light">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul class="collapse">
+  <li><a href="#purpose" id="toc-purpose" class="nav-link active" data-scroll-target="#purpose">Purpose</a></li>
+  <li><a href="#setup" id="toc-setup" class="nav-link" data-scroll-target="#setup">Setup</a></li>
+  <li><a href="#build-processed-tables" id="toc-build-processed-tables" class="nav-link" data-scroll-target="#build-processed-tables">Build processed tables</a></li>
+  <li><a href="#main-gfp-on-panels" id="toc-main-gfp-on-panels" class="nav-link" data-scroll-target="#main-gfp-on-panels">Main GFP ON panels</a></li>
+  <li><a href="#main-gfp-off-panels" id="toc-main-gfp-off-panels" class="nav-link" data-scroll-target="#main-gfp-off-panels">Main GFP OFF panels</a></li>
+  <li><a href="#direct-repeat-comparison" id="toc-direct-repeat-comparison" class="nav-link" data-scroll-target="#direct-repeat-comparison">Direct repeat comparison</a></li>
+  <li><a href="#codon-optimized-supplementary-panel" id="toc-codon-optimized-supplementary-panel" class="nav-link" data-scroll-target="#codon-optimized-supplementary-panel">Codon-optimized supplementary panel</a></li>
+  <li><a href="#guide-promoter-exploration" id="toc-guide-promoter-exploration" class="nav-link" data-scroll-target="#guide-promoter-exploration">Guide promoter exploration</a></li>
+  </ul>
+</nav>
+</div>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Robust Cas Variant Overview</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="purpose" class="level2">
+<h2 class="anchored" data-anchor-id="purpose">Purpose</h2>
+<p>This notebook replaces the mixed GFP ON/OFF Cas-variant notebook with a structured workflow that rebuilds processed tables from raw inputs and exports the main panels under <code>results/04_cas_variants_overview/</code>.</p>
+</section>
+<section id="setup" class="level2">
+<h2 class="anchored" data-anchor-id="setup">Setup</h2>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>resolve_project_root <span class="ot">&lt;-</span> <span class="cf">function</span>() {</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  rstudio_path <span class="ot">&lt;-</span> <span class="st">""</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">requireNamespace</span>(<span class="st">"rstudioapi"</span>, <span class="at">quietly =</span> <span class="cn">TRUE</span>)) {</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    rstudio_path <span class="ot">&lt;-</span> <span class="fu">tryCatch</span>(rstudioapi<span class="sc">::</span><span class="fu">getSourceEditorContext</span>()<span class="sc">$</span>path, <span class="at">error =</span> <span class="cf">function</span>(e) <span class="st">""</span>)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="sc">!</span><span class="fu">nzchar</span>(rstudio_path)) {</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>      rstudio_path <span class="ot">&lt;-</span> <span class="fu">tryCatch</span>(rstudioapi<span class="sc">::</span><span class="fu">getActiveDocumentContext</span>()<span class="sc">$</span>path, <span class="at">error =</span> <span class="cf">function</span>(e) <span class="st">""</span>)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>  search_roots <span class="ot">&lt;-</span> <span class="fu">unique</span>(<span class="fu">c</span>(</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">Sys.getenv</span>(<span class="st">"CAS12A_NOTEBOOK_PROJECT_ROOT"</span>, <span class="at">unset =</span> <span class="st">""</span>),</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">tryCatch</span>(knitr<span class="sc">::</span><span class="fu">current_input</span>(<span class="at">dir =</span> <span class="cn">TRUE</span>), <span class="at">error =</span> <span class="cf">function</span>(e) <span class="st">""</span>),</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    rstudio_path,</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">getwd</span>(),</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">normalizePath</span>(<span class="fu">file.path</span>(<span class="fu">getwd</span>(), <span class="st">".."</span>), <span class="at">mustWork =</span> <span class="cn">FALSE</span>),</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">normalizePath</span>(<span class="fu">file.path</span>(<span class="fu">getwd</span>(), <span class="st">".."</span>, <span class="st">".."</span>), <span class="at">mustWork =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>  ))</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>  search_roots <span class="ot">&lt;-</span> search_roots[<span class="fu">nzchar</span>(search_roots)]</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (root <span class="cf">in</span> search_roots) {</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>    current <span class="ot">&lt;-</span> <span class="fu">normalizePath</span>(root, <span class="at">mustWork =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="sc">!</span><span class="fu">dir.exists</span>(current)) {</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>      current <span class="ot">&lt;-</span> <span class="fu">dirname</span>(current)</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>    <span class="cf">repeat</span> {</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>      required_paths <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>        <span class="fu">file.path</span>(current, <span class="st">"_quarto.yml"</span>),</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>        <span class="fu">file.path</span>(current, <span class="st">"config"</span>, <span class="st">"paths.R"</span>),</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>        <span class="fu">file.path</span>(current, <span class="st">"R"</span>, <span class="st">"common.R"</span>)</span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>      )</span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> (<span class="fu">all</span>(<span class="fu">file.exists</span>(required_paths))) {</span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>        <span class="fu">return</span>(current)</span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>      parent <span class="ot">&lt;-</span> <span class="fu">dirname</span>(current)</span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> (<span class="fu">identical</span>(parent, current)) {</span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>        <span class="cf">break</span></span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>      current <span class="ot">&lt;-</span> parent</span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a>  <span class="fu">stop</span>(</span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a>    <span class="fu">paste</span>(</span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Could not locate the notebook project root."</span>,</span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Save the notebook and either run it from the project root,"</span>,</span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a>      <span class="st">"or set Sys.setenv(CAS12A_NOTEBOOK_PROJECT_ROOT = '/path/to/New project')."</span></span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a>    <span class="at">call. =</span> <span class="cn">FALSE</span></span>
+<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a>project_root <span class="ot">&lt;-</span> <span class="fu">resolve_project_root</span>()</span>
+<span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-58"><a href="#cb1-58" aria-hidden="true" tabindex="-1"></a><span class="fu">source</span>(<span class="fu">file.path</span>(project_root, <span class="st">"config"</span>, <span class="st">"paths.R"</span>), <span class="at">local =</span> knitr<span class="sc">::</span><span class="fu">knit_global</span>())</span>
+<span id="cb1-59"><a href="#cb1-59" aria-hidden="true" tabindex="-1"></a><span class="fu">source</span>(<span class="fu">file.path</span>(project_root, <span class="st">"R"</span>, <span class="st">"common.R"</span>), <span class="at">local =</span> knitr<span class="sc">::</span><span class="fu">knit_global</span>())</span>
+<span id="cb1-60"><a href="#cb1-60" aria-hidden="true" tabindex="-1"></a><span class="fu">source</span>(<span class="fu">file.path</span>(project_root, <span class="st">"R"</span>, <span class="st">"cas_variants.R"</span>), <span class="at">local =</span> knitr<span class="sc">::</span><span class="fu">knit_global</span>())</span>
+<span id="cb1-61"><a href="#cb1-61" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-62"><a href="#cb1-62" aria-hidden="true" tabindex="-1"></a><span class="fu">load_paper_packages</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>Registered S3 methods overwritten by 'ggpp':
+  method                  from   
+  heightDetails.titleGrob ggplot2
+  widthDetails.titleGrob  ggplot2</code></pre>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>paths <span class="ot">&lt;-</span> <span class="fu">get_analysis_paths</span>(</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">list</span>(<span class="at">results_dir =</span> <span class="fu">normalizePath</span>(<span class="fu">file.path</span>(project_root, <span class="st">"results"</span>), <span class="at">mustWork =</span> <span class="cn">FALSE</span>))</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>output_dir <span class="ot">&lt;-</span> <span class="fu">analysis_output_dir</span>(paths, <span class="st">"04_cas_variants_overview"</span>)</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>tables_dir <span class="ot">&lt;-</span> <span class="fu">ensure_dir</span>(<span class="fu">file.path</span>(output_dir, <span class="st">"tables"</span>))</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>plots_dir <span class="ot">&lt;-</span> <span class="fu">ensure_dir</span>(<span class="fu">file.path</span>(output_dir, <span class="st">"plots"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+</section>
+<section id="build-processed-tables" class="level2">
+<h2 class="anchored" data-anchor-id="build-processed-tables">Build processed tables</h2>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>gfp_on <span class="ot">&lt;-</span> <span class="fu">build_gfp_on_variants</span>(paths)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>New names:
+New names:
+New names:
+New names:
+• `` -&gt; `...1`</code></pre>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>gfp_off_list <span class="ot">&lt;-</span> <span class="fu">build_gfp_off_variants</span>(paths)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>New names:
+New names:
+New names:
+• `` -&gt; `...1`</code></pre>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>direct_repeat_tables <span class="ot">&lt;-</span> <span class="fu">build_direct_repeat_final_tables</span>(paths)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>New names:
+• `` -&gt; `...1`</code></pre>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>guide_promoter_tables <span class="ot">&lt;-</span> <span class="fu">build_guide_promoter_final_tables</span>(paths)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>New names:
+New names:
+• `` -&gt; `...1`</code></pre>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>gfp_off <span class="ot">&lt;-</span> gfp_off_list<span class="sc">$</span>updated</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="fu">write_csv_checked</span>(gfp_on, <span class="fu">file.path</span>(tables_dir, <span class="st">"gfp_on_variants.csv"</span>))</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="fu">write_csv_checked</span>(gfp_off, <span class="fu">file.path</span>(tables_dir, <span class="st">"gfp_off_variants.csv"</span>))</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="fu">write_csv_checked</span>(direct_repeat_tables<span class="sc">$</span>with_colony_counts, <span class="fu">file.path</span>(tables_dir, <span class="st">"gfp_off_direct_repeat.csv"</span>))</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a><span class="fu">write_csv_checked</span>(direct_repeat_tables<span class="sc">$</span>syn1, <span class="fu">file.path</span>(tables_dir, <span class="st">"gfp_off_direct_repeat_syn1.csv"</span>))</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="fu">write_csv_checked</span>(guide_promoter_tables<span class="sc">$</span>base, <span class="fu">file.path</span>(tables_dir, <span class="st">"guide_promoter_data.csv"</span>))</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a><span class="fu">write_csv_checked</span>(</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>  guide_promoter_tables<span class="sc">$</span>plate_counts,</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">file.path</span>(tables_dir, <span class="st">"guide_promoter_plate_counts_20240916.csv"</span>)</span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a><span class="fu">write_csv_checked</span>(</span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>  guide_promoter_tables<span class="sc">$</span>with_colony_counts,</span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">file.path</span>(tables_dir, <span class="st">"guide_promoter_data_with_colony_counts.csv"</span>)</span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>gfp_on</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div data-pagedtable="false">
+  <script data-pagedtable-source="" type="application/json">
+{"columns":[{"label":["name"],"name":[1],"type":["chr"],"align":["left"]},{"label":["parent"],"name":[2],"type":["chr"],"align":["left"]},{"label":["parent_frequency"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["plate"],"name":[4],"type":["chr"],"align":["left"]},{"label":["sample"],"name":[5],"type":["chr"],"align":["left"]},{"label":["group"],"name":[6],"type":["chr"],"align":["left"]},{"label":["var"],"name":[7],"type":["chr"],"align":["left"]},{"label":["rep"],"name":[8],"type":["chr"],"align":["left"]},{"label":["control"],"name":[9],"type":["chr"],"align":["left"]},{"label":["prom_cas"],"name":[10],"type":["chr"],"align":["left"]},{"label":["timepoint"],"name":[11],"type":["chr"],"align":["left"]},{"label":["generations"],"name":[12],"type":["dbl"],"align":["right"]},{"label":["efficiency"],"name":[13],"type":["dbl"],"align":["right"]}],"data":[{"1":"VB_20240909_Cas_vars_Experiment_T01_PGK1_D1_C3.fcs","2":"root","3":"1","4":"VB_20240909_Cas_vars","5":"C3","6":"T01_PGK1_D1","7":"LbCas12a(CO)","8":"1","9":"No","10":"PGK1","11":"T01","12":"0.000000","13":"26.58000"},{"1":"VB_20240909_Cas_vars_Experiment_T01_PGK1_D1_D3.fcs","2":"root","3":"1","4":"VB_20240909_Cas_vars","5":"D3","6":"T01_PGK1_D1","7":"FnCas12a(CO)","8":"1","9":"No","10":"PGK1","11":"T01","12":"0.000000","13":"72.24000"},{"1":"VB_20240909_Cas_vars_Experiment_T01_PGK1_D1_E3.fcs","2":"root","3":"1","4":"VB_20240909_Cas_vars","5":"E3","6":"T01_PGK1_D1","7":"FnCas12a","8":"1","9":"No","10":"PGK1","11":"T01","12":"0.000000","13":"86.46400"},{"1":"VB_20240909_Cas_vars_Experiment_T01_PGK1_D1_F3.fcs","2":"root","3":"1","4":"VB_20240909_Cas_vars","5":"F3","6":"T01_PGK1_D1","7":"LbCas12a","8":"1","9":"No","10":"PGK1","11":"T01","12":"0.000000","13":"10.54800"},{"1":"VB_20240909_Cas_vars_Experiment_T01_PGK1_D1_G3.fcs","2":"root","3":"1","4":"VB_20240909_Cas_vars","5":"G3","6":"T01_PGK1_D1","7":"AsCas12a","8":"1","9":"No","10":"PGK1","11":"T01","12":"0.000000","13":"3.43200"},{"1":"VB_20240909_Cas_vars_Experiment_T01_PGK1_D2_C4.fcs","2":"root","3":"1","4":"VB_20240909_Cas_vars","5":"C4","6":"T01_PGK1_D2","7":"LbCas12a(CO)","8":"2","9":"No","10":"PGK1","11":"T01","12":"0.000000","13":"25.34400"},{"1":"VB_20240909_Cas_vars_Experiment_T01_PGK1_D2_D4.fcs","2":"root","3":"1","4":"VB_20240909_Cas_vars","5":"D4","6":"T01_PGK1_D2","7":"FnCas12a(CO)","8":"2","9":"No","10":"PGK1","11":"T01","12":"0.000000","13":"75.09600"},{"1":"VB_20240909_Cas_vars_Experiment_T01_PGK1_D2_E4.fcs","2":"root","3":"1","4":"VB_20240909_Cas_vars","5":"E4","6":"T01_PGK1_D2","7":"FnCas12a","8":"2","9":"No","10":"PGK1","11":"T01","12":"0.000000","13":"83.75200"},{"1":"VB_20240909_Cas_vars_Experiment_T01_PGK1_D2_F4.fcs","2":"root","3":"1","4":"VB_20240909_Cas_vars","5":"F4","6":"T01_PGK1_D2","7":"LbCas12a","8":"2","9":"No","10":"PGK1","11":"T01","12":"0.000000","13":"11.12400"},{"1":"VB_20240909_Cas_vars_Experiment_T01_PGK1_D2_G4.fcs","2":"root","3":"1","4":"VB_20240909_Cas_vars","5":"G4","6":"T01_PGK1_D2","7":"AsCas12a","8":"2","9":"No","10":"PGK1","11":"T01","12":"0.000000","13":"2.94000"},{"1":"VB_20240909_Cas_vars_Experiment_T01_TEF_D1_C1.fcs","2":"root","3":"1","4":"VB_20240909_Cas_vars","5":"C1","6":"T01_TEF_D1","7":"LbCas12a(CO)","8":"1","9":"No","10":"TEF","11":"T01","12":"0.000000","13":"3.38400"},{"1":"VB_20240909_Cas_vars_Experiment_T01_TEF_D1_D1.fcs","2":"root","3":"1","4":"VB_20240909_Cas_vars","5":"D1","6":"T01_TEF_D1","7":"FnCas12a(CO)","8":"1","9":"No","10":"TEF","11":"T01","12":"0.000000","13":"48.19600"},{"1":"VB_20240909_Cas_vars_Experiment_T01_TEF_D1_E1.fcs","2":"root","3":"1","4":"VB_20240909_Cas_vars","5":"E1","6":"T01_TEF_D1","7":"FnCas12a","8":"1","9":"No","10":"TEF","11":"T01","12":"0.000000","13":"77.84000"},{"1":"VB_20240909_Cas_vars_Experiment_T01_TEF_D1_F1.fcs","2":"root","3":"1","4":"VB_20240909_Cas_vars","5":"F1","6":"T01_TEF_D1","7":"LbCas12a","8":"1","9":"No","10":"TEF","11":"T01","12":"0.000000","13":"3.51200"},{"1":"VB_20240909_Cas_vars_Experiment_T01_TEF_D1_G1.fcs","2":"root","3":"1","4":"VB_20240909_Cas_vars","5":"G1","6":"T01_TEF_D1","7":"AsCas12a","8":"1","9":"No","10":"TEF","11":"T01","12":"0.000000","13":"1.88800"},{"1":"VB_20240909_Cas_vars_Experiment_T01_TEF_D1_H1.fcs","2":"root","3":"1","4":"VB_20240909_Cas_vars","5":"H1","6":"T01_TEF_D1","7":"MbCas12a","8":"1","9":"No","10":"TEF","11":"T01","12":"0.000000","13":"1.79600"},{"1":"VB_20240909_Cas_vars_Experiment_T01_TEF_D2_C2.fcs","2":"root","3":"1","4":"VB_20240909_Cas_vars","5":"C2","6":"T01_TEF_D2","7":"LbCas12a(CO)","8":"2","9":"No","10":"TEF","11":"T01","12":"0.000000","13":"4.00800"},{"1":"VB_20240909_Cas_vars_Experiment_T01_TEF_D2_D2.fcs","2":"root","3":"1","4":"VB_20240909_Cas_vars","5":"D2","6":"T01_TEF_D2","7":"FnCas12a(CO)","8":"2","9":"No","10":"TEF","11":"T01","12":"0.000000","13":"50.69200"},{"1":"VB_20240909_Cas_vars_Experiment_T01_TEF_D2_E2.fcs","2":"root","3":"1","4":"VB_20240909_Cas_vars","5":"E2","6":"T01_TEF_D2","7":"FnCas12a","8":"2","9":"No","10":"TEF","11":"T01","12":"0.000000","13":"83.74000"},{"1":"VB_20240909_Cas_vars_Experiment_T01_TEF_D2_F2.fcs","2":"root","3":"1","4":"VB_20240909_Cas_vars","5":"F2","6":"T01_TEF_D2","7":"LbCas12a","8":"2","9":"No","10":"TEF","11":"T01","12":"0.000000","13":"3.67600"},{"1":"VB_20240909_Cas_vars_Experiment_T01_TEF_D2_G2.fcs","2":"root","3":"1","4":"VB_20240909_Cas_vars","5":"G2","6":"T01_TEF_D2","7":"AsCas12a","8":"2","9":"No","10":"TEF","11":"T01","12":"0.000000","13":"1.56800"},{"1":"VB_20240909_Cas_vars_Experiment_T01_TEF_D2_H2.fcs","2":"root","3":"1","4":"VB_20240909_Cas_vars","5":"H2","6":"T01_TEF_D2","7":"MbCas12a","8":"2","9":"No","10":"TEF","11":"T01","12":"0.000000","13":"1.42400"},{"1":"VB_20240909_Cas_vars_Experiment_T02_PGK1_D1_C7.fcs","2":"root","3":"1","4":"VB_20240909_Cas_vars","5":"C7","6":"T02_PGK1_D1","7":"LbCas12a(CO)","8":"1","9":"No","10":"PGK1","11":"T02","12":"5.292782","13":"79.75600"},{"1":"VB_20240909_Cas_vars_Experiment_T02_PGK1_D1_D7.fcs","2":"root","3":"1","4":"VB_20240909_Cas_vars","5":"D7","6":"T02_PGK1_D1","7":"FnCas12a(CO)","8":"1","9":"No","10":"PGK1","11":"T02","12":"7.070389","13":"61.54800"},{"1":"VB_20240909_Cas_vars_Experiment_T02_PGK1_D1_E7.fcs","2":"root","3":"1","4":"VB_20240909_Cas_vars","5":"E7","6":"T02_PGK1_D1","7":"FnCas12a","8":"1","9":"No","10":"PGK1","11":"T02","12":"7.478972","13":"80.15600"},{"1":"VB_20240909_Cas_vars_Experiment_T02_PGK1_D1_F7.fcs","2":"root","3":"1","4":"VB_20240909_Cas_vars","5":"F7","6":"T02_PGK1_D1","7":"LbCas12a","8":"1","9":"No","10":"PGK1","11":"T02","12":"5.292782","13":"60.46800"},{"1":"VB_20240909_Cas_vars_Experiment_T02_PGK1_D1_G7.fcs","2":"root","3":"1","4":"VB_20240909_Cas_vars","5":"G7","6":"T02_PGK1_D1","7":"AsCas12a","8":"1","9":"No","10":"PGK1","11":"T02","12":"4.807355","13":"57.16800"},{"1":"VB_20240909_Cas_vars_Experiment_T02_PGK1_D2_C8.fcs","2":"root","3":"1","4":"VB_20240909_Cas_vars","5":"C8","6":"T02_PGK1_D2","7":"LbCas12a(CO)","8":"2","9":"No","10":"PGK1","11":"T02","12":"5.678072","13":"77.50800"},{"1":"VB_20240909_Cas_vars_Experiment_T02_PGK1_D2_D8.fcs","2":"root","3":"1","4":"VB_20240909_Cas_vars","5":"D8","6":"T02_PGK1_D2","7":"FnCas12a(CO)","8":"2","9":"No","10":"PGK1","11":"T02","12":"7.307429","13":"66.65600"},{"1":"VB_20240909_Cas_vars_Experiment_T02_PGK1_D2_E8.fcs","2":"root","3":"1","4":"VB_20240909_Cas_vars","5":"E8","6":"T02_PGK1_D2","7":"FnCas12a","8":"2","9":"No","10":"PGK1","11":"T02","12":"7.478972","13":"78.45200"},{"1":"VB_20240909_Cas_vars_Experiment_T02_PGK1_D2_F8.fcs","2":"root","3":"1","4":"VB_20240909_Cas_vars","5":"F8","6":"T02_PGK1_D2","7":"LbCas12a","8":"2","9":"No","10":"PGK1","11":"T02","12":"5.378512","13":"63.48400"},{"1":"VB_20240909_Cas_vars_Experiment_T02_PGK1_D2_G8.fcs","2":"root","3":"1","4":"VB_20240909_Cas_vars","5":"G8","6":"T02_PGK1_D2","7":"AsCas12a","8":"2","9":"No","10":"PGK1","11":"T02","12":"4.584963","13":"62.14400"},{"1":"VB_20240909_Cas_vars_Experiment_T02_TEF_D1_C5.fcs","2":"root","3":"1","4":"VB_20240909_Cas_vars","5":"C5","6":"T02_TEF_D1","7":"LbCas12a(CO)","8":"1","9":"No","10":"TEF","11":"T02","12":"6.857981","13":"31.40800"},{"1":"VB_20240909_Cas_vars_Experiment_T02_TEF_D1_D5.fcs","2":"root","3":"1","4":"VB_20240909_Cas_vars","5":"D5","6":"T02_TEF_D1","7":"FnCas12a(CO)","8":"1","9":"No","10":"TEF","11":"T02","12":"7.842979","13":"76.71600"},{"1":"VB_20240909_Cas_vars_Experiment_T02_TEF_D1_E5.fcs","2":"root","3":"1","4":"VB_20240909_Cas_vars","5":"E5","6":"T02_TEF_D1","7":"FnCas12a","8":"1","9":"No","10":"TEF","11":"T02","12":"7.754888","13":"80.70400"},{"1":"VB_20240909_Cas_vars_Experiment_T02_TEF_D1_F5.fcs","2":"root","3":"1","4":"VB_20240909_Cas_vars","5":"F5","6":"T02_TEF_D1","7":"LbCas12a","8":"1","9":"No","10":"TEF","11":"T02","12":"6.459432","13":"43.61600"},{"1":"VB_20240909_Cas_vars_Experiment_T02_TEF_D1_G5.fcs","2":"root","3":"1","4":"VB_20240909_Cas_vars","5":"G5","6":"T02_TEF_D1","7":"AsCas12a","8":"1","9":"No","10":"TEF","11":"T02","12":"6.776104","13":"25.68400"},{"1":"VB_20240909_Cas_vars_Experiment_T02_TEF_D1_H5.fcs","2":"root","3":"1","4":"VB_20240909_Cas_vars","5":"H5","6":"T02_TEF_D1","7":"MbCas12a","8":"1","9":"No","10":"TEF","11":"T02","12":"6.944858","13":"18.54000"},{"1":"VB_20240909_Cas_vars_Experiment_T02_TEF_D2_C6.fcs","2":"root","3":"1","4":"VB_20240909_Cas_vars","5":"C6","6":"T02_TEF_D2","7":"LbCas12a(CO)","8":"2","9":"No","10":"TEF","11":"T02","12":"5.459432","13":"32.57200"},{"1":"VB_20240909_Cas_vars_Experiment_T02_TEF_D2_D6.fcs","2":"root","3":"1","4":"VB_20240909_Cas_vars","5":"D6","6":"T02_TEF_D2","7":"FnCas12a(CO)","8":"2","9":"No","10":"TEF","11":"T02","12":"6.459432","13":"79.51200"},{"1":"VB_20240909_Cas_vars_Experiment_T02_TEF_D2_E6.fcs","2":"root","3":"1","4":"VB_20240909_Cas_vars","5":"E6","6":"T02_TEF_D2","7":"FnCas12a","8":"2","9":"No","10":"TEF","11":"T02","12":"7.596935","13":"85.32000"},{"1":"VB_20240909_Cas_vars_Experiment_T02_TEF_D2_F6.fcs","2":"root","3":"1","4":"VB_20240909_Cas_vars","5":"F6","6":"T02_TEF_D2","7":"LbCas12a","8":"2","9":"No","10":"TEF","11":"T02","12":"5.405992","13":"38.54000"},{"1":"VB_20240909_Cas_vars_Experiment_T02_TEF_D2_G6.fcs","2":"root","3":"1","4":"VB_20240909_Cas_vars","5":"G6","6":"T02_TEF_D2","7":"AsCas12a","8":"2","9":"No","10":"TEF","11":"T02","12":"5.608809","13":"23.40800"},{"1":"VB_20240909_Cas_vars_Experiment_T02_TEF_D2_H6.fcs","2":"root","3":"1","4":"VB_20240909_Cas_vars","5":"H6","6":"T02_TEF_D2","7":"MbCas12a","8":"2","9":"No","10":"TEF","11":"T02","12":"5.906891","13":"17.64400"},{"1":"VB_20240909_Cas_vars_Experiment_T03_PGK1_D1_C11.fcs","2":"root","3":"1","4":"VB_20240909_Cas_vars","5":"C11","6":"T03_PGK1_D1","7":"LbCas12a(CO)","8":"1","9":"No","10":"PGK1","11":"T03","12":"14.855024","13":"76.59600"},{"1":"VB_20240909_Cas_vars_Experiment_T03_PGK1_D1_D11.fcs","2":"root","3":"1","4":"VB_20240909_Cas_vars","5":"D11","6":"T03_PGK1_D1","7":"FnCas12a(CO)","8":"1","9":"No","10":"PGK1","11":"T03","12":"16.751276","13":"45.28400"},{"1":"VB_20240909_Cas_vars_Experiment_T03_PGK1_D1_E11.fcs","2":"root","3":"1","4":"VB_20240909_Cas_vars","5":"E11","6":"T03_PGK1_D1","7":"FnCas12a","8":"1","9":"No","10":"PGK1","11":"T03","12":"17.053376","13":"66.71600"},{"1":"VB_20240909_Cas_vars_Experiment_T03_PGK1_D1_F11.fcs","2":"root","3":"1","4":"VB_20240909_Cas_vars","5":"F11","6":"T03_PGK1_D1","7":"LbCas12a","8":"1","9":"No","10":"PGK1","11":"T03","12":"11.675449","13":"63.73200"},{"1":"VB_20240909_Cas_vars_Experiment_T03_PGK1_D1_G11.fcs","2":"root","3":"1","4":"VB_20240909_Cas_vars","5":"G11","6":"T03_PGK1_D1","7":"AsCas12a","8":"1","9":"No","10":"PGK1","11":"T03","12":"14.425006","13":"70.64785"},{"1":"VB_20240909_Cas_vars_Experiment_T03_PGK1_D2_C12.fcs","2":"root","3":"1","4":"VB_20240909_Cas_vars","5":"C12","6":"T03_PGK1_D2","7":"LbCas12a(CO)","8":"2","9":"No","10":"PGK1","11":"T03","12":"14.978196","13":"71.75200"},{"1":"VB_20240909_Cas_vars_Experiment_T03_PGK1_D2_D12.fcs","2":"root","3":"1","4":"VB_20240909_Cas_vars","5":"D12","6":"T03_PGK1_D2","7":"FnCas12a(CO)","8":"2","9":"No","10":"PGK1","11":"T03","12":"16.514931","13":"49.58800"},{"1":"VB_20240909_Cas_vars_Experiment_T03_PGK1_D2_E12.fcs","2":"root","3":"1","4":"VB_20240909_Cas_vars","5":"E12","6":"T03_PGK1_D2","7":"FnCas12a","8":"2","9":"No","10":"PGK1","11":"T03","12":"16.891753","13":"65.00400"},{"1":"VB_20240909_Cas_vars_Experiment_T03_PGK1_D2_F12.fcs","2":"root","3":"1","4":"VB_20240909_Cas_vars","5":"F12","6":"T03_PGK1_D2","7":"LbCas12a","8":"2","9":"No","10":"PGK1","11":"T03","12":"14.700440","13":"75.86400"},{"1":"VB_20240909_Cas_vars_Experiment_T03_PGK1_D2_G12.fcs","2":"root","3":"1","4":"VB_20240909_Cas_vars","5":"G12","6":"T03_PGK1_D2","7":"AsCas12a","8":"2","9":"No","10":"PGK1","11":"T03","12":"13.997744","13":"74.16800"},{"1":"VB_20240909_Cas_vars_Experiment_T03_TEF_D1_C9.fcs","2":"root","3":"1","4":"VB_20240909_Cas_vars","5":"C9","6":"T03_TEF_D1","7":"LbCas12a(CO)","8":"1","9":"No","10":"TEF","11":"T03","12":"15.906740","13":"62.04800"},{"1":"VB_20240909_Cas_vars_Experiment_T03_TEF_D1_D9.fcs","2":"root","3":"1","4":"VB_20240909_Cas_vars","5":"D9","6":"T03_TEF_D1","7":"FnCas12a(CO)","8":"1","9":"No","10":"TEF","11":"T03","12":"17.224954","13":"64.11600"},{"1":"VB_20240909_Cas_vars_Experiment_T03_TEF_D1_E9.fcs","2":"root","3":"1","4":"VB_20240909_Cas_vars","5":"E9","6":"T03_TEF_D1","7":"FnCas12a","8":"1","9":"No","10":"TEF","11":"T03","12":"17.330805","13":"68.66000"},{"1":"VB_20240909_Cas_vars_Experiment_T03_TEF_D1_F9.fcs","2":"root","3":"1","4":"VB_20240909_Cas_vars","5":"F9","6":"T03_TEF_D1","7":"LbCas12a","8":"1","9":"No","10":"TEF","11":"T03","12":"15.713043","13":"69.74000"},{"1":"VB_20240909_Cas_vars_Experiment_T03_TEF_D1_G9.fcs","2":"root","3":"1","4":"VB_20240909_Cas_vars","5":"G9","6":"T03_TEF_D1","7":"AsCas12a","8":"1","9":"No","10":"TEF","11":"T03","12":"15.937992","13":"42.18400"},{"1":"VB_20240909_Cas_vars_Experiment_T03_TEF_D1_H9.fcs","2":"root","3":"1","4":"VB_20240909_Cas_vars","5":"H9","6":"T03_TEF_D1","7":"MbCas12a","8":"1","9":"No","10":"TEF","11":"T03","12":"16.204131","13":"34.96400"},{"1":"VB_20240909_Cas_vars_Experiment_T03_TEF_D2_C10.fcs","2":"root","3":"1","4":"VB_20240909_Cas_vars","5":"C10","6":"T03_TEF_D2","7":"LbCas12a(CO)","8":"2","9":"No","10":"TEF","11":"T03","12":"14.797499","13":"55.32400"},{"1":"VB_20240909_Cas_vars_Experiment_T03_TEF_D2_D10.fcs","2":"root","3":"1","4":"VB_20240909_Cas_vars","5":"D10","6":"T03_TEF_D2","7":"FnCas12a(CO)","8":"2","9":"No","10":"TEF","11":"T03","12":"15.952887","13":"68.60400"},{"1":"VB_20240909_Cas_vars_Experiment_T03_TEF_D2_E10.fcs","2":"root","3":"1","4":"VB_20240909_Cas_vars","5":"E10","6":"T03_TEF_D2","7":"FnCas12a","8":"2","9":"No","10":"TEF","11":"T03","12":"17.137644","13":"74.76800"},{"1":"VB_20240909_Cas_vars_Experiment_T03_TEF_D2_F10.fcs","2":"root","3":"1","4":"VB_20240909_Cas_vars","5":"F10","6":"T03_TEF_D2","7":"LbCas12a","8":"2","9":"No","10":"TEF","11":"T03","12":"14.787968","13":"66.68400"},{"1":"VB_20240909_Cas_vars_Experiment_T03_TEF_D2_G10.fcs","2":"root","3":"1","4":"VB_20240909_Cas_vars","5":"G10","6":"T03_TEF_D2","7":"AsCas12a","8":"2","9":"No","10":"TEF","11":"T03","12":"15.031715","13":"37.63200"},{"1":"VB_20240909_Cas_vars_Experiment_T03_TEF_D2_H10.fcs","2":"root","3":"1","4":"VB_20240909_Cas_vars","5":"H10","6":"T03_TEF_D2","7":"MbCas12a","8":"2","9":"No","10":"TEF","11":"T03","12":"15.126059","13":"30.88800"},{"1":"VB_20240911_Cas_vars_P2_Experiment_T04_PGK1_D1_C3.fcs","2":"root","3":"1","4":"VB_20240911_Cas_vars_P2","5":"C3","6":"T04_PGK1_D1","7":"LbCas12a(CO)","8":"1","9":"No","10":"PGK1","11":"T04","12":"21.662379","13":"72.28000"},{"1":"VB_20240911_Cas_vars_P2_Experiment_T04_PGK1_D1_D3.fcs","2":"root","3":"1","4":"VB_20240911_Cas_vars_P2","5":"D3","6":"T04_PGK1_D1","7":"FnCas12a(CO)","8":"1","9":"No","10":"PGK1","11":"T04","12":"22.952910","13":"39.17600"},{"1":"VB_20240911_Cas_vars_P2_Experiment_T04_PGK1_D1_E3.fcs","2":"root","3":"1","4":"VB_20240911_Cas_vars_P2","5":"E3","6":"T04_PGK1_D1","7":"FnCas12a","8":"1","9":"No","10":"PGK1","11":"T04","12":"23.808264","13":"60.28000"},{"1":"VB_20240911_Cas_vars_P2_Experiment_T04_PGK1_D1_F3.fcs","2":"root","3":"1","4":"VB_20240911_Cas_vars_P2","5":"F3","6":"T04_PGK1_D1","7":"LbCas12a","8":"1","9":"No","10":"PGK1","11":"T04","12":"18.386944","13":"60.07600"},{"1":"VB_20240911_Cas_vars_P2_Experiment_T04_PGK1_D1_G3.fcs","2":"root","3":"1","4":"VB_20240911_Cas_vars_P2","5":"G3","6":"T04_PGK1_D1","7":"AsCas12a","8":"1","9":"No","10":"PGK1","11":"T04","12":"21.302750","13":"73.46400"},{"1":"VB_20240911_Cas_vars_P2_Experiment_T04_PGK1_D2_C4.fcs","2":"root","3":"1","4":"VB_20240911_Cas_vars_P2","5":"C4","6":"T04_PGK1_D2","7":"LbCas12a(CO)","8":"2","9":"No","10":"PGK1","11":"T04","12":"20.463622","13":"66.19200"},{"1":"VB_20240911_Cas_vars_P2_Experiment_T04_PGK1_D2_D4.fcs","2":"root","3":"1","4":"VB_20240911_Cas_vars_P2","5":"D4","6":"T04_PGK1_D2","7":"FnCas12a(CO)","8":"2","9":"No","10":"PGK1","11":"T04","12":"20.836859","13":"42.19600"},{"1":"VB_20240911_Cas_vars_P2_Experiment_T04_PGK1_D2_E4.fcs","2":"root","3":"1","4":"VB_20240911_Cas_vars_P2","5":"E4","6":"T04_PGK1_D2","7":"FnCas12a","8":"2","9":"No","10":"PGK1","11":"T04","12":"22.759650","13":"59.39600"},{"1":"VB_20240911_Cas_vars_P2_Experiment_T04_PGK1_D2_F4.fcs","2":"root","3":"1","4":"VB_20240911_Cas_vars_P2","5":"F4","6":"T04_PGK1_D2","7":"LbCas12a","8":"2","9":"No","10":"PGK1","11":"T04","12":"21.518063","13":"72.55600"},{"1":"VB_20240911_Cas_vars_P2_Experiment_T04_PGK1_D2_G4.fcs","2":"root","3":"1","4":"VB_20240911_Cas_vars_P2","5":"G4","6":"T04_PGK1_D2","7":"AsCas12a","8":"2","9":"No","10":"PGK1","11":"T04","12":"19.558459","13":"74.37600"},{"1":"VB_20240911_Cas_vars_P2_Experiment_T04_TEF_D1_C1.fcs","2":"root","3":"1","4":"VB_20240911_Cas_vars_P2","5":"C1","6":"T04_TEF_D1","7":"LbCas12a(CO)","8":"1","9":"No","10":"TEF","11":"T04","12":"22.550597","13":"68.19200"},{"1":"VB_20240911_Cas_vars_P2_Experiment_T04_TEF_D1_D1.fcs","2":"root","3":"1","4":"VB_20240911_Cas_vars_P2","5":"D1","6":"T04_TEF_D1","7":"FnCas12a(CO)","8":"1","9":"No","10":"TEF","11":"T04","12":"23.891711","13":"54.65600"},{"1":"VB_20240911_Cas_vars_P2_Experiment_T04_TEF_D1_E1.fcs","2":"root","3":"1","4":"VB_20240911_Cas_vars_P2","5":"E1","6":"T04_TEF_D1","7":"FnCas12a","8":"1","9":"No","10":"TEF","11":"T04","12":"24.127818","13":"61.59600"},{"1":"VB_20240911_Cas_vars_P2_Experiment_T04_TEF_D1_F1.fcs","2":"root","3":"1","4":"VB_20240911_Cas_vars_P2","5":"F1","6":"T04_TEF_D1","7":"LbCas12a","8":"1","9":"No","10":"TEF","11":"T04","12":"21.520398","13":"72.52000"},{"1":"VB_20240911_Cas_vars_P2_Experiment_T04_TEF_D1_G1.fcs","2":"root","3":"1","4":"VB_20240911_Cas_vars_P2","5":"G1","6":"T04_TEF_D1","7":"AsCas12a","8":"1","9":"No","10":"TEF","11":"T04","12":"22.546801","13":"51.05200"},{"1":"VB_20240911_Cas_vars_P2_Experiment_T04_TEF_D1_H1.fcs","2":"root","3":"1","4":"VB_20240911_Cas_vars_P2","5":"H1","6":"T04_TEF_D1","7":"MbCas12a","8":"1","9":"No","10":"TEF","11":"T04","12":"22.148989","13":"42.13600"},{"1":"VB_20240911_Cas_vars_P2_Experiment_T04_TEF_D2_C2.fcs","2":"root","3":"1","4":"VB_20240911_Cas_vars_P2","5":"C2","6":"T04_TEF_D2","7":"LbCas12a(CO)","8":"2","9":"No","10":"TEF","11":"T04","12":"20.090281","13":"62.95200"},{"1":"VB_20240911_Cas_vars_P2_Experiment_T04_TEF_D2_D2.fcs","2":"root","3":"1","4":"VB_20240911_Cas_vars_P2","5":"D2","6":"T04_TEF_D2","7":"FnCas12a(CO)","8":"2","9":"No","10":"TEF","11":"T04","12":"22.200814","13":"61.49600"},{"1":"VB_20240911_Cas_vars_P2_Experiment_T04_TEF_D2_E2.fcs","2":"root","3":"1","4":"VB_20240911_Cas_vars_P2","5":"E2","6":"T04_TEF_D2","7":"FnCas12a","8":"2","9":"No","10":"TEF","11":"T04","12":"23.307569","13":"70.40000"},{"1":"VB_20240911_Cas_vars_P2_Experiment_T04_TEF_D2_F2.fcs","2":"root","3":"1","4":"VB_20240911_Cas_vars_P2","5":"F2","6":"T04_TEF_D2","7":"LbCas12a","8":"2","9":"No","10":"TEF","11":"T04","12":"21.925471","13":"72.79600"},{"1":"VB_20240911_Cas_vars_P2_Experiment_T04_TEF_D2_G2.fcs","2":"root","3":"1","4":"VB_20240911_Cas_vars_P2","5":"G2","6":"T04_TEF_D2","7":"AsCas12a","8":"2","9":"No","10":"TEF","11":"T04","12":"21.517142","13":"51.62000"},{"1":"VB_20240911_Cas_vars_P2_Experiment_T04_TEF_D2_H2.fcs","2":"root","3":"1","4":"VB_20240911_Cas_vars_P2","5":"H2","6":"T04_TEF_D2","7":"MbCas12a","8":"2","9":"No","10":"TEF","11":"T04","12":"21.974056","13":"43.16400"},{"1":"VB_20240916_PGK1_proms_Experiment_ys304_T01_A11.fcs","2":"root","3":"1","4":"VB_20240916_PGK1_proms","5":"A11","6":"ys304_T01","7":"enAsCas12a","8":"1","9":"No","10":"TEF","11":"T01","12":"0.000000","13":"77.66000"},{"1":"VB_20240916_PGK1_proms_Experiment_ys304_T01_A12.fcs","2":"root","3":"1","4":"VB_20240916_PGK1_proms","5":"A12","6":"ys304_T01","7":"enAsCas12a","8":"2","9":"No","10":"TEF","11":"T01","12":"0.000000","13":"80.73600"},{"1":"VB_20240916_PGK1_proms_Experiment_ys304_T02_C11.fcs","2":"root","3":"1","4":"VB_20240916_PGK1_proms","5":"C11","6":"ys304_T02","7":"enAsCas12a","8":"1","9":"No","10":"TEF","11":"T02","12":"7.738768","13":"65.20800"},{"1":"VB_20240916_PGK1_proms_Experiment_ys304_T02_C12.fcs","2":"root","3":"1","4":"VB_20240916_PGK1_proms","5":"C12","6":"ys304_T02","7":"enAsCas12a","8":"2","9":"No","10":"TEF","11":"T02","12":"7.300124","13":"70.17600"},{"1":"VB_20240916_PGK1_proms_Experiment_ys318_T01_C3.fcs","2":"root","3":"1","4":"VB_20240916_PGK1_proms","5":"C3","6":"ys318_T01","7":"enAsCas12a","8":"1","9":"No","10":"PGK1","11":"T01","12":"0.000000","13":"72.82000"},{"1":"VB_20240916_PGK1_proms_Experiment_ys318_T01_C4.fcs","2":"root","3":"1","4":"VB_20240916_PGK1_proms","5":"C4","6":"ys318_T01","7":"enAsCas12a","8":"2","9":"No","10":"PGK1","11":"T01","12":"0.000000","13":"73.73600"},{"1":"VB_20240916_PGK1_proms_Experiment_ys318_T02_G3.fcs","2":"root","3":"1","4":"VB_20240916_PGK1_proms","5":"G3","6":"ys318_T02","7":"enAsCas12a","8":"1","9":"No","10":"PGK1","11":"T02","12":"8.419539","13":"48.78800"},{"1":"VB_20240916_PGK1_proms_Experiment_ys318_T02_G4.fcs","2":"root","3":"1","4":"VB_20240916_PGK1_proms","5":"G4","6":"ys318_T02","7":"enAsCas12a","8":"2","9":"No","10":"PGK1","11":"T02","12":"8.066089","13":"49.19600"},{"1":"VB_20240916_PGK1_proms_P2_Experiment_ys304_T03_A11.fcs","2":"root","3":"1","4":"VB_20240916_PGK1_proms_P2","5":"A11","6":"ys304_T03","7":"enAsCas12a","8":"1","9":"No","10":"TEF","11":"T03","12":"13.299483","13":"57.02000"},{"1":"VB_20240916_PGK1_proms_P2_Experiment_ys304_T03_A12.fcs","2":"root","3":"1","4":"VB_20240916_PGK1_proms_P2","5":"A12","6":"ys304_T03","7":"enAsCas12a","8":"2","9":"No","10":"TEF","11":"T03","12":"12.226123","13":"60.94000"},{"1":"VB_20240916_PGK1_proms_P2_Experiment_ys304_T04_C11.fcs","2":"root","3":"1","4":"VB_20240916_PGK1_proms_P2","5":"C11","6":"ys304_T04","7":"enAsCas12a","8":"1","9":"No","10":"TEF","11":"T04","12":"22.817152","13":"44.23600"},{"1":"VB_20240916_PGK1_proms_P2_Experiment_ys304_T04_C12.fcs","2":"root","3":"1","4":"VB_20240916_PGK1_proms_P2","5":"C12","6":"ys304_T04","7":"enAsCas12a","8":"2","9":"No","10":"TEF","11":"T04","12":"21.719979","13":"46.56000"},{"1":"VB_20240916_PGK1_proms_P2_Experiment_ys318_T03_C3.fcs","2":"root","3":"1","4":"VB_20240916_PGK1_proms_P2","5":"C3","6":"ys318_T03","7":"enAsCas12a","8":"1","9":"No","10":"PGK1","11":"T03","12":"13.878971","13":"32.93200"},{"1":"VB_20240916_PGK1_proms_P2_Experiment_ys318_T03_C4.fcs","2":"root","3":"1","4":"VB_20240916_PGK1_proms_P2","5":"C4","6":"ys318_T03","7":"enAsCas12a","8":"2","9":"No","10":"PGK1","11":"T03","12":"12.602142","13":"32.73600"},{"1":"VB_20240916_PGK1_proms_P2_Experiment_ys318_T04_G3.fcs","2":"root","3":"1","4":"VB_20240916_PGK1_proms_P2","5":"G3","6":"ys318_T04","7":"enAsCas12a","8":"1","9":"No","10":"PGK1","11":"T04","12":"23.275575","13":"19.68000"},{"1":"VB_20240916_PGK1_proms_P2_Experiment_ys318_T04_G4.fcs","2":"root","3":"1","4":"VB_20240916_PGK1_proms_P2","5":"G4","6":"ys318_T04","7":"enAsCas12a","8":"2","9":"No","10":"PGK1","11":"T04","12":"21.627282","13":"12.92000"},{"1":"VB_20241007_MbCas12a_PGK1_Experiment_T01_G1.fcs","2":"root","3":"1","4":"VB_20241007_MbCas12a_PGK1","5":"G1","6":"T01","7":"MbCas12a","8":"1","9":"No","10":"PGK1","11":"T01","12":"0.000000","13":"4.97200"},{"1":"VB_20241007_MbCas12a_PGK1_Experiment_T01_H1.fcs","2":"root","3":"1","4":"VB_20241007_MbCas12a_PGK1","5":"H1","6":"T01","7":"MbCas12a","8":"2","9":"No","10":"PGK1","11":"T01","12":"0.000000","13":"5.71200"},{"1":"VB_20241007_MbCas12a_PGK1_Experiment_T02_G2.fcs","2":"root","3":"1","4":"VB_20241007_MbCas12a_PGK1","5":"G2","6":"T02","7":"MbCas12a","8":"1","9":"No","10":"PGK1","11":"T02","12":"6.264785","13":"62.03600"},{"1":"VB_20241007_MbCas12a_PGK1_Experiment_T02_H2.fcs","2":"root","3":"1","4":"VB_20241007_MbCas12a_PGK1","5":"H2","6":"T02","7":"MbCas12a","8":"2","9":"No","10":"PGK1","11":"T02","12":"6.498483","13":"63.33600"},{"1":"VB_20241007_MbCas12a_PGK1_Experiment_T03_G3.fcs","2":"root","3":"1","4":"VB_20241007_MbCas12a_PGK1","5":"G3","6":"T03","7":"MbCas12a","8":"1","9":"No","10":"PGK1","11":"T03","12":"14.169765","13":"66.06800"},{"1":"VB_20241007_MbCas12a_PGK1_Experiment_T03_H3.fcs","2":"root","3":"1","4":"VB_20241007_MbCas12a_PGK1","5":"H3","6":"T03","7":"MbCas12a","8":"2","9":"No","10":"PGK1","11":"T03","12":"14.280261","13":"70.97200"},{"1":"VB_20241007_MbCas12a_PGK1_Experiment_T04_G4.fcs","2":"root","3":"1","4":"VB_20241007_MbCas12a_PGK1","5":"G4","6":"T04","7":"MbCas12a","8":"1","9":"No","10":"PGK1","11":"T04","12":"20.620976","13":"58.02000"},{"1":"VB_20241007_MbCas12a_PGK1_Experiment_T04_H4.fcs","2":"root","3":"1","4":"VB_20241007_MbCas12a_PGK1","5":"H4","6":"T04","7":"MbCas12a","8":"2","9":"No","10":"PGK1","11":"T04","12":"20.672579","13":"61.83200"},{"1":"VB_20240930_Gal_vars_Experiment_T01_constitutive_E4.fcs","2":"root","3":"1","4":"VB_20240930_Gal_vars","5":"E4","6":"T01_constitutive","7":"enAsCas12a_less_NLS","8":"1","9":"No","10":"TEF","11":"T01","12":"0.000000","13":"1.86400"},{"1":"VB_20240930_Gal_vars_Experiment_T01_constitutive_F4.fcs","2":"root","3":"1","4":"VB_20240930_Gal_vars","5":"F4","6":"T01_constitutive","7":"enAsCas12a_less_NLS","8":"2","9":"No","10":"TEF","11":"T01","12":"0.000000","13":"2.35600"},{"1":"VB_20240930_Gal_vars_Experiment_T01_constitutive_G4.fcs","2":"root","3":"1","4":"VB_20240930_Gal_vars","5":"G4","6":"T01_constitutive","7":"enAsCas12a_less_NLS","8":"1","9":"No","10":"PGK1","11":"T01","12":"0.000000","13":"42.12800"},{"1":"VB_20240930_Gal_vars_Experiment_T01_constitutive_H4.fcs","2":"root","3":"1","4":"VB_20240930_Gal_vars","5":"H4","6":"T01_constitutive","7":"enAsCas12a_less_NLS","8":"2","9":"No","10":"PGK1","11":"T01","12":"0.000000","13":"40.79600"},{"1":"VB_20240930_Gal_vars_Experiment_T02_constitutive_E9.fcs","2":"root","3":"1","4":"VB_20240930_Gal_vars","5":"E9","6":"T02_constitutive","7":"enAsCas12a_less_NLS","8":"1","9":"No","10":"TEF","11":"T02","12":"4.678072","13":"12.44400"},{"1":"VB_20240930_Gal_vars_Experiment_T02_constitutive_F9.fcs","2":"root","3":"1","4":"VB_20240930_Gal_vars","5":"F9","6":"T02_constitutive","7":"enAsCas12a_less_NLS","8":"2","9":"No","10":"TEF","11":"T02","12":"5.145677","13":"11.29600"},{"1":"VB_20240930_Gal_vars_Experiment_T02_constitutive_G9.fcs","2":"root","3":"1","4":"VB_20240930_Gal_vars","5":"G9","6":"T02_constitutive","7":"enAsCas12a_less_NLS","8":"1","9":"No","10":"PGK1","11":"T02","12":"6.944858","13":"57.71200"},{"1":"VB_20240930_Gal_vars_Experiment_T02_constitutive_H9.fcs","2":"root","3":"1","4":"VB_20240930_Gal_vars","5":"H9","6":"T02_constitutive","7":"enAsCas12a_less_NLS","8":"2","9":"No","10":"PGK1","11":"T02","12":"7.169925","13":"56.10800"},{"1":"VB_20240930_Gal_vars_Experiment_T03_consitutive_E11.fcs","2":"root","3":"1","4":"VB_20240930_Gal_vars","5":"E11","6":"T03_consitutive","7":"enAsCas12a_less_NLS","8":"1","9":"No","10":"TEF","11":"T03","12":"11.392317","13":"21.57200"},{"1":"VB_20240930_Gal_vars_Experiment_T03_consitutive_F11.fcs","2":"root","3":"1","4":"VB_20240930_Gal_vars","5":"F11","6":"T03_consitutive","7":"enAsCas12a_less_NLS","8":"2","9":"No","10":"TEF","11":"T03","12":"12.940093","13":"20.29600"},{"1":"VB_20240930_Gal_vars_Experiment_T03_consitutive_G11.fcs","2":"root","3":"1","4":"VB_20240930_Gal_vars","5":"G11","6":"T03_consitutive","7":"enAsCas12a_less_NLS","8":"1","9":"No","10":"PGK1","11":"T03","12":"14.780909","13":"49.90000"},{"1":"VB_20240930_Gal_vars_Experiment_T03_consitutive_H11.fcs","2":"root","3":"1","4":"VB_20240930_Gal_vars","5":"H11","6":"T03_consitutive","7":"enAsCas12a_less_NLS","8":"2","9":"No","10":"PGK1","11":"T03","12":"14.309476","13":"44.50800"},{"1":"VB_20240930_Gal_vars_P2_Experiment_T04_constitutive_E5.fcs","2":"root","3":"1","4":"VB_20240930_Gal_vars_P2","5":"E5","6":"T04_constitutive","7":"enAsCas12a_less_NLS","8":"1","9":"No","10":"TEF","11":"T04","12":"19.492980","13":"28.95600"},{"1":"VB_20240930_Gal_vars_P2_Experiment_T04_constitutive_F5.fcs","2":"root","3":"1","4":"VB_20240930_Gal_vars_P2","5":"F5","6":"T04_constitutive","7":"enAsCas12a_less_NLS","8":"2","9":"No","10":"TEF","11":"T04","12":"20.043381","13":"24.72800"},{"1":"VB_20240930_Gal_vars_P2_Experiment_T04_constitutive_G5.fcs","2":"root","3":"1","4":"VB_20240930_Gal_vars_P2","5":"G5","6":"T04_constitutive","7":"enAsCas12a_less_NLS","8":"1","9":"No","10":"PGK1","11":"T04","12":"23.026462","13":"36.22000"},{"1":"VB_20240930_Gal_vars_P2_Experiment_T04_constitutive_H5.fcs","2":"root","3":"1","4":"VB_20240930_Gal_vars_P2","5":"H5","6":"T04_constitutive","7":"enAsCas12a_less_NLS","8":"2","9":"No","10":"PGK1","11":"T04","12":"22.644867","13":"29.41600"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+</div>
+</div>
+</section>
+<section id="main-gfp-on-panels" class="level2">
+<h2 class="anchored" data-anchor-id="main-gfp-on-panels">Main GFP ON panels</h2>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>tef_on_plot <span class="ot">&lt;-</span> <span class="fu">plot_variant_timecourse</span>(</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  gfp_on,</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">cas_promoter =</span> <span class="st">"TEF"</span>,</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">exclude =</span> <span class="fu">c</span>(<span class="st">"enAsCas12a_less_NLS"</span>, <span class="st">"FnCas12a(CO)"</span>, <span class="st">"LbCas12a(CO)"</span>),</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">facet =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">nrows =</span> <span class="dv">1</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>pgk1_on_plot <span class="ot">&lt;-</span> <span class="fu">plot_variant_timecourse</span>(</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>  gfp_on,</span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">cas_promoter =</span> <span class="st">"PGK1"</span>,</span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">exclude =</span> <span class="fu">c</span>(<span class="st">"FnCas12a(CO)"</span>, <span class="st">"LbCas12a(CO)"</span>),</span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">facet =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">nrows =</span> <span class="dv">1</span></span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a><span class="fu">safe_ggsave</span>(</span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>  tef_on_plot,</span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">file.path</span>(plots_dir, <span class="st">"tef_variants_on.pdf"</span>),</span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>  <span class="at">width =</span> <span class="dv">7</span>,</span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>  <span class="at">height =</span> <span class="dv">4</span></span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a><span class="fu">safe_ggsave</span>(</span>
+<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a>  pgk1_on_plot,</span>
+<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">file.path</span>(plots_dir, <span class="st">"pgk1_variants_on.pdf"</span>),</span>
+<span id="cb13-27"><a href="#cb13-27" aria-hidden="true" tabindex="-1"></a>  <span class="at">width =</span> <span class="dv">7</span>,</span>
+<span id="cb13-28"><a href="#cb13-28" aria-hidden="true" tabindex="-1"></a>  <span class="at">height =</span> <span class="dv">4</span></span>
+<span id="cb13-29"><a href="#cb13-29" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb13-30"><a href="#cb13-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-31"><a href="#cb13-31" aria-hidden="true" tabindex="-1"></a>tef_on_plot</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="04_cas_variants_overview_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="main-gfp-off-panels" class="level2">
+<h2 class="anchored" data-anchor-id="main-gfp-off-panels">Main GFP OFF panels</h2>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>tef_off_plot <span class="ot">&lt;-</span> <span class="fu">plot_variant_timecourse</span>(</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  gfp_off,</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">cas_promoter =</span> <span class="st">"TEF"</span>,</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">exclude =</span> <span class="fu">c</span>(<span class="st">"FnCas12a(CO)"</span>, <span class="st">"LbCas12a(CO)"</span>),</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">facet =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">nrows =</span> <span class="dv">1</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>pgk1_off_plot <span class="ot">&lt;-</span> <span class="fu">plot_variant_timecourse</span>(</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>  gfp_off,</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">cas_promoter =</span> <span class="st">"PGK1"</span>,</span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">exclude =</span> <span class="fu">c</span>(<span class="st">"enAsCas12a_less_NLS"</span>, <span class="st">"FnCas12a(CO)"</span>, <span class="st">"LbCas12a(CO)"</span>),</span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">facet =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">nrows =</span> <span class="dv">1</span></span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a><span class="fu">safe_ggsave</span>(</span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>  tef_off_plot,</span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">file.path</span>(plots_dir, <span class="st">"tef_variants_off.pdf"</span>),</span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>  <span class="at">width =</span> <span class="dv">7</span>,</span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a>  <span class="at">height =</span> <span class="dv">4</span></span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a><span class="fu">safe_ggsave</span>(</span>
+<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a>  pgk1_off_plot,</span>
+<span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">file.path</span>(plots_dir, <span class="st">"pgk1_variants_off.pdf"</span>),</span>
+<span id="cb14-27"><a href="#cb14-27" aria-hidden="true" tabindex="-1"></a>  <span class="at">width =</span> <span class="dv">7</span>,</span>
+<span id="cb14-28"><a href="#cb14-28" aria-hidden="true" tabindex="-1"></a>  <span class="at">height =</span> <span class="dv">4</span></span>
+<span id="cb14-29"><a href="#cb14-29" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb14-30"><a href="#cb14-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-31"><a href="#cb14-31" aria-hidden="true" tabindex="-1"></a>tef_off_plot</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="04_cas_variants_overview_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="direct-repeat-comparison" class="level2">
+<h2 class="anchored" data-anchor-id="direct-repeat-comparison">Direct repeat comparison</h2>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>direct_repeat_plot <span class="ot">&lt;-</span> <span class="fu">plot_direct_repeat_by_guide_promoter</span>(</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  direct_repeat_tables<span class="sc">$</span>with_colony_counts,</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">cas_promoter =</span> <span class="st">"TEF"</span>,</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">exclude =</span> <span class="fu">c</span>(<span class="st">"enAsCas12a_less_NLS"</span>, <span class="st">"FnCas12a(CO)"</span>, <span class="st">"LbCas12a(CO)"</span>),</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">nrows =</span> <span class="dv">1</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a><span class="fu">safe_ggsave</span>(</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>  direct_repeat_plot,</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">file.path</span>(plots_dir, <span class="st">"direct_repeat_tef.pdf"</span>),</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">width =</span> <span class="dv">8</span>,</span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">height =</span> <span class="dv">4</span></span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>direct_repeat_plot</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="04_cas_variants_overview_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="codon-optimized-supplementary-panel" class="level2">
+<h2 class="anchored" data-anchor-id="codon-optimized-supplementary-panel">Codon-optimized supplementary panel</h2>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>co_data <span class="ot">&lt;-</span> gfp_on <span class="sc">%&gt;%</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(var <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"FnCas12a"</span>, <span class="st">"LbCas12a"</span>, <span class="st">"FnCas12a(CO)"</span>, <span class="st">"LbCas12a(CO)"</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">parent_var =</span> dplyr<span class="sc">::</span><span class="fu">if_else</span>(stringr<span class="sc">::</span><span class="fu">str_detect</span>(var, <span class="st">"Fn"</span>), <span class="st">"Fn"</span>, <span class="st">"Lb"</span>))</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>co_tef_plot <span class="ot">&lt;-</span> <span class="fu">plot_codon_optimized_comparison</span>(co_data, <span class="st">"TEF"</span>)</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>co_pgk1_plot <span class="ot">&lt;-</span> <span class="fu">plot_codon_optimized_comparison</span>(co_data, <span class="st">"PGK1"</span>)</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a><span class="fu">safe_ggsave</span>(</span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>  co_tef_plot,</span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">file.path</span>(plots_dir, <span class="st">"codon_optimized_tef.pdf"</span>),</span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">width =</span> <span class="dv">7</span>,</span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">height =</span> <span class="dv">4</span></span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a><span class="fu">safe_ggsave</span>(</span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a>  co_pgk1_plot,</span>
+<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">file.path</span>(plots_dir, <span class="st">"codon_optimized_pgk1.pdf"</span>),</span>
+<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">width =</span> <span class="dv">7</span>,</span>
+<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a>  <span class="at">height =</span> <span class="dv">4</span></span>
+<span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb16-21"><a href="#cb16-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-22"><a href="#cb16-22" aria-hidden="true" tabindex="-1"></a>co_tef_plot</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="04_cas_variants_overview_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="guide-promoter-exploration" class="level2">
+<h2 class="anchored" data-anchor-id="guide-promoter-exploration">Guide promoter exploration</h2>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>guide_promoter_on_plot <span class="ot">&lt;-</span> <span class="fu">plot_guide_promoter_timecourse</span>(guide_promoter_tables<span class="sc">$</span>with_colony_counts, <span class="st">"ON"</span>)</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>guide_promoter_off_plot <span class="ot">&lt;-</span> <span class="fu">plot_guide_promoter_timecourse</span>(guide_promoter_tables<span class="sc">$</span>with_colony_counts, <span class="st">"OFF"</span>)</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="fu">safe_ggsave</span>(</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>  guide_promoter_on_plot,</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">file.path</span>(plots_dir, <span class="st">"guide_promoter_on.pdf"</span>),</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">width =</span> <span class="dv">8</span>,</span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">height =</span> <span class="dv">4</span></span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a><span class="fu">safe_ggsave</span>(</span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>  guide_promoter_off_plot,</span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">file.path</span>(plots_dir, <span class="st">"guide_promoter_off.pdf"</span>),</span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">width =</span> <span class="dv">8</span>,</span>
+<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">height =</span> <span class="dv">4</span></span>
+<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a>guide_promoter_on_plot</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="04_cas_variants_overview_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

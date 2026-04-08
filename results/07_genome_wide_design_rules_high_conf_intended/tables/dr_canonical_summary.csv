@@ -1,0 +1,3 @@
+"dr_canonical_flag","total_guides","successful_guides","total_assayed_colonies","edited_colonies","design_success_rate","design_success_lower","design_success_upper","colony_edit_rate","colony_edit_lower","colony_edit_upper"
+"Canonical",146,82,217,99,0.561643835616438,0.480601013988568,0.639525953151678,0.456221198156682,0.391287182942105,0.522678246821577
+"Non-canonical",384,216,616,271,0.5625,0.512506149166056,0.611255761553734,0.439935064935065,0.401228539350067,0.479386093719505

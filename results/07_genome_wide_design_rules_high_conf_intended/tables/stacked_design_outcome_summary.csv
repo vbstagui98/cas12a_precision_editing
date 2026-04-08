@@ -1,0 +1,124 @@
+"parameter","parameter_pretty","parameter_group","parameter_value","outcome_state","design_count","total_designs","fraction","value_order"
+"deepcpf1_quartile","DeepCpf1 quartile","Core cassette parameters","Q1 lowest","Intended edit only",61,137,0.445255474452555,1
+"deepcpf1_quartile","DeepCpf1 quartile","Core cassette parameters","Q1 lowest","Other variants observed",3,137,0.0218978102189781,1
+"deepcpf1_quartile","DeepCpf1 quartile","Core cassette parameters","Q1 lowest","Unedited",73,137,0.532846715328467,1
+"deepcpf1_quartile","DeepCpf1 quartile","Core cassette parameters","Q2","Intended edit only",72,138,0.521739130434783,2
+"deepcpf1_quartile","DeepCpf1 quartile","Core cassette parameters","Q2","Other variants observed",6,138,0.0434782608695652,2
+"deepcpf1_quartile","DeepCpf1 quartile","Core cassette parameters","Q2","Unedited",60,138,0.434782608695652,2
+"deepcpf1_quartile","DeepCpf1 quartile","Core cassette parameters","Q3","Intended edit only",72,130,0.553846153846154,3
+"deepcpf1_quartile","DeepCpf1 quartile","Core cassette parameters","Q3","Other variants observed",6,130,0.0461538461538462,3
+"deepcpf1_quartile","DeepCpf1 quartile","Core cassette parameters","Q3","Unedited",52,130,0.4,3
+"deepcpf1_quartile","DeepCpf1 quartile","Core cassette parameters","Q4 highest","Intended edit only",81,125,0.648,4
+"deepcpf1_quartile","DeepCpf1 quartile","Core cassette parameters","Q4 highest","Other variants observed",4,125,0.032,4
+"deepcpf1_quartile","DeepCpf1 quartile","Core cassette parameters","Q4 highest","Unedited",40,125,0.32,4
+"pam","PAM","Core cassette parameters","TTTA","Intended edit only",90,167,0.538922155688623,2
+"pam","PAM","Core cassette parameters","TTTA","Other variants observed",7,167,0.0419161676646707,2
+"pam","PAM","Core cassette parameters","TTTA","Unedited",70,167,0.419161676646707,2
+"pam","PAM","Core cassette parameters","TTTC","Intended edit only",101,157,0.643312101910828,1
+"pam","PAM","Core cassette parameters","TTTC","Other variants observed",5,157,0.0318471337579618,1
+"pam","PAM","Core cassette parameters","TTTC","Unedited",51,157,0.32484076433121,1
+"pam","PAM","Core cassette parameters","TTTG","Intended edit only",95,206,0.461165048543689,3
+"pam","PAM","Core cassette parameters","TTTG","Other variants observed",7,206,0.0339805825242718,3
+"pam","PAM","Core cassette parameters","TTTG","Unedited",104,206,0.504854368932039,3
+"pam_upstream_nt","5' PAM base","Core cassette parameters","A","Intended edit only",68,134,0.507462686567164,2
+"pam_upstream_nt","5' PAM base","Core cassette parameters","A","Other variants observed",5,134,0.0373134328358209,2
+"pam_upstream_nt","5' PAM base","Core cassette parameters","A","Unedited",61,134,0.455223880597015,2
+"pam_upstream_nt","5' PAM base","Core cassette parameters","C","Intended edit only",54,113,0.47787610619469,1
+"pam_upstream_nt","5' PAM base","Core cassette parameters","C","Other variants observed",5,113,0.0442477876106195,1
+"pam_upstream_nt","5' PAM base","Core cassette parameters","C","Unedited",54,113,0.47787610619469,1
+"pam_upstream_nt","5' PAM base","Core cassette parameters","G","Intended edit only",45,77,0.584415584415584,3
+"pam_upstream_nt","5' PAM base","Core cassette parameters","G","Other variants observed",3,77,0.038961038961039,3
+"pam_upstream_nt","5' PAM base","Core cassette parameters","G","Unedited",29,77,0.376623376623377,3
+"pam_upstream_nt","5' PAM base","Core cassette parameters","T","Intended edit only",119,206,0.577669902912621,4
+"pam_upstream_nt","5' PAM base","Core cassette parameters","T","Other variants observed",6,206,0.029126213592233,4
+"pam_upstream_nt","5' PAM base","Core cassette parameters","T","Unedited",81,206,0.393203883495146,4
+"pam_dist_bin","PAM distance bin","Core cassette parameters","1-6","Intended edit only",100,162,0.617283950617284,2
+"pam_dist_bin","PAM distance bin","Core cassette parameters","1-6","Other variants observed",6,162,0.037037037037037,2
+"pam_dist_bin","PAM distance bin","Core cassette parameters","1-6","Unedited",56,162,0.345679012345679,2
+"pam_dist_bin","PAM distance bin","Core cassette parameters","12-17","Intended edit only",79,140,0.564285714285714,4
+"pam_dist_bin","PAM distance bin","Core cassette parameters","12-17","Other variants observed",5,140,0.0357142857142857,4
+"pam_dist_bin","PAM distance bin","Core cassette parameters","12-17","Unedited",56,140,0.4,4
+"pam_dist_bin","PAM distance bin","Core cassette parameters","18-23","Intended edit only",17,67,0.253731343283582,5
+"pam_dist_bin","PAM distance bin","Core cassette parameters","18-23","Other variants observed",3,67,0.0447761194029851,5
+"pam_dist_bin","PAM distance bin","Core cassette parameters","18-23","Unedited",47,67,0.701492537313433,5
+"pam_dist_bin","PAM distance bin","Core cassette parameters","7-11","Intended edit only",64,99,0.646464646464647,3
+"pam_dist_bin","PAM distance bin","Core cassette parameters","7-11","Other variants observed",2,99,0.0202020202020202,3
+"pam_dist_bin","PAM distance bin","Core cassette parameters","7-11","Unedited",33,99,0.333333333333333,3
+"pam_dist_bin","PAM distance bin","Core cassette parameters","PAM","Intended edit only",26,62,0.419354838709677,1
+"pam_dist_bin","PAM distance bin","Core cassette parameters","PAM","Other variants observed",3,62,0.0483870967741935,1
+"pam_dist_bin","PAM distance bin","Core cassette parameters","PAM","Unedited",33,62,0.532258064516129,1
+"guide_gc_23_bin","Guide GC (23 nt)","GC and DR parameters","<30%","Intended edit only",34,77,0.441558441558442,1
+"guide_gc_23_bin","Guide GC (23 nt)","GC and DR parameters","<30%","Other variants observed",4,77,0.051948051948052,1
+"guide_gc_23_bin","Guide GC (23 nt)","GC and DR parameters","<30%","Unedited",39,77,0.506493506493506,1
+"guide_gc_23_bin","Guide GC (23 nt)","GC and DR parameters",">=60%","Intended edit only",18,31,0.580645161290323,5
+"guide_gc_23_bin","Guide GC (23 nt)","GC and DR parameters",">=60%","Other variants observed",2,31,0.0645161290322581,5
+"guide_gc_23_bin","Guide GC (23 nt)","GC and DR parameters",">=60%","Unedited",11,31,0.354838709677419,5
+"guide_gc_23_bin","Guide GC (23 nt)","GC and DR parameters","30-39%","Intended edit only",130,240,0.541666666666667,2
+"guide_gc_23_bin","Guide GC (23 nt)","GC and DR parameters","30-39%","Other variants observed",10,240,0.0416666666666667,2
+"guide_gc_23_bin","Guide GC (23 nt)","GC and DR parameters","30-39%","Unedited",100,240,0.416666666666667,2
+"guide_gc_23_bin","Guide GC (23 nt)","GC and DR parameters","40-49%","Intended edit only",70,116,0.603448275862069,3
+"guide_gc_23_bin","Guide GC (23 nt)","GC and DR parameters","40-49%","Other variants observed",2,116,0.0172413793103448,3
+"guide_gc_23_bin","Guide GC (23 nt)","GC and DR parameters","40-49%","Unedited",44,116,0.379310344827586,3
+"guide_gc_23_bin","Guide GC (23 nt)","GC and DR parameters","50-59%","Intended edit only",34,66,0.515151515151515,4
+"guide_gc_23_bin","Guide GC (23 nt)","GC and DR parameters","50-59%","Other variants observed",1,66,0.0151515151515152,4
+"guide_gc_23_bin","Guide GC (23 nt)","GC and DR parameters","50-59%","Unedited",31,66,0.46969696969697,4
+"guide_gc_20_bin","Guide GC (first 20 nt)","GC and DR parameters","<30%","Intended edit only",31,72,0.430555555555556,1
+"guide_gc_20_bin","Guide GC (first 20 nt)","GC and DR parameters","<30%","Other variants observed",3,72,0.0416666666666667,1
+"guide_gc_20_bin","Guide GC (first 20 nt)","GC and DR parameters","<30%","Unedited",38,72,0.527777777777778,1
+"guide_gc_20_bin","Guide GC (first 20 nt)","GC and DR parameters",">=60%","Intended edit only",30,46,0.652173913043478,5
+"guide_gc_20_bin","Guide GC (first 20 nt)","GC and DR parameters",">=60%","Other variants observed",2,46,0.0434782608695652,5
+"guide_gc_20_bin","Guide GC (first 20 nt)","GC and DR parameters",">=60%","Unedited",14,46,0.304347826086957,5
+"guide_gc_20_bin","Guide GC (first 20 nt)","GC and DR parameters","30-39%","Intended edit only",81,162,0.5,2
+"guide_gc_20_bin","Guide GC (first 20 nt)","GC and DR parameters","30-39%","Other variants observed",5,162,0.0308641975308642,2
+"guide_gc_20_bin","Guide GC (first 20 nt)","GC and DR parameters","30-39%","Unedited",76,162,0.469135802469136,2
+"guide_gc_20_bin","Guide GC (first 20 nt)","GC and DR parameters","40-49%","Intended edit only",98,162,0.604938271604938,3
+"guide_gc_20_bin","Guide GC (first 20 nt)","GC and DR parameters","40-49%","Other variants observed",7,162,0.0432098765432099,3
+"guide_gc_20_bin","Guide GC (first 20 nt)","GC and DR parameters","40-49%","Unedited",57,162,0.351851851851852,3
+"guide_gc_20_bin","Guide GC (first 20 nt)","GC and DR parameters","50-59%","Intended edit only",46,88,0.522727272727273,4
+"guide_gc_20_bin","Guide GC (first 20 nt)","GC and DR parameters","50-59%","Other variants observed",2,88,0.0227272727272727,4
+"guide_gc_20_bin","Guide GC (first 20 nt)","GC and DR parameters","50-59%","Unedited",40,88,0.454545454545455,4
+"guide_gc_18_bin","Guide GC (first 18 nt)","GC and DR parameters","<30%","Intended edit only",46,116,0.396551724137931,1
+"guide_gc_18_bin","Guide GC (first 18 nt)","GC and DR parameters","<30%","Other variants observed",6,116,0.0517241379310345,1
+"guide_gc_18_bin","Guide GC (first 18 nt)","GC and DR parameters","<30%","Unedited",64,116,0.551724137931034,1
+"guide_gc_18_bin","Guide GC (first 18 nt)","GC and DR parameters",">=60%","Intended edit only",29,44,0.659090909090909,5
+"guide_gc_18_bin","Guide GC (first 18 nt)","GC and DR parameters",">=60%","Other variants observed",2,44,0.0454545454545455,5
+"guide_gc_18_bin","Guide GC (first 18 nt)","GC and DR parameters",">=60%","Unedited",13,44,0.295454545454545,5
+"guide_gc_18_bin","Guide GC (first 18 nt)","GC and DR parameters","30-39%","Intended edit only",109,186,0.586021505376344,2
+"guide_gc_18_bin","Guide GC (first 18 nt)","GC and DR parameters","30-39%","Other variants observed",5,186,0.0268817204301075,2
+"guide_gc_18_bin","Guide GC (first 18 nt)","GC and DR parameters","30-39%","Unedited",72,186,0.387096774193548,2
+"guide_gc_18_bin","Guide GC (first 18 nt)","GC and DR parameters","40-49%","Intended edit only",55,91,0.604395604395604,3
+"guide_gc_18_bin","Guide GC (first 18 nt)","GC and DR parameters","40-49%","Other variants observed",4,91,0.043956043956044,3
+"guide_gc_18_bin","Guide GC (first 18 nt)","GC and DR parameters","40-49%","Unedited",32,91,0.351648351648352,3
+"guide_gc_18_bin","Guide GC (first 18 nt)","GC and DR parameters","50-59%","Intended edit only",47,93,0.505376344086022,4
+"guide_gc_18_bin","Guide GC (first 18 nt)","GC and DR parameters","50-59%","Other variants observed",2,93,0.021505376344086,4
+"guide_gc_18_bin","Guide GC (first 18 nt)","GC and DR parameters","50-59%","Unedited",44,93,0.473118279569892,4
+"donor_wt_gc_bin","WT donor GC","GC and DR parameters","<30%","Intended edit only",18,39,0.461538461538462,1
+"donor_wt_gc_bin","WT donor GC","GC and DR parameters","<30%","Other variants observed",1,39,0.0256410256410256,1
+"donor_wt_gc_bin","WT donor GC","GC and DR parameters","<30%","Unedited",20,39,0.512820512820513,1
+"donor_wt_gc_bin","WT donor GC","GC and DR parameters","30-39%","Intended edit only",177,334,0.529940119760479,2
+"donor_wt_gc_bin","WT donor GC","GC and DR parameters","30-39%","Other variants observed",11,334,0.032934131736527,2
+"donor_wt_gc_bin","WT donor GC","GC and DR parameters","30-39%","Unedited",146,334,0.437125748502994,2
+"donor_wt_gc_bin","WT donor GC","GC and DR parameters","40-49%","Intended edit only",83,145,0.572413793103448,3
+"donor_wt_gc_bin","WT donor GC","GC and DR parameters","40-49%","Other variants observed",7,145,0.0482758620689655,3
+"donor_wt_gc_bin","WT donor GC","GC and DR parameters","40-49%","Unedited",55,145,0.379310344827586,3
+"donor_wt_gc_bin","WT donor GC","GC and DR parameters","50-59%","Intended edit only",8,12,0.666666666666667,4
+"donor_wt_gc_bin","WT donor GC","GC and DR parameters","50-59%","Other variants observed",0,12,0,4
+"donor_wt_gc_bin","WT donor GC","GC and DR parameters","50-59%","Unedited",4,12,0.333333333333333,4
+"dr_perturbed_flag","DR perturbation","GC and DR parameters","Not perturbed","Intended edit only",200,372,0.53763440860215,1
+"dr_perturbed_flag","DR perturbation","GC and DR parameters","Not perturbed","Other variants observed",15,372,0.0403225806451613,1
+"dr_perturbed_flag","DR perturbation","GC and DR parameters","Not perturbed","Unedited",157,372,0.422043010752688,1
+"dr_perturbed_flag","DR perturbation","GC and DR parameters","Perturbed","Intended edit only",86,158,0.544303797468354,2
+"dr_perturbed_flag","DR perturbation","GC and DR parameters","Perturbed","Other variants observed",4,158,0.0253164556962025,2
+"dr_perturbed_flag","DR perturbation","GC and DR parameters","Perturbed","Unedited",68,158,0.430379746835443,2
+"dr_canonical_flag","DR structure class","GC and DR parameters","Canonical","Intended edit only",78,146,0.534246575342466,1
+"dr_canonical_flag","DR structure class","GC and DR parameters","Canonical","Other variants observed",6,146,0.0410958904109589,1
+"dr_canonical_flag","DR structure class","GC and DR parameters","Canonical","Unedited",62,146,0.424657534246575,1
+"dr_canonical_flag","DR structure class","GC and DR parameters","Non-canonical","Intended edit only",208,384,0.541666666666667,2
+"dr_canonical_flag","DR structure class","GC and DR parameters","Non-canonical","Other variants observed",13,384,0.0338541666666667,2
+"dr_canonical_flag","DR structure class","GC and DR parameters","Non-canonical","Unedited",163,384,0.424479166666667,2
+"dr_spacer_pair_flag","DR-spacer pairing","GC and DR parameters","Any DR-spacer pairing","Intended edit only",86,158,0.544303797468354,2
+"dr_spacer_pair_flag","DR-spacer pairing","GC and DR parameters","Any DR-spacer pairing","Other variants observed",4,158,0.0253164556962025,2
+"dr_spacer_pair_flag","DR-spacer pairing","GC and DR parameters","Any DR-spacer pairing","Unedited",68,158,0.430379746835443,2
+"dr_spacer_pair_flag","DR-spacer pairing","GC and DR parameters","No DR-spacer pairing","Intended edit only",200,372,0.53763440860215,1
+"dr_spacer_pair_flag","DR-spacer pairing","GC and DR parameters","No DR-spacer pairing","Other variants observed",15,372,0.0403225806451613,1
+"dr_spacer_pair_flag","DR-spacer pairing","GC and DR parameters","No DR-spacer pairing","Unedited",157,372,0.422043010752688,1

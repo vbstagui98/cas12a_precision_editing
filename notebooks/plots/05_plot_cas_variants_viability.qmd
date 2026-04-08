@@ -1,0 +1,117 @@
+---
+title: "Plot Only: Cas Variants Viability"
+format: html
+editor: visual
+---
+
+## Setup
+
+```{r}
+resolve_project_root <- function() {
+  rstudio_path <- ""
+  if (requireNamespace("rstudioapi", quietly = TRUE)) {
+    rstudio_path <- tryCatch(rstudioapi::getSourceEditorContext()$path, error = function(e) "")
+    if (!nzchar(rstudio_path)) {
+      rstudio_path <- tryCatch(rstudioapi::getActiveDocumentContext()$path, error = function(e) "")
+    }
+  }
+
+  search_roots <- unique(c(
+    Sys.getenv("CAS12A_NOTEBOOK_PROJECT_ROOT", unset = ""),
+    tryCatch(knitr::current_input(dir = TRUE), error = function(e) ""),
+    rstudio_path,
+    getwd(),
+    normalizePath(file.path(getwd(), ".."), mustWork = FALSE),
+    normalizePath(file.path(getwd(), "..", ".."), mustWork = FALSE)
+  ))
+  search_roots <- search_roots[nzchar(search_roots)]
+
+  for (root in search_roots) {
+    current <- normalizePath(root, mustWork = FALSE)
+    if (!dir.exists(current)) {
+      current <- dirname(current)
+    }
+
+    repeat {
+      required_paths <- c(
+        file.path(current, "_quarto.yml"),
+        file.path(current, "config", "paths.R"),
+        file.path(current, "R", "common.R")
+      )
+
+      if (all(file.exists(required_paths))) {
+        return(current)
+      }
+
+      parent <- dirname(current)
+      if (identical(parent, current)) {
+        break
+      }
+
+      current <- parent
+    }
+  }
+
+  stop(
+    paste(
+      "Could not locate the notebook project root.",
+      "Save the notebook and either run it from the project root,",
+      "or set Sys.setenv(CAS12A_NOTEBOOK_PROJECT_ROOT = '/path/to/New project')."
+    ),
+    call. = FALSE
+  )
+}
+
+project_root <- resolve_project_root()
+
+source(file.path(project_root, "config", "paths.R"), local = knitr::knit_global())
+source(file.path(project_root, "R", "common.R"), local = knitr::knit_global())
+source(file.path(project_root, "R", "cas_variants.R"), local = knitr::knit_global())
+
+load_paper_packages()
+
+paths <- get_analysis_paths(
+  list(results_dir = normalizePath(file.path(project_root, "results"), mustWork = FALSE))
+)
+
+input_dir <- file.path(paths$results_dir, "05_cas_variants_viability", "tables")
+output_dir <- analysis_output_dir(paths, "plot_only/05_cas_variants_viability")
+plots_dir <- ensure_dir(file.path(output_dir, "plots"))
+
+efficiency_off_data <- read_csv_clean(file.path(input_dir, "efficiency_off_data.csv"))
+efficiency_on_data <- read_csv_clean(file.path(input_dir, "efficiency_on_data.csv"))
+```
+
+## GFP OFF
+
+```{r}
+off_plot <- efficiency_off_data %>%
+  dplyr::filter(timepoint == "scraped") %>%
+  ggplot(aes(x = true_colony_count, y = efficiency, colour = var)) +
+  geom_point(size = 2) +
+  scale_color_manual(values = variant_palette()) +
+  scale_y_continuous(limits = c(0, 100), breaks = seq(0, 100, 20)) +
+  labs(x = "Colony count", y = "Editing efficiency (%)") +
+  publication_theme(legend_position = "right", aspect_ratio = 1)
+
+safe_ggsave(off_plot, file.path(plots_dir, "gfp_off_efficiency_vs_colony_count.png"), width = 6, height = 6)
+
+off_plot
+```
+
+## GFP ON
+
+```{r}
+on_plot <- efficiency_on_data %>%
+  dplyr::filter(timepoint == "T01") %>%
+  ggplot(aes(x = colonies_cutoff, y = efficiency, colour = var)) +
+  geom_point(size = 2) +
+  scale_color_manual(values = variant_palette()) +
+  scale_y_continuous(limits = c(0, 100), breaks = seq(0, 100, 20)) +
+  labs(x = "Colony count", y = "Editing efficiency (%)") +
+  publication_theme(legend_position = "right", aspect_ratio = 1)
+
+safe_ggsave(on_plot, file.path(plots_dir, "gfp_on_efficiency_vs_colony_count.png"), width = 6, height = 6)
+
+on_plot
+```

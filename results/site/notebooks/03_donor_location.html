@@ -1,0 +1,1019 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.26">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Robust Donor Location Analysis</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="03_donor_location_files/libs/clipboard/clipboard.min.js"></script>
+<script src="03_donor_location_files/libs/quarto-html/quarto.js" type="module"></script>
+<script src="03_donor_location_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="03_donor_location_files/libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="03_donor_location_files/libs/quarto-html/popper.min.js"></script>
+<script src="03_donor_location_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="03_donor_location_files/libs/quarto-html/anchor.min.js"></script>
+<link href="03_donor_location_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="03_donor_location_files/libs/quarto-html/quarto-syntax-highlighting-587c61ba64f3a5504c4d52d930310e48.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="03_donor_location_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="03_donor_location_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="03_donor_location_files/libs/bootstrap/bootstrap-d6a003b94517c951b2d65075d42fb01b.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="03_donor_location_files/libs/pagedtable-1.1/css/pagedtable.css" rel="stylesheet">
+<script src="03_donor_location_files/libs/pagedtable-1.1/js/pagedtable.js"></script>
+
+
+</head>
+
+<body class="quarto-light">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul class="collapse">
+  <li><a href="#purpose" id="toc-purpose" class="nav-link active" data-scroll-target="#purpose">Purpose</a></li>
+  <li><a href="#setup" id="toc-setup" class="nav-link" data-scroll-target="#setup">Setup</a></li>
+  <li><a href="#inputs" id="toc-inputs" class="nav-link" data-scroll-target="#inputs">Inputs</a></li>
+  <li><a href="#combined-line-and-heatmap-panels" id="toc-combined-line-and-heatmap-panels" class="nav-link" data-scroll-target="#combined-line-and-heatmap-panels">Combined line-and-heatmap panels</a></li>
+  <li><a href="#short-guide-viability-overlays" id="toc-short-guide-viability-overlays" class="nav-link" data-scroll-target="#short-guide-viability-overlays">Short guide viability overlays</a></li>
+  <li><a href="#donor-position-colony-counts" id="toc-donor-position-colony-counts" class="nav-link" data-scroll-target="#donor-position-colony-counts">Donor position colony counts</a></li>
+  </ul>
+</nav>
+</div>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Robust Donor Location Analysis</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="purpose" class="level2">
+<h2 class="anchored" data-anchor-id="purpose">Purpose</h2>
+<p>This notebook rebuilds the donor-position and guide-length figures with stable column renaming, explicit timepoint selection, and exports under <code>results/03_donor_location/</code>.</p>
+</section>
+<section id="setup" class="level2">
+<h2 class="anchored" data-anchor-id="setup">Setup</h2>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>resolve_project_root <span class="ot">&lt;-</span> <span class="cf">function</span>() {</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  rstudio_path <span class="ot">&lt;-</span> <span class="st">""</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">requireNamespace</span>(<span class="st">"rstudioapi"</span>, <span class="at">quietly =</span> <span class="cn">TRUE</span>)) {</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    rstudio_path <span class="ot">&lt;-</span> <span class="fu">tryCatch</span>(rstudioapi<span class="sc">::</span><span class="fu">getSourceEditorContext</span>()<span class="sc">$</span>path, <span class="at">error =</span> <span class="cf">function</span>(e) <span class="st">""</span>)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="sc">!</span><span class="fu">nzchar</span>(rstudio_path)) {</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>      rstudio_path <span class="ot">&lt;-</span> <span class="fu">tryCatch</span>(rstudioapi<span class="sc">::</span><span class="fu">getActiveDocumentContext</span>()<span class="sc">$</span>path, <span class="at">error =</span> <span class="cf">function</span>(e) <span class="st">""</span>)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>  search_roots <span class="ot">&lt;-</span> <span class="fu">unique</span>(<span class="fu">c</span>(</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">Sys.getenv</span>(<span class="st">"CAS12A_NOTEBOOK_PROJECT_ROOT"</span>, <span class="at">unset =</span> <span class="st">""</span>),</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">tryCatch</span>(knitr<span class="sc">::</span><span class="fu">current_input</span>(<span class="at">dir =</span> <span class="cn">TRUE</span>), <span class="at">error =</span> <span class="cf">function</span>(e) <span class="st">""</span>),</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    rstudio_path,</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">getwd</span>(),</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">normalizePath</span>(<span class="fu">file.path</span>(<span class="fu">getwd</span>(), <span class="st">".."</span>), <span class="at">mustWork =</span> <span class="cn">FALSE</span>),</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">normalizePath</span>(<span class="fu">file.path</span>(<span class="fu">getwd</span>(), <span class="st">".."</span>, <span class="st">".."</span>), <span class="at">mustWork =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>  ))</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>  search_roots <span class="ot">&lt;-</span> search_roots[<span class="fu">nzchar</span>(search_roots)]</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (root <span class="cf">in</span> search_roots) {</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>    current <span class="ot">&lt;-</span> <span class="fu">normalizePath</span>(root, <span class="at">mustWork =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="sc">!</span><span class="fu">dir.exists</span>(current)) {</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>      current <span class="ot">&lt;-</span> <span class="fu">dirname</span>(current)</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>    <span class="cf">repeat</span> {</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>      required_paths <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>        <span class="fu">file.path</span>(current, <span class="st">"_quarto.yml"</span>),</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>        <span class="fu">file.path</span>(current, <span class="st">"config"</span>, <span class="st">"paths.R"</span>),</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>        <span class="fu">file.path</span>(current, <span class="st">"R"</span>, <span class="st">"common.R"</span>)</span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>      )</span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> (<span class="fu">all</span>(<span class="fu">file.exists</span>(required_paths))) {</span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>        <span class="fu">return</span>(current)</span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>      parent <span class="ot">&lt;-</span> <span class="fu">dirname</span>(current)</span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> (<span class="fu">identical</span>(parent, current)) {</span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>        <span class="cf">break</span></span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>      current <span class="ot">&lt;-</span> parent</span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a>  <span class="fu">stop</span>(</span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a>    <span class="fu">paste</span>(</span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Could not locate the notebook project root."</span>,</span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Save the notebook and either run it from the project root,"</span>,</span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a>      <span class="st">"or set Sys.setenv(CAS12A_NOTEBOOK_PROJECT_ROOT = '/path/to/New project')."</span></span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a>    <span class="at">call. =</span> <span class="cn">FALSE</span></span>
+<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a>project_root <span class="ot">&lt;-</span> <span class="fu">resolve_project_root</span>()</span>
+<span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-58"><a href="#cb1-58" aria-hidden="true" tabindex="-1"></a><span class="fu">source</span>(<span class="fu">file.path</span>(project_root, <span class="st">"config"</span>, <span class="st">"paths.R"</span>), <span class="at">local =</span> knitr<span class="sc">::</span><span class="fu">knit_global</span>())</span>
+<span id="cb1-59"><a href="#cb1-59" aria-hidden="true" tabindex="-1"></a><span class="fu">source</span>(<span class="fu">file.path</span>(project_root, <span class="st">"R"</span>, <span class="st">"common.R"</span>), <span class="at">local =</span> knitr<span class="sc">::</span><span class="fu">knit_global</span>())</span>
+<span id="cb1-60"><a href="#cb1-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-61"><a href="#cb1-61" aria-hidden="true" tabindex="-1"></a><span class="fu">load_paper_packages</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>Registered S3 methods overwritten by 'ggpp':
+  method                  from   
+  heightDetails.titleGrob ggplot2
+  widthDetails.titleGrob  ggplot2</code></pre>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>paths <span class="ot">&lt;-</span> <span class="fu">get_analysis_paths</span>(</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">list</span>(<span class="at">results_dir =</span> <span class="fu">normalizePath</span>(<span class="fu">file.path</span>(project_root, <span class="st">"results"</span>), <span class="at">mustWork =</span> <span class="cn">FALSE</span>))</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>output_dir <span class="ot">&lt;-</span> <span class="fu">analysis_output_dir</span>(paths, <span class="st">"03_donor_location"</span>)</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>tables_dir <span class="ot">&lt;-</span> <span class="fu">ensure_dir</span>(<span class="fu">file.path</span>(output_dir, <span class="st">"tables"</span>))</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>plots_dir <span class="ot">&lt;-</span> <span class="fu">ensure_dir</span>(<span class="fu">file.path</span>(output_dir, <span class="st">"plots"</span>))</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>selected_timepoints <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"enAsCas12a"</span> <span class="ot">=</span> <span class="st">"T1"</span>, <span class="st">"FnCas12a"</span> <span class="ot">=</span> <span class="st">"T2"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+</section>
+<section id="inputs" class="level2">
+<h2 class="anchored" data-anchor-id="inputs">Inputs</h2>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>standardize_donor_table <span class="ot">&lt;-</span> <span class="cf">function</span>(data, nuisance_column) {</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  data <span class="ot">&lt;-</span> data <span class="sc">%&gt;%</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">-</span><span class="dv">1</span>, <span class="sc">-</span>dplyr<span class="sc">::</span><span class="fu">any_of</span>(nuisance_column))</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">ncol</span>(data) <span class="sc">!=</span> <span class="dv">7</span>) {</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">stop</span>(<span class="st">"Unexpected donor table layout after dropping nuisance columns."</span>, <span class="at">call. =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">names</span>(data) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"dist"</span>, <span class="st">"replicate"</span>, <span class="st">"frc_alt"</span>, <span class="st">"frc_ref"</span>, <span class="st">"hdr_pct"</span>, <span class="st">"timepoint"</span>, <span class="st">"strain"</span>)</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>  data <span class="sc">%&gt;%</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>      <span class="at">dist =</span> <span class="fu">as.numeric</span>(dist),</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>      <span class="at">replicate =</span> <span class="fu">as.character</span>(replicate)</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>enas_donor <span class="ot">&lt;-</span> <span class="fu">read_csv_clean</span>(</span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">file.path</span>(</span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>    paths<span class="sc">$</span>presentations_amplicon_root,</span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>    <span class="st">"20250611_amplicons_ys85_misc"</span>,</span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>    <span class="st">"data"</span>,</span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>    <span class="st">"processed"</span>,</span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>    <span class="st">"ys85_donor_HDR.csv"</span></span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>) <span class="sc">%&gt;%</span></span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">standardize_donor_table</span>(<span class="st">"part11"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">cas_variant =</span> <span class="st">"enAsCas12a"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>New names:
+• `` -&gt; `...1`</code></pre>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>fn_donor <span class="ot">&lt;-</span> <span class="fu">read_csv_clean</span>(</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">file.path</span>(</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    paths<span class="sc">$</span>presentations_amplicon_root,</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"20250312_ys88_donor_mut"</span>,</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"data"</span>,</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">"processed"</span>,</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">"ys88_donor_hdr_20251121.csv"</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>) <span class="sc">%&gt;%</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">standardize_donor_table</span>(<span class="st">"part7"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">cas_variant =</span> <span class="st">"FnCas12a"</span>,</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">timepoint =</span> dplyr<span class="sc">::</span><span class="fu">case_when</span>(</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>      timepoint <span class="sc">==</span> <span class="st">"scraped"</span> <span class="sc">~</span> <span class="st">"S"</span>,</span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>      timepoint <span class="sc">==</span> <span class="st">"timepoint1"</span> <span class="sc">~</span> <span class="st">"T1"</span>,</span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>      timepoint <span class="sc">==</span> <span class="st">"timepoint2"</span> <span class="sc">~</span> <span class="st">"T2"</span>,</span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>      timepoint <span class="sc">==</span> <span class="st">"timepoint3"</span> <span class="sc">~</span> <span class="st">"T3"</span>,</span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>      <span class="cn">TRUE</span> <span class="sc">~</span> timepoint</span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>New names:
+• `` -&gt; `...1`</code></pre>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>donor_positions <span class="ot">&lt;-</span> dplyr<span class="sc">::</span><span class="fu">bind_rows</span>(enas_donor, fn_donor)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>guide_length <span class="ot">&lt;-</span> <span class="fu">read_csv_clean</span>(</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">file.path</span>(</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    paths<span class="sc">$</span>presentations_amplicon_root,</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">"20250611_amplicons_shorterguide"</span>,</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">"data"</span>,</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">"processed"</span>,</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">"guide_len_hdr_results_20251121.csv"</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>) <span class="sc">%&gt;%</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">-</span>dplyr<span class="sc">::</span><span class="fu">any_of</span>(<span class="st">"col_1"</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">cas_variant =</span> dplyr<span class="sc">::</span><span class="fu">case_when</span>(</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>      strain <span class="sc">==</span> <span class="st">"ys85"</span> <span class="sc">~</span> <span class="st">"enAsCas12a"</span>,</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>      strain <span class="sc">==</span> <span class="st">"ys88"</span> <span class="sc">~</span> <span class="st">"FnCas12a"</span>,</span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>      <span class="cn">TRUE</span> <span class="sc">~</span> strain</span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>New names:
+• `` -&gt; `...1`</code></pre>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">write_csv_checked</span>(donor_positions, <span class="fu">file.path</span>(tables_dir, <span class="st">"donor_positions.csv"</span>))</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">write_csv_checked</span>(guide_length, <span class="fu">file.path</span>(tables_dir, <span class="st">"guide_length.csv"</span>))</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>donor_positions</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div data-pagedtable="false">
+  <script data-pagedtable-source="" type="application/json">
+{"columns":[{"label":["dist"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["replicate"],"name":[2],"type":["chr"],"align":["left"]},{"label":["frc_alt"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["frc_ref"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["hdr_pct"],"name":[5],"type":["dbl"],"align":["right"]},{"label":["timepoint"],"name":[6],"type":["chr"],"align":["left"]},{"label":["strain"],"name":[7],"type":["chr"],"align":["left"]},{"label":["cas_variant"],"name":[8],"type":["chr"],"align":["left"]}],"data":[{"1":"0","2":"2","3":"22.9986975","4":"76.99729486","5":"22.9986975","6":"T1","7":"ys85","8":"enAsCas12a"},{"1":"19","2":"1","3":"1.2083142","4":"85.32518455","5":"1.2083142","6":"T2","7":"ys85","8":"enAsCas12a"},{"1":"1","2":"2","3":"78.1942384","4":"15.37297233","5":"78.1942384","6":"T3","7":"ys85","8":"enAsCas12a"},{"1":"7","2":"1","3":"99.8033677","4":"0.19164163","5":"99.8033677","6":"T1","7":"ys85","8":"enAsCas12a"},{"1":"9","2":"2","3":"82.5040787","4":"15.24687466","5":"82.5040787","6":"T2","7":"ys85","8":"enAsCas12a"},{"1":"18","2":"1","3":"92.7687726","4":"6.74554794","5":"92.7687726","6":"T1","7":"ys85","8":"enAsCas12a"},{"1":"3","2":"1","3":"80.6631329","4":"3.11726570","5":"80.6631329","6":"T3","7":"ys85","8":"enAsCas12a"},{"1":"18","2":"1","3":"67.5698307","4":"20.27134797","5":"67.5698307","6":"T3","7":"ys85","8":"enAsCas12a"},{"1":"9","2":"2","3":"76.4592335","4":"20.50228036","5":"76.4592335","6":"T3","7":"ys85","8":"enAsCas12a"},{"1":"23","2":"2","3":"0.4247731","4":"99.56420686","5":"0.4247731","6":"T2","7":"ys85","8":"enAsCas12a"},{"1":"1","2":"1","3":"82.0621058","4":"6.41713375","5":"82.0621058","6":"T3","7":"ys85","8":"enAsCas12a"},{"1":"19","2":"2","3":"7.4420789","4":"92.53893879","5":"7.4420789","6":"T1","7":"ys85","8":"enAsCas12a"},{"1":"18","2":"2","3":"58.7888483","4":"4.42787721","5":"58.7888483","6":"T3","7":"ys85","8":"enAsCas12a"},{"1":"8","2":"1","3":"87.4883315","4":"10.29941682","5":"87.4883315","6":"T3","7":"ys85","8":"enAsCas12a"},{"1":"16","2":"2","3":"98.8542864","4":"0.07798050","5":"98.8542864","6":"T1","7":"ys85","8":"enAsCas12a"},{"1":"13","2":"1","3":"88.2578411","4":"1.58823883","5":"88.2578411","6":"T2","7":"ys85","8":"enAsCas12a"},{"1":"9","2":"1","3":"81.7131183","4":"15.70408500","5":"81.7131183","6":"T2","7":"ys85","8":"enAsCas12a"},{"1":"12","2":"2","3":"68.1544029","4":"31.29171693","5":"68.1544029","6":"T3","7":"ys85","8":"enAsCas12a"},{"1":"12","2":"1","3":"98.6421542","4":"1.33986112","5":"98.6421542","6":"S","7":"ys85","8":"enAsCas12a"},{"1":"21","2":"1","3":"2.7294094","4":"97.26859029","5":"2.7294094","6":"S","7":"ys85","8":"enAsCas12a"},{"1":"0","2":"2","3":"5.2997934","4":"94.69318569","5":"5.2997934","6":"T3","7":"ys85","8":"enAsCas12a"},{"1":"21","2":"2","3":"4.7997033","4":"95.19929443","5":"4.7997033","6":"S","7":"ys85","8":"enAsCas12a"},{"1":"4","2":"1","3":"89.0556161","4":"0.11688662","5":"89.0556161","6":"T1","7":"ys85","8":"enAsCas12a"},{"1":"19","2":"1","3":"11.5192321","4":"82.90801246","5":"11.5192321","6":"S","7":"ys85","8":"enAsCas12a"},{"1":"4","2":"2","3":"86.8712822","4":"3.08322919","5":"86.8712822","6":"T1","7":"ys85","8":"enAsCas12a"},{"1":"11","2":"2","3":"76.5062588","4":"20.31888430","5":"76.5062588","6":"T2","7":"ys85","8":"enAsCas12a"},{"1":"12","2":"2","3":"98.5561946","4":"1.42084032","5":"98.5561946","6":"S","7":"ys85","8":"enAsCas12a"},{"1":"11","2":"1","3":"99.7759507","4":"0.21304687","5":"99.7759507","6":"T1","7":"ys85","8":"enAsCas12a"},{"1":"2","2":"1","3":"78.8278770","4":"3.24276687","5":"78.8278770","6":"T2","7":"ys85","8":"enAsCas12a"},{"1":"13","2":"2","3":"98.6174010","4":"0.69779764","5":"98.6174010","6":"T1","7":"ys85","8":"enAsCas12a"},{"1":"13","2":"1","3":"96.2647065","4":"2.33605657","5":"96.2647065","6":"S","7":"ys85","8":"enAsCas12a"},{"1":"18","2":"1","3":"80.8911842","4":"14.68492273","5":"80.8911842","6":"T2","7":"ys85","8":"enAsCas12a"},{"1":"21","2":"2","3":"3.5248774","4":"96.46811493","5":"3.5248774","6":"T1","7":"ys85","8":"enAsCas12a"},{"1":"2","2":"2","3":"85.8457652","4":"14.11814244","5":"85.8457652","6":"T3","7":"ys85","8":"enAsCas12a"},{"1":"4","2":"2","3":"68.5648677","4":"20.05294507","5":"68.5648677","6":"T2","7":"ys85","8":"enAsCas12a"},{"1":"10","2":"1","3":"82.7467011","4":"14.75347421","5":"82.7467011","6":"T3","7":"ys85","8":"enAsCas12a"},{"1":"19","2":"2","3":"9.6066331","4":"90.07031195","5":"9.6066331","6":"S","7":"ys85","8":"enAsCas12a"},{"1":"10","2":"2","3":"98.2028087","4":"1.59828077","5":"98.2028087","6":"S","7":"ys85","8":"enAsCas12a"},{"1":"16","2":"2","3":"77.1412269","4":"6.60186594","5":"77.1412269","6":"T3","7":"ys85","8":"enAsCas12a"},{"1":"4","2":"2","3":"86.2259863","4":"6.32189086","5":"86.2259863","6":"S","7":"ys85","8":"enAsCas12a"},{"1":"8","2":"1","3":"84.4982070","4":"13.25029218","5":"84.4982070","6":"T2","7":"ys85","8":"enAsCas12a"},{"1":"13","2":"2","3":"88.5270606","4":"2.54288879","5":"88.5270606","6":"T2","7":"ys85","8":"enAsCas12a"},{"1":"5","2":"1","3":"74.8695026","4":"19.44261115","5":"74.8695026","6":"T2","7":"ys85","8":"enAsCas12a"},{"1":"14","2":"2","3":"97.1420277","4":"1.30535757","5":"97.1420277","6":"S","7":"ys85","8":"enAsCas12a"},{"1":"14","2":"1","3":"98.4697758","4":"1.46016813","5":"98.4697758","6":"S","7":"ys85","8":"enAsCas12a"},{"1":"18","2":"2","3":"88.8265638","4":"9.20218360","5":"88.8265638","6":"S","7":"ys85","8":"enAsCas12a"},{"1":"1","2":"2","3":"99.8683933","4":"0.12658355","5":"99.8683933","6":"T1","7":"ys85","8":"enAsCas12a"},{"1":"15","2":"2","3":"68.7978668","4":"28.48650708","5":"68.7978668","6":"T3","7":"ys85","8":"enAsCas12a"},{"1":"23","2":"2","3":"0.2104612","4":"99.77756942","5":"0.2104612","6":"T3","7":"ys85","8":"enAsCas12a"},{"1":"21","2":"2","3":"1.4149055","4":"98.58109190","5":"1.4149055","6":"T2","7":"ys85","8":"enAsCas12a"},{"1":"9","2":"1","3":"83.2305734","4":"14.33727330","5":"83.2305734","6":"T3","7":"ys85","8":"enAsCas12a"},{"1":"7","2":"1","3":"98.0102036","4":"1.98979643","5":"98.0102036","6":"S","7":"ys85","8":"enAsCas12a"},{"1":"18","2":"2","3":"95.4884661","4":"0.57419523","5":"95.4884661","6":"T1","7":"ys85","8":"enAsCas12a"},{"1":"9","2":"1","3":"97.8811400","4":"1.90807285","5":"97.8811400","6":"S","7":"ys85","8":"enAsCas12a"},{"1":"19","2":"1","3":"9.8735418","4":"78.11793425","5":"9.8735418","6":"T1","7":"ys85","8":"enAsCas12a"},{"1":"12","2":"2","3":"99.8190253","4":"0.16597676","5":"99.8190253","6":"T1","7":"ys85","8":"enAsCas12a"},{"1":"5","2":"1","3":"87.3961441","4":"6.35348055","5":"87.3961441","6":"S","7":"ys85","8":"enAsCas12a"},{"1":"6","2":"2","3":"0.1415151","4":"0.37837729","5":"0.1415151","6":"T1","7":"ys85","8":"enAsCas12a"},{"1":"10","2":"2","3":"85.0971316","4":"14.07732460","5":"85.0971316","6":"T3","7":"ys85","8":"enAsCas12a"},{"1":"8","2":"1","3":"94.8311413","4":"5.16285308","5":"94.8311413","6":"S","7":"ys85","8":"enAsCas12a"},{"1":"15","2":"1","3":"31.3336673","4":"27.23246493","5":"31.3336673","6":"T3","7":"ys85","8":"enAsCas12a"},{"1":"5","2":"2","3":"91.9927097","4":"0.07110025","5":"91.9927097","6":"T1","7":"ys85","8":"enAsCas12a"},{"1":"15","2":"2","3":"96.5119990","4":"3.47902412","5":"96.5119990","6":"S","7":"ys85","8":"enAsCas12a"},{"1":"2","2":"1","3":"97.5688752","4":"2.43012515","5":"97.5688752","6":"T1","7":"ys85","8":"enAsCas12a"},{"1":"9","2":"2","3":"97.9517939","4":"1.81349489","5":"97.9517939","6":"T1","7":"ys85","8":"enAsCas12a"},{"1":"2","2":"1","3":"82.5141749","4":"17.44982550","5":"82.5141749","6":"T3","7":"ys85","8":"enAsCas12a"},{"1":"14","2":"2","3":"74.3094752","4":"22.43404988","5":"74.3094752","6":"T3","7":"ys85","8":"enAsCas12a"},{"1":"18","2":"2","3":"85.2323380","4":"5.45010167","5":"85.2323380","6":"T2","7":"ys85","8":"enAsCas12a"},{"1":"17","2":"2","3":"95.3022290","4":"4.08759271","5":"95.3022290","6":"S","7":"ys85","8":"enAsCas12a"},{"1":"7","2":"2","3":"80.5561390","4":"16.82620655","5":"80.5561390","6":"T2","7":"ys85","8":"enAsCas12a"},{"1":"20","2":"1","3":"2.3873554","4":"43.01538585","5":"2.3873554","6":"S","7":"ys85","8":"enAsCas12a"},{"1":"22","2":"2","3":"0.7377115","4":"99.25928153","5":"0.7377115","6":"T1","7":"ys85","8":"enAsCas12a"},{"1":"5","2":"2","3":"74.8580129","4":"15.82442679","5":"74.8580129","6":"T2","7":"ys85","8":"enAsCas12a"},{"1":"7","2":"2","3":"98.4658312","4":"1.53316865","5":"98.4658312","6":"S","7":"ys85","8":"enAsCas12a"},{"1":"14","2":"2","3":"98.5240997","4":"1.38584537","5":"98.5240997","6":"T1","7":"ys85","8":"enAsCas12a"},{"1":"7","2":"1","3":"69.9035806","4":"4.80601450","5":"69.9035806","6":"T3","7":"ys85","8":"enAsCas12a"},{"1":"15","2":"1","3":"99.5433562","4":"0.04096804","5":"99.5433562","6":"T1","7":"ys85","8":"enAsCas12a"},{"1":"4","2":"1","3":"68.8374845","4":"16.77796495","5":"68.8374845","6":"T3","7":"ys85","8":"enAsCas12a"},{"1":"6","2":"2","3":"0.2067318","4":"18.44228569","5":"0.2067318","6":"T3","7":"ys85","8":"enAsCas12a"},{"1":"16","2":"2","3":"96.0163849","4":"3.02882315","5":"96.0163849","6":"S","7":"ys85","8":"enAsCas12a"},{"1":"18","2":"1","3":"86.0488625","4":"13.43468818","5":"86.0488625","6":"S","7":"ys85","8":"enAsCas12a"},{"1":"7","2":"2","3":"73.0662237","4":"19.33976424","5":"73.0662237","6":"T3","7":"ys85","8":"enAsCas12a"},{"1":"17","2":"1","3":"99.3922553","4":"0.10195718","5":"99.3922553","6":"T1","7":"ys85","8":"enAsCas12a"},{"1":"22","2":"2","3":"0.2209867","4":"99.77401356","5":"0.2209867","6":"T2","7":"ys85","8":"enAsCas12a"},{"1":"0","2":"1","3":"1.9965990","4":"97.99539862","5":"1.9965990","6":"T3","7":"ys85","8":"enAsCas12a"},{"1":"21","2":"1","3":"8.1200812","4":"74.98974990","5":"8.1200812","6":"T3","7":"ys85","8":"enAsCas12a"},{"1":"10","2":"1","3":"98.2309553","4":"1.44521958","5":"98.2309553","6":"S","7":"ys85","8":"enAsCas12a"},{"1":"16","2":"1","3":"99.3565727","4":"0.11190041","5":"99.3565727","6":"T1","7":"ys85","8":"enAsCas12a"},{"1":"13","2":"2","3":"82.9612857","4":"7.52444694","5":"82.9612857","6":"S","7":"ys85","8":"enAsCas12a"},{"1":"21","2":"1","3":"2.5282834","4":"97.46572538","5":"2.5282834","6":"T1","7":"ys85","8":"enAsCas12a"},{"1":"3","2":"1","3":"96.2033037","4":"3.79169666","5":"96.2033037","6":"S","7":"ys85","8":"enAsCas12a"},{"1":"1","2":"1","3":"83.7461934","4":"16.24881434","5":"83.7461934","6":"T2","7":"ys85","8":"enAsCas12a"},{"1":"22","2":"1","3":"0.7462687","4":"99.25373134","5":"0.7462687","6":"S","7":"ys85","8":"enAsCas12a"},{"1":"9","2":"1","3":"98.6487162","4":"1.12040618","5":"98.6487162","6":"T1","7":"ys85","8":"enAsCas12a"},{"1":"0","2":"1","3":"42.5234348","4":"7.88209935","5":"42.5234348","6":"S","7":"ys85","8":"enAsCas12a"},{"1":"3","2":"2","3":"98.1917305","4":"1.80327705","5":"98.1917305","6":"T1","7":"ys85","8":"enAsCas12a"},{"1":"4","2":"1","3":"70.3963217","4":"16.00179919","5":"70.3963217","6":"T2","7":"ys85","8":"enAsCas12a"},{"1":"19","2":"2","3":"0.4988354","4":"99.49316725","5":"0.4988354","6":"T3","7":"ys85","8":"enAsCas12a"},{"1":"13","2":"1","3":"97.8417984","4":"0.41626737","5":"97.8417984","6":"T1","7":"ys85","8":"enAsCas12a"},{"1":"1","2":"2","3":"84.4209030","4":"15.56708154","5":"84.4209030","6":"T2","7":"ys85","8":"enAsCas12a"},{"1":"21","2":"2","3":"2.0311327","4":"97.96386206","5":"2.0311327","6":"T3","7":"ys85","8":"enAsCas12a"},{"1":"15","2":"2","3":"99.7854787","4":"0.20750424","5":"99.7854787","6":"T1","7":"ys85","8":"enAsCas12a"},{"1":"12","2":"1","3":"86.6477216","4":"11.68624547","5":"86.6477216","6":"T2","7":"ys85","8":"enAsCas12a"},{"1":"7","2":"1","3":"56.2768439","4":"40.90385751","5":"56.2768439","6":"T2","7":"ys85","8":"enAsCas12a"},{"1":"15","2":"2","3":"85.7718014","4":"12.28408444","5":"85.7718014","6":"T2","7":"ys85","8":"enAsCas12a"},{"1":"3","2":"1","3":"77.2354303","4":"3.72496569","5":"77.2354303","6":"T2","7":"ys85","8":"enAsCas12a"},{"1":"3","2":"2","3":"95.4706625","4":"4.52332779","5":"95.4706625","6":"S","7":"ys85","8":"enAsCas12a"},{"1":"20","2":"2","3":"11.0340542","4":"76.64107755","5":"11.0340542","6":"T3","7":"ys85","8":"enAsCas12a"},{"1":"14","2":"1","3":"99.5789705","4":"0.35002450","5":"99.5789705","6":"T1","7":"ys85","8":"enAsCas12a"},{"1":"17","2":"1","3":"45.4892401","4":"52.96221552","5":"45.4892401","6":"T3","7":"ys85","8":"enAsCas12a"},{"1":"17","2":"2","3":"81.3929012","4":"3.94735523","5":"81.3929012","6":"T2","7":"ys85","8":"enAsCas12a"},{"1":"2","2":"2","3":"98.7745538","4":"1.21846645","5":"98.7745538","6":"T1","7":"ys85","8":"enAsCas12a"},{"1":"8","2":"2","3":"94.8640061","4":"4.82623554","5":"94.8640061","6":"S","7":"ys85","8":"enAsCas12a"},{"1":"23","2":"1","3":"1.2968588","4":"98.69315003","5":"1.2968588","6":"S","7":"ys85","8":"enAsCas12a"},{"1":"14","2":"2","3":"73.3621383","4":"11.35148714","5":"73.3621383","6":"T2","7":"ys85","8":"enAsCas12a"},{"1":"14","2":"1","3":"91.3261176","4":"7.56353751","5":"91.3261176","6":"T2","7":"ys85","8":"enAsCas12a"},{"1":"16","2":"2","3":"86.1526578","4":"3.60127198","5":"86.1526578","6":"T2","7":"ys85","8":"enAsCas12a"},{"1":"17","2":"2","3":"70.6764062","4":"23.81561460","5":"70.6764062","6":"T3","7":"ys85","8":"enAsCas12a"},{"1":"20","2":"2","3":"17.3940905","4":"78.58280016","5":"17.3940905","6":"T2","7":"ys85","8":"enAsCas12a"},{"1":"7","2":"2","3":"99.9352060","4":"0.06280030","5":"99.9352060","6":"T1","7":"ys85","8":"enAsCas12a"},{"1":"13","2":"1","3":"66.1363727","4":"5.44127672","5":"66.1363727","6":"T3","7":"ys85","8":"enAsCas12a"},{"1":"16","2":"1","3":"83.9665196","4":"12.54811548","5":"83.9665196","6":"T2","7":"ys85","8":"enAsCas12a"},{"1":"1","2":"1","3":"94.8636355","4":"5.13037927","5":"94.8636355","6":"T1","7":"ys85","8":"enAsCas12a"},{"1":"17","2":"1","3":"96.8028668","4":"2.64058778","5":"96.8028668","6":"S","7":"ys85","8":"enAsCas12a"},{"1":"0","2":"1","3":"18.6067681","4":"81.38923066","5":"18.6067681","6":"T1","7":"ys85","8":"enAsCas12a"},{"1":"23","2":"2","3":"2.2643059","4":"97.72768242","5":"2.2643059","6":"S","7":"ys85","8":"enAsCas12a"},{"1":"23","2":"2","3":"1.8117503","4":"98.17923101","5":"1.8117503","6":"T1","7":"ys85","8":"enAsCas12a"},{"1":"3","2":"2","3":"81.3427414","4":"3.11601198","5":"81.3427414","6":"T2","7":"ys85","8":"enAsCas12a"},{"1":"11","2":"2","3":"97.8479240","4":"2.14007004","5":"97.8479240","6":"S","7":"ys85","8":"enAsCas12a"},{"1":"2","2":"2","3":"97.1794231","4":"2.81057841","5":"97.1794231","6":"S","7":"ys85","8":"enAsCas12a"},{"1":"12","2":"1","3":"65.8824352","4":"21.49393594","5":"65.8824352","6":"T3","7":"ys85","8":"enAsCas12a"},{"1":"21","2":"1","3":"5.3904166","4":"94.60657480","5":"5.3904166","6":"T2","7":"ys85","8":"enAsCas12a"},{"1":"4","2":"1","3":"87.0491000","4":"4.42870151","5":"87.0491000","6":"S","7":"ys85","8":"enAsCas12a"},{"1":"8","2":"2","3":"99.3523562","4":"0.34281145","5":"99.3523562","6":"T1","7":"ys85","8":"enAsCas12a"},{"1":"5","2":"2","3":"66.4167059","4":"22.82629400","5":"66.4167059","6":"T3","7":"ys85","8":"enAsCas12a"},{"1":"15","2":"1","3":"9.9895121","4":"37.42096589","5":"9.9895121","6":"T2","7":"ys85","8":"enAsCas12a"},{"1":"1","2":"1","3":"92.0010396","4":"7.99596153","5":"92.0010396","6":"S","7":"ys85","8":"enAsCas12a"},{"1":"23","2":"1","3":"0.1390222","4":"99.84997600","5":"0.1390222","6":"T1","7":"ys85","8":"enAsCas12a"},{"1":"13","2":"2","3":"69.3265517","4":"7.40733368","5":"69.3265517","6":"T3","7":"ys85","8":"enAsCas12a"},{"1":"20","2":"1","3":"0.1460657","4":"4.89220149","5":"0.1460657","6":"T1","7":"ys85","8":"enAsCas12a"},{"1":"10","2":"2","3":"99.6487893","4":"0.16209726","5":"99.6487893","6":"T1","7":"ys85","8":"enAsCas12a"},{"1":"19","2":"1","3":"0.1868897","4":"82.64124167","5":"0.1868897","6":"T3","7":"ys85","8":"enAsCas12a"},{"1":"22","2":"2","3":"1.2873259","4":"98.71067199","5":"1.2873259","6":"S","7":"ys85","8":"enAsCas12a"},{"1":"11","2":"2","3":"58.6470541","4":"40.89239846","5":"58.6470541","6":"T3","7":"ys85","8":"enAsCas12a"},{"1":"8","2":"2","3":"86.5052874","4":"11.13617000","5":"86.5052874","6":"T2","7":"ys85","8":"enAsCas12a"},{"1":"12","2":"1","3":"99.9160118","4":"0.06299118","5":"99.9160118","6":"T1","7":"ys85","8":"enAsCas12a"},{"1":"12","2":"2","3":"94.0438871","4":"5.54348153","5":"94.0438871","6":"T2","7":"ys85","8":"enAsCas12a"},{"1":"3","2":"1","3":"99.7981393","4":"0.19886278","5":"99.7981393","6":"T1","7":"ys85","8":"enAsCas12a"},{"1":"17","2":"2","3":"99.2934739","4":"0.24152169","5":"99.2934739","6":"T1","7":"ys85","8":"enAsCas12a"},{"1":"10","2":"1","3":"81.0062730","4":"15.52161579","5":"81.0062730","6":"T2","7":"ys85","8":"enAsCas12a"},{"1":"0","2":"2","3":"45.3264199","4":"54.66757422","5":"45.3264199","6":"S","7":"ys85","8":"enAsCas12a"},{"1":"8","2":"1","3":"97.3248153","4":"2.67019365","5":"97.3248153","6":"T1","7":"ys85","8":"enAsCas12a"},{"1":"10","2":"2","3":"74.5909740","4":"25.22135820","5":"74.5909740","6":"T2","7":"ys85","8":"enAsCas12a"},{"1":"5","2":"2","3":"88.9475949","4":"2.13743208","5":"88.9475949","6":"S","7":"ys85","8":"enAsCas12a"},{"1":"5","2":"1","3":"91.9804567","4":"3.54822238","5":"91.9804567","6":"T1","7":"ys85","8":"enAsCas12a"},{"1":"1","2":"2","3":"97.2368895","4":"2.75711028","5":"97.2368895","6":"S","7":"ys85","8":"enAsCas12a"},{"1":"20","2":"2","3":"17.4901710","4":"82.04763953","5":"17.4901710","6":"T1","7":"ys85","8":"enAsCas12a"},{"1":"11","2":"2","3":"99.8623428","4":"0.13167214","5":"99.8623428","6":"T1","7":"ys85","8":"enAsCas12a"},{"1":"15","2":"1","3":"97.0151047","4":"2.74266038","5":"97.0151047","6":"S","7":"ys85","8":"enAsCas12a"},{"1":"11","2":"1","3":"77.1307814","4":"19.91667167","5":"77.1307814","6":"T3","7":"ys85","8":"enAsCas12a"},{"1":"9","2":"2","3":"96.5948388","4":"3.17128750","5":"96.5948388","6":"S","7":"ys85","8":"enAsCas12a"},{"1":"11","2":"1","3":"97.9821994","4":"2.01480386","5":"97.9821994","6":"S","7":"ys85","8":"enAsCas12a"},{"1":"16","2":"1","3":"76.0172762","4":"19.17778089","5":"76.0172762","6":"T3","7":"ys85","8":"enAsCas12a"},{"1":"2","2":"1","3":"95.9337470","4":"4.03722978","5":"95.9337470","6":"S","7":"ys85","8":"enAsCas12a"},{"1":"14","2":"1","3":"76.2406632","4":"22.79540432","5":"76.2406632","6":"T3","7":"ys85","8":"enAsCas12a"},{"1":"11","2":"1","3":"78.1536399","4":"18.69972386","5":"78.1536399","6":"T2","7":"ys85","8":"enAsCas12a"},{"1":"10","2":"1","3":"99.6965083","4":"0.13021094","5":"99.6965083","6":"T1","7":"ys85","8":"enAsCas12a"},{"1":"19","2":"2","3":"1.0843989","4":"98.90558821","5":"1.0843989","6":"T2","7":"ys85","8":"enAsCas12a"},{"1":"2","2":"2","3":"81.9180769","4":"18.06390921","5":"81.9180769","6":"T2","7":"ys85","8":"enAsCas12a"},{"1":"17","2":"1","3":"69.6614167","4":"4.93783978","5":"69.6614167","6":"T2","7":"ys85","8":"enAsCas12a"},{"1":"5","2":"1","3":"75.0911445","4":"19.21107680","5":"75.0911445","6":"T3","7":"ys85","8":"enAsCas12a"},{"1":"3","2":"2","3":"78.3063844","4":"19.99437937","5":"78.3063844","6":"T3","7":"ys85","8":"enAsCas12a"},{"1":"20","2":"2","3":"11.3362267","4":"88.29676594","5":"11.3362267","6":"S","7":"ys85","8":"enAsCas12a"},{"1":"4","2":"2","3":"70.5627445","4":"17.11806600","5":"70.5627445","6":"T3","7":"ys85","8":"enAsCas12a"},{"1":"16","2":"1","3":"96.5551033","4":"2.96791096","5":"96.5551033","6":"S","7":"ys85","8":"enAsCas12a"},{"1":"6","2":"2","3":"0.1661861","4":"1.36653051","5":"0.1661861","6":"S","7":"ys85","8":"enAsCas12a"},{"1":"0","2":"1","3":"4.5507235","4":"95.44228156","5":"4.5507235","6":"T2","7":"ys85","8":"enAsCas12a"},{"1":"0","2":"2","3":"10.3006604","4":"89.69534944","5":"10.3006604","6":"T2","7":"ys85","8":"enAsCas12a"},{"1":"6","2":"2","3":"0.1763103","4":"15.64854143","5":"0.1763103","6":"T2","7":"ys85","8":"enAsCas12a"},{"1":"8","2":"2","3":"76.4771538","4":"21.90542628","5":"76.4771538","6":"T3","7":"ys85","8":"enAsCas12a"},{"1":"3","2":"2","3":"77.0650757","4":"19.77840168","5":"77.0650757","6":"T2","7":"ys88","8":"FnCas12a"},{"1":"9","2":"2","3":"88.5342778","4":"8.23208355","5":"88.5342778","6":"T2","7":"ys88","8":"FnCas12a"},{"1":"2","2":"1","3":"89.0514965","4":"7.48539533","5":"89.0514965","6":"T3","7":"ys88","8":"FnCas12a"},{"1":"23","2":"1","3":"55.7263173","4":"40.30857567","5":"55.7263173","6":"T1","7":"ys88","8":"FnCas12a"},{"1":"1","2":"2","3":"83.7850842","4":"11.31415397","5":"83.7850842","6":"T3","7":"ys88","8":"FnCas12a"},{"1":"10","2":"1","3":"13.2076419","4":"86.76523766","5":"13.2076419","6":"S","7":"ys88","8":"FnCas12a"},{"1":"21","2":"1","3":"70.6429288","4":"26.59879639","5":"70.6429288","6":"T2","7":"ys88","8":"FnCas12a"},{"1":"10","2":"2","3":"92.0571021","4":"7.52326550","5":"92.0571021","6":"T2","7":"ys88","8":"FnCas12a"},{"1":"6","2":"1","3":"0.1642645","4":"5.77129178","5":"0.1642645","6":"T2","7":"ys88","8":"FnCas12a"},{"1":"18","2":"1","3":"91.5755988","4":"6.47660335","5":"91.5755988","6":"T2","7":"ys88","8":"FnCas12a"},{"1":"23","2":"2","3":"68.1160730","4":"25.93362663","5":"68.1160730","6":"T2","7":"ys88","8":"FnCas12a"},{"1":"23","2":"2","3":"4.9650504","4":"94.92579463","5":"4.9650504","6":"S","7":"ys88","8":"FnCas12a"},{"1":"5","2":"1","3":"66.1774778","4":"22.54633360","5":"66.1774778","6":"T2","7":"ys88","8":"FnCas12a"},{"1":"14","2":"1","3":"83.7241020","4":"15.25201067","5":"83.7241020","6":"T1","7":"ys88","8":"FnCas12a"},{"1":"5","2":"2","3":"50.3220547","4":"40.21356253","5":"50.3220547","6":"T1","7":"ys88","8":"FnCas12a"},{"1":"8","2":"1","3":"65.8431956","4":"33.66453013","5":"65.8431956","6":"T1","7":"ys88","8":"FnCas12a"},{"1":"18","2":"2","3":"91.3892989","4":"6.82048656","5":"91.3892989","6":"T2","7":"ys88","8":"FnCas12a"},{"1":"3","2":"2","3":"58.5941020","4":"38.08341261","5":"58.5941020","6":"T1","7":"ys88","8":"FnCas12a"},{"1":"12","2":"1","3":"85.9856577","4":"13.72147836","5":"85.9856577","6":"T1","7":"ys88","8":"FnCas12a"},{"1":"15","2":"1","3":"84.5734008","4":"14.04105466","5":"84.5734008","6":"T1","7":"ys88","8":"FnCas12a"},{"1":"18","2":"2","3":"16.4000321","4":"83.20603035","5":"16.4000321","6":"S","7":"ys88","8":"FnCas12a"},{"1":"9","2":"2","3":"11.9692011","4":"88.01272913","5":"11.9692011","6":"S","7":"ys88","8":"FnCas12a"},{"1":"5","2":"2","3":"65.6754691","4":"22.00378110","5":"65.6754691","6":"T2","7":"ys88","8":"FnCas12a"},{"1":"13","2":"2","3":"81.6027798","4":"17.94190772","5":"81.6027798","6":"T1","7":"ys88","8":"FnCas12a"},{"1":"17","2":"2","3":"97.1169365","4":"2.05904466","5":"97.1169365","6":"T3","7":"ys88","8":"FnCas12a"},{"1":"21","2":"2","3":"5.7943981","4":"94.20459902","5":"5.7943981","6":"S","7":"ys88","8":"FnCas12a"},{"1":"13","2":"2","3":"14.8072982","4":"85.19170207","5":"14.8072982","6":"S","7":"ys88","8":"FnCas12a"},{"1":"19","2":"1","3":"92.1235862","4":"5.79961329","5":"92.1235862","6":"T2","7":"ys88","8":"FnCas12a"},{"1":"16","2":"2","3":"93.9431037","4":"5.04641011","5":"93.9431037","6":"T2","7":"ys88","8":"FnCas12a"},{"1":"17","2":"1","3":"84.4800449","4":"13.53998536","5":"84.4800449","6":"T1","7":"ys88","8":"FnCas12a"},{"1":"0","2":"2","3":"35.0486090","4":"49.77877660","5":"35.0486090","6":"T1","7":"ys88","8":"FnCas12a"},{"1":"7","2":"2","3":"89.7870892","4":"7.37576862","5":"89.7870892","6":"T3","7":"ys88","8":"FnCas12a"},{"1":"4","2":"1","3":"82.2547766","4":"8.53085778","5":"82.2547766","6":"T3","7":"ys88","8":"FnCas12a"},{"1":"3","2":"1","3":"89.3279643","4":"7.76612475","5":"89.3279643","6":"T3","7":"ys88","8":"FnCas12a"},{"1":"19","2":"2","3":"15.9393017","4":"83.78943786","5":"15.9393017","6":"S","7":"ys88","8":"FnCas12a"},{"1":"0","2":"1","3":"44.3656430","4":"31.89439490","5":"44.3656430","6":"T2","7":"ys88","8":"FnCas12a"},{"1":"14","2":"1","3":"96.0443956","4":"3.23967603","5":"96.0443956","6":"T3","7":"ys88","8":"FnCas12a"},{"1":"1","2":"1","3":"69.4214130","4":"30.56856120","5":"69.4214130","6":"T2","7":"ys88","8":"FnCas12a"},{"1":"10","2":"1","3":"80.8643645","4":"16.98874964","5":"80.8643645","6":"T1","7":"ys88","8":"FnCas12a"},{"1":"2","2":"2","3":"86.1606243","4":"9.50014115","5":"86.1606243","6":"T3","7":"ys88","8":"FnCas12a"},{"1":"22","2":"2","3":"71.3554322","4":"23.57582121","5":"71.3554322","6":"T2","7":"ys88","8":"FnCas12a"},{"1":"23","2":"1","3":"4.8953572","4":"95.03047069","5":"4.8953572","6":"S","7":"ys88","8":"FnCas12a"},{"1":"8","2":"1","3":"81.9005116","4":"17.50846827","5":"81.9005116","6":"T2","7":"ys88","8":"FnCas12a"},{"1":"1","2":"2","3":"51.4043620","4":"48.58861870","5":"51.4043620","6":"T1","7":"ys88","8":"FnCas12a"},{"1":"18","2":"1","3":"93.7998495","4":"4.08929019","5":"93.7998495","6":"T3","7":"ys88","8":"FnCas12a"},{"1":"13","2":"1","3":"95.5459267","4":"3.93771702","5":"95.5459267","6":"T3","7":"ys88","8":"FnCas12a"},{"1":"19","2":"1","3":"83.9446097","4":"14.58151853","5":"83.9446097","6":"T1","7":"ys88","8":"FnCas12a"},{"1":"5","2":"2","3":"75.5305305","4":"10.23323323","5":"75.5305305","6":"T3","7":"ys88","8":"FnCas12a"},{"1":"22","2":"1","3":"68.1455938","4":"28.40502421","5":"68.1455938","6":"T2","7":"ys88","8":"FnCas12a"},{"1":"1","2":"1","3":"3.4654650","4":"96.52655926","5":"3.4654650","6":"S","7":"ys88","8":"FnCas12a"},{"1":"7","2":"2","3":"80.3234528","4":"16.77248147","5":"80.3234528","6":"T2","7":"ys88","8":"FnCas12a"},{"1":"1","2":"1","3":"48.7640046","4":"51.23200829","5":"48.7640046","6":"T1","7":"ys88","8":"FnCas12a"},{"1":"18","2":"1","3":"16.6583352","4":"82.99374138","5":"16.6583352","6":"S","7":"ys88","8":"FnCas12a"},{"1":"18","2":"1","3":"83.5386158","4":"14.25275827","5":"83.5386158","6":"T1","7":"ys88","8":"FnCas12a"},{"1":"16","2":"2","3":"16.6290602","4":"82.98183860","5":"16.6290602","6":"S","7":"ys88","8":"FnCas12a"},{"1":"11","2":"1","3":"92.4739024","4":"5.62509365","5":"92.4739024","6":"T2","7":"ys88","8":"FnCas12a"},{"1":"22","2":"2","3":"4.9917455","4":"95.00425234","5":"4.9917455","6":"S","7":"ys88","8":"FnCas12a"},{"1":"20","2":"1","3":"9.1156164","4":"90.87838851","5":"9.1156164","6":"S","7":"ys88","8":"FnCas12a"},{"1":"0","2":"2","3":"41.8471618","4":"34.14614599","5":"41.8471618","6":"T2","7":"ys88","8":"FnCas12a"},{"1":"3","2":"1","3":"77.3930855","4":"19.64582235","5":"77.3930855","6":"T2","7":"ys88","8":"FnCas12a"},{"1":"16","2":"1","3":"94.1849399","4":"4.84738598","5":"94.1849399","6":"T2","7":"ys88","8":"FnCas12a"},{"1":"20","2":"2","3":"74.2542166","4":"23.10778096","5":"74.2542166","6":"T1","7":"ys88","8":"FnCas12a"},{"1":"7","2":"2","3":"65.4541809","4":"32.37417285","5":"65.4541809","6":"T1","7":"ys88","8":"FnCas12a"},{"1":"11","2":"2","3":"83.4021983","4":"14.72540918","5":"83.4021983","6":"T1","7":"ys88","8":"FnCas12a"},{"1":"17","2":"1","3":"93.0615107","4":"5.44780605","5":"93.0615107","6":"T2","7":"ys88","8":"FnCas12a"},{"1":"16","2":"1","3":"96.8973317","4":"2.05977140","5":"96.8973317","6":"T3","7":"ys88","8":"FnCas12a"},{"1":"0","2":"1","3":"35.5090097","4":"50.14379374","5":"35.5090097","6":"T1","7":"ys88","8":"FnCas12a"},{"1":"20","2":"1","3":"84.4557242","4":"12.70680470","5":"84.4557242","6":"T2","7":"ys88","8":"FnCas12a"},{"1":"22","2":"2","3":"57.7392994","4":"39.17319286","5":"57.7392994","6":"T1","7":"ys88","8":"FnCas12a"},{"1":"5","2":"1","3":"5.0303677","4":"94.96763770","5":"5.0303677","6":"S","7":"ys88","8":"FnCas12a"},{"1":"17","2":"2","3":"85.6857157","4":"13.57932103","5":"85.6857157","6":"T1","7":"ys88","8":"FnCas12a"},{"1":"3","2":"1","3":"58.7925194","4":"38.57964682","5":"58.7925194","6":"T1","7":"ys88","8":"FnCas12a"},{"1":"21","2":"2","3":"58.4680323","4":"38.74629911","5":"58.4680323","6":"T1","7":"ys88","8":"FnCas12a"},{"1":"5","2":"1","3":"50.0497923","4":"42.03474395","5":"50.0497923","6":"T1","7":"ys88","8":"FnCas12a"},{"1":"13","2":"2","3":"91.4917748","4":"8.26533377","5":"91.4917748","6":"T2","7":"ys88","8":"FnCas12a"},{"1":"20","2":"2","3":"84.1941036","4":"12.34536835","5":"84.1941036","6":"T2","7":"ys88","8":"FnCas12a"},{"1":"19","2":"1","3":"96.3400828","4":"2.18613179","5":"96.3400828","6":"T3","7":"ys88","8":"FnCas12a"},{"1":"9","2":"2","3":"77.5001002","4":"19.20750030","5":"77.5001002","6":"T1","7":"ys88","8":"FnCas12a"},{"1":"16","2":"1","3":"86.6898520","4":"11.89590704","5":"86.6898520","6":"T1","7":"ys88","8":"FnCas12a"},{"1":"2","2":"1","3":"4.2157724","4":"95.78123127","5":"4.2157724","6":"S","7":"ys88","8":"FnCas12a"},{"1":"7","2":"1","3":"65.7757810","4":"32.33504773","5":"65.7757810","6":"T1","7":"ys88","8":"FnCas12a"},{"1":"14","2":"1","3":"15.5078133","4":"84.47622089","5":"15.5078133","6":"S","7":"ys88","8":"FnCas12a"},{"1":"4","2":"2","3":"4.1869103","4":"95.36940373","5":"4.1869103","6":"S","7":"ys88","8":"FnCas12a"},{"1":"18","2":"2","3":"94.2612549","4":"3.40819821","5":"94.2612549","6":"T3","7":"ys88","8":"FnCas12a"},{"1":"7","2":"1","3":"81.7252210","4":"16.10821768","5":"81.7252210","6":"T2","7":"ys88","8":"FnCas12a"},{"1":"4","2":"1","3":"4.2036019","4":"95.40231038","5":"4.2036019","6":"S","7":"ys88","8":"FnCas12a"},{"1":"9","2":"1","3":"12.2538119","4":"87.71826604","5":"12.2538119","6":"S","7":"ys88","8":"FnCas12a"},{"1":"15","2":"2","3":"96.6705408","4":"2.54794301","5":"96.6705408","6":"T3","7":"ys88","8":"FnCas12a"},{"1":"19","2":"2","3":"92.4127191","4":"6.28221229","5":"92.4127191","6":"T2","7":"ys88","8":"FnCas12a"},{"1":"5","2":"2","3":"5.4462114","4":"94.55177821","5":"5.4462114","6":"S","7":"ys88","8":"FnCas12a"},{"1":"10","2":"2","3":"81.8554231","4":"17.70070054","5":"81.8554231","6":"T1","7":"ys88","8":"FnCas12a"},{"1":"19","2":"2","3":"83.7153221","4":"15.10404630","5":"83.7153221","6":"T1","7":"ys88","8":"FnCas12a"},{"1":"12","2":"1","3":"94.1118675","4":"5.64550896","5":"94.1118675","6":"T2","7":"ys88","8":"FnCas12a"},{"1":"4","2":"2","3":"80.7841055","4":"8.76683232","5":"80.7841055","6":"T3","7":"ys88","8":"FnCas12a"},{"1":"6","2":"1","3":"0.1605233","4":"2.17709734","5":"0.1605233","6":"T3","7":"ys88","8":"FnCas12a"},{"1":"6","2":"1","3":"0.1329506","4":"15.08989273","5":"0.1329506","6":"T1","7":"ys88","8":"FnCas12a"},{"1":"7","2":"1","3":"7.2858599","4":"92.71014406","5":"7.2858599","6":"S","7":"ys88","8":"FnCas12a"},{"1":"12","2":"1","3":"97.2168519","4":"2.77005800","5":"97.2168519","6":"T3","7":"ys88","8":"FnCas12a"},{"1":"11","2":"2","3":"14.6267700","4":"85.36822288","5":"14.6267700","6":"S","7":"ys88","8":"FnCas12a"},{"1":"0","2":"2","3":"46.1834825","4":"20.07946887","5":"46.1834825","6":"T3","7":"ys88","8":"FnCas12a"},{"1":"10","2":"2","3":"11.0504707","4":"88.92749850","5":"11.0504707","6":"S","7":"ys88","8":"FnCas12a"},{"1":"22","2":"1","3":"56.0601646","4":"41.87607383","5":"56.0601646","6":"T1","7":"ys88","8":"FnCas12a"},{"1":"15","2":"2","3":"17.4068775","4":"82.54910004","5":"17.4068775","6":"S","7":"ys88","8":"FnCas12a"},{"1":"3","2":"2","3":"88.3151873","4":"8.55023072","5":"88.3151873","6":"T3","7":"ys88","8":"FnCas12a"},{"1":"17","2":"1","3":"15.6741286","4":"84.07269161","5":"15.6741286","6":"S","7":"ys88","8":"FnCas12a"},{"1":"18","2":"2","3":"83.5652724","4":"14.49627259","5":"83.5652724","6":"T1","7":"ys88","8":"FnCas12a"},{"1":"0","2":"1","3":"49.1115156","4":"18.84974708","5":"49.1115156","6":"T3","7":"ys88","8":"FnCas12a"},{"1":"13","2":"2","3":"95.5605417","4":"3.99270775","5":"95.5605417","6":"T3","7":"ys88","8":"FnCas12a"},{"1":"19","2":"1","3":"16.6815076","4":"83.03034548","5":"16.6815076","6":"S","7":"ys88","8":"FnCas12a"},{"1":"13","2":"1","3":"91.5947886","4":"7.91060981","5":"91.5947886","6":"T2","7":"ys88","8":"FnCas12a"},{"1":"4","2":"1","3":"53.3948232","4":"39.62182723","5":"53.3948232","6":"T1","7":"ys88","8":"FnCas12a"},{"1":"16","2":"2","3":"96.8747818","4":"2.06685353","5":"96.8747818","6":"T3","7":"ys88","8":"FnCas12a"},{"1":"17","2":"2","3":"15.1715329","4":"84.51713333","5":"15.1715329","6":"S","7":"ys88","8":"FnCas12a"},{"1":"3","2":"1","3":"4.7213947","4":"95.26361037","5":"4.7213947","6":"S","7":"ys88","8":"FnCas12a"},{"1":"15","2":"1","3":"93.3905967","4":"5.19690577","5":"93.3905967","6":"T2","7":"ys88","8":"FnCas12a"},{"1":"12","2":"2","3":"96.0547504","4":"2.45571659","5":"96.0547504","6":"T3","7":"ys88","8":"FnCas12a"},{"1":"14","2":"2","3":"83.5447105","4":"14.46904654","5":"83.5447105","6":"T1","7":"ys88","8":"FnCas12a"},{"1":"17","2":"1","3":"96.2973764","4":"2.27165311","5":"96.2973764","6":"T3","7":"ys88","8":"FnCas12a"},{"1":"0","2":"1","3":"3.3907147","4":"96.60326632","5":"3.3907147","6":"S","7":"ys88","8":"FnCas12a"},{"1":"21","2":"1","3":"55.0698689","4":"43.13864743","5":"55.0698689","6":"T1","7":"ys88","8":"FnCas12a"},{"1":"2","2":"2","3":"55.6678903","4":"39.71936370","5":"55.6678903","6":"T1","7":"ys88","8":"FnCas12a"},{"1":"21","2":"1","3":"5.8384059","4":"94.15758281","5":"5.8384059","6":"S","7":"ys88","8":"FnCas12a"},{"1":"23","2":"2","3":"56.6306380","4":"39.62184916","5":"56.6306380","6":"T1","7":"ys88","8":"FnCas12a"},{"1":"15","2":"1","3":"96.5581144","4":"2.14066053","5":"96.5581144","6":"T3","7":"ys88","8":"FnCas12a"},{"1":"11","2":"1","3":"14.6330977","4":"85.36290282","5":"14.6330977","6":"S","7":"ys88","8":"FnCas12a"},{"1":"2","2":"2","3":"4.3522796","4":"95.63968668","5":"4.3522796","6":"S","7":"ys88","8":"FnCas12a"},{"1":"10","2":"1","3":"91.4782767","4":"8.10472431","5":"91.4782767","6":"T2","7":"ys88","8":"FnCas12a"},{"1":"7","2":"1","3":"91.5108707","4":"8.47911031","5":"91.5108707","6":"T3","7":"ys88","8":"FnCas12a"},{"1":"19","2":"2","3":"96.5286982","4":"2.51937984","5":"96.5286982","6":"T3","7":"ys88","8":"FnCas12a"},{"1":"22","2":"1","3":"5.0104280","4":"94.98657832","5":"5.0104280","6":"S","7":"ys88","8":"FnCas12a"},{"1":"12","2":"2","3":"14.9663147","4":"85.01759678","5":"14.9663147","6":"S","7":"ys88","8":"FnCas12a"},{"1":"9","2":"1","3":"79.2910241","4":"17.86723803","5":"79.2910241","6":"T1","7":"ys88","8":"FnCas12a"},{"1":"8","2":"2","3":"7.2002090","4":"92.78773201","5":"7.2002090","6":"S","7":"ys88","8":"FnCas12a"},{"1":"12","2":"2","3":"82.7782712","4":"15.25264723","5":"82.7782712","6":"T1","7":"ys88","8":"FnCas12a"},{"1":"8","2":"1","3":"7.0784157","4":"92.91358272","5":"7.0784157","6":"S","7":"ys88","8":"FnCas12a"},{"1":"7","2":"2","3":"7.3816477","4":"92.61534138","5":"7.3816477","6":"S","7":"ys88","8":"FnCas12a"},{"1":"0","2":"2","3":"2.1936961","4":"97.80630386","5":"2.1936961","6":"S","7":"ys88","8":"FnCas12a"},{"1":"1","2":"2","3":"3.4334679","4":"96.56056780","5":"3.4334679","6":"S","7":"ys88","8":"FnCas12a"},{"1":"4","2":"1","3":"71.4505119","4":"20.00803052","5":"71.4505119","6":"T2","7":"ys88","8":"FnCas12a"},{"1":"23","2":"1","3":"66.4481898","4":"27.46365430","5":"66.4481898","6":"T2","7":"ys88","8":"FnCas12a"},{"1":"15","2":"2","3":"84.5903999","4":"14.59609638","5":"84.5903999","6":"T1","7":"ys88","8":"FnCas12a"},{"1":"4","2":"2","3":"53.1765155","4":"39.62512298","5":"53.1765155","6":"T1","7":"ys88","8":"FnCas12a"},{"1":"14","2":"2","3":"15.2894339","4":"84.70056316","5":"15.2894339","6":"S","7":"ys88","8":"FnCas12a"},{"1":"2","2":"1","3":"60.2021295","4":"36.71083867","5":"60.2021295","6":"T1","7":"ys88","8":"FnCas12a"},{"1":"5","2":"1","3":"76.7389663","4":"10.42322983","5":"76.7389663","6":"T3","7":"ys88","8":"FnCas12a"},{"1":"3","2":"2","3":"4.6250742","4":"95.35681587","5":"4.6250742","6":"S","7":"ys88","8":"FnCas12a"},{"1":"2","2":"1","3":"77.7003030","4":"18.68190300","5":"77.7003030","6":"T2","7":"ys88","8":"FnCas12a"},{"1":"21","2":"2","3":"70.4863766","4":"25.89346802","5":"70.4863766","6":"T2","7":"ys88","8":"FnCas12a"},{"1":"1","2":"2","3":"71.4501329","4":"28.54087120","5":"71.4501329","6":"T2","7":"ys88","8":"FnCas12a"},{"1":"14","2":"1","3":"92.7081246","4":"6.33492324","5":"92.7081246","6":"T2","7":"ys88","8":"FnCas12a"},{"1":"8","2":"2","3":"80.5016679","4":"18.66490643","5":"80.5016679","6":"T2","7":"ys88","8":"FnCas12a"},{"1":"20","2":"1","3":"74.3382759","4":"23.08620256","5":"74.3382759","6":"T1","7":"ys88","8":"FnCas12a"},{"1":"9","2":"1","3":"89.3015959","4":"7.50367239","5":"89.3015959","6":"T2","7":"ys88","8":"FnCas12a"},{"1":"13","2":"1","3":"14.1499800","4":"85.84301161","5":"14.1499800","6":"S","7":"ys88","8":"FnCas12a"},{"1":"11","2":"1","3":"83.4675523","4":"14.73674733","5":"83.4675523","6":"T1","7":"ys88","8":"FnCas12a"},{"1":"16","2":"1","3":"16.4214208","4":"83.29714952","5":"16.4214208","6":"S","7":"ys88","8":"FnCas12a"},{"1":"16","2":"2","3":"85.7141425","4":"12.46014718","5":"85.7141425","6":"T1","7":"ys88","8":"FnCas12a"},{"1":"8","2":"2","3":"63.9083291","4":"33.69477067","5":"63.9083291","6":"T1","7":"ys88","8":"FnCas12a"},{"1":"11","2":"2","3":"92.2154124","4":"7.38068924","5":"92.2154124","6":"T2","7":"ys88","8":"FnCas12a"},{"1":"15","2":"2","3":"93.4522791","4":"5.81270075","5":"93.4522791","6":"T2","7":"ys88","8":"FnCas12a"},{"1":"20","2":"2","3":"9.3223064","4":"90.67367406","5":"9.3223064","6":"S","7":"ys88","8":"FnCas12a"},{"1":"14","2":"2","3":"95.9567546","4":"4.04324541","5":"95.9567546","6":"T2","7":"ys88","8":"FnCas12a"},{"1":"12","2":"2","3":"92.5852669","4":"5.77616241","5":"92.5852669","6":"T2","7":"ys88","8":"FnCas12a"},{"1":"12","2":"1","3":"14.5013596","4":"85.48064619","5":"14.5013596","6":"S","7":"ys88","8":"FnCas12a"},{"1":"15","2":"1","3":"18.1483807","4":"81.84862893","5":"18.1483807","6":"S","7":"ys88","8":"FnCas12a"},{"1":"14","2":"2","3":"96.6435764","4":"2.71376804","5":"96.6435764","6":"T3","7":"ys88","8":"FnCas12a"},{"1":"2","2":"2","3":"73.7310686","4":"21.26022848","5":"73.7310686","6":"T2","7":"ys88","8":"FnCas12a"},{"1":"13","2":"1","3":"81.9029608","4":"17.55570898","5":"81.9029608","6":"T1","7":"ys88","8":"FnCas12a"},{"1":"4","2":"2","3":"70.0542575","4":"20.32554508","5":"70.0542575","6":"T2","7":"ys88","8":"FnCas12a"},{"1":"17","2":"2","3":"93.4960492","4":"5.24593127","5":"93.4960492","6":"T2","7":"ys88","8":"FnCas12a"},{"1":"9","2":"2","3":"94.0047151","4":"3.04986621","5":"94.0047151","6":"T3","7":"ys88","8":"FnCas12a"},{"1":"22","2":"1","3":"77.0905304","4":"18.00394525","5":"77.0905304","6":"T3","7":"ys88","8":"FnCas12a"},{"1":"22","2":"2","3":"79.6879373","4":"13.56902963","5":"79.6879373","6":"T3","7":"ys88","8":"FnCas12a"},{"1":"8","2":"2","3":"90.0194747","4":"9.36399504","5":"90.0194747","6":"T3","7":"ys88","8":"FnCas12a"},{"1":"10","2":"1","3":"95.4684954","4":"2.63413074","5":"95.4684954","6":"T3","7":"ys88","8":"FnCas12a"},{"1":"11","2":"1","3":"96.2020105","4":"2.12595025","5":"96.2020105","6":"T3","7":"ys88","8":"FnCas12a"},{"1":"9","2":"1","3":"94.4461703","4":"5.14796517","5":"94.4461703","6":"T3","7":"ys88","8":"FnCas12a"},{"1":"11","2":"2","3":"96.5511047","4":"3.24631260","5":"96.5511047","6":"T3","7":"ys88","8":"FnCas12a"},{"1":"23","2":"2","3":"77.6386153","4":"14.85766555","5":"77.6386153","6":"T3","7":"ys88","8":"FnCas12a"},{"1":"8","2":"1","3":"90.1483040","4":"6.46980055","5":"90.1483040","6":"T3","7":"ys88","8":"FnCas12a"},{"1":"23","2":"1","3":"75.2479409","4":"16.23049748","5":"75.2479409","6":"T3","7":"ys88","8":"FnCas12a"},{"1":"10","2":"2","3":"96.2539982","4":"3.30482388","5":"96.2539982","6":"T3","7":"ys88","8":"FnCas12a"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+</div>
+</div>
+</section>
+<section id="combined-line-and-heatmap-panels" class="level2">
+<h2 class="anchored" data-anchor-id="combined-line-and-heatmap-panels">Combined line-and-heatmap panels</h2>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>plot_flexible_final <span class="ot">&lt;-</span> <span class="cf">function</span>(data, selected_timepoints, x_var, y_var, x_label, <span class="at">y_limits =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">100</span>)) {</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  lookup <span class="ot">&lt;-</span> tibble<span class="sc">::</span><span class="fu">tibble</span>(</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">cas_variant =</span> <span class="fu">names</span>(selected_timepoints),</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">selected_timepoint =</span> <span class="fu">unname</span>(selected_timepoints)</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>  plot_data_raw <span class="ot">&lt;-</span> data <span class="sc">%&gt;%</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">left_join</span>(lookup, <span class="at">by =</span> <span class="st">"cas_variant"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">filter</span>(timepoint <span class="sc">==</span> selected_timepoint)</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">identical</span>(x_var, <span class="st">"dist"</span>)) {</span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>    plot_data_raw <span class="ot">&lt;-</span> plot_data_raw <span class="sc">%&gt;%</span></span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>      dplyr<span class="sc">::</span><span class="fu">filter</span>(<span class="fu">as.numeric</span>(.data[[x_var]]) <span class="sc">!=</span> <span class="dv">6</span>)</span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>  plot_data_avg <span class="ot">&lt;-</span> plot_data_raw <span class="sc">%&gt;%</span></span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">group_by</span>(cas_variant, .data[[x_var]]) <span class="sc">%&gt;%</span></span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">summarise</span>(<span class="at">avg_y =</span> <span class="fu">mean</span>(.data[[y_var]], <span class="at">na.rm =</span> <span class="cn">TRUE</span>), <span class="at">.groups =</span> <span class="st">"drop"</span>)</span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>  variant_colors <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"enAsCas12a"</span> <span class="ot">=</span> <span class="st">"#E69F00"</span>, <span class="st">"FnCas12a"</span> <span class="ot">=</span> <span class="st">"#009E73"</span>)</span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a>  x_values <span class="ot">&lt;-</span> <span class="fu">sort</span>(<span class="fu">unique</span>(plot_data_raw[[x_var]]))</span>
+<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a>  x_limits <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fu">min</span>(x_values) <span class="sc">-</span> <span class="fl">0.5</span>, <span class="fu">max</span>(x_values) <span class="sc">+</span> <span class="fl">0.5</span>)</span>
+<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a>  p_line <span class="ot">&lt;-</span> <span class="fu">ggplot</span>() <span class="sc">+</span></span>
+<span id="cb11-25"><a href="#cb11-25" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_line</span>(</span>
+<span id="cb11-26"><a href="#cb11-26" aria-hidden="true" tabindex="-1"></a>      <span class="at">data =</span> plot_data_avg,</span>
+<span id="cb11-27"><a href="#cb11-27" aria-hidden="true" tabindex="-1"></a>      <span class="fu">aes</span>(<span class="at">x =</span> .data[[x_var]], <span class="at">y =</span> avg_y, <span class="at">color =</span> cas_variant, <span class="at">group =</span> cas_variant),</span>
+<span id="cb11-28"><a href="#cb11-28" aria-hidden="true" tabindex="-1"></a>      <span class="at">linewidth =</span> <span class="fl">0.8</span></span>
+<span id="cb11-29"><a href="#cb11-29" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">+</span></span>
+<span id="cb11-30"><a href="#cb11-30" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_point</span>(</span>
+<span id="cb11-31"><a href="#cb11-31" aria-hidden="true" tabindex="-1"></a>      <span class="at">data =</span> plot_data_raw,</span>
+<span id="cb11-32"><a href="#cb11-32" aria-hidden="true" tabindex="-1"></a>      <span class="fu">aes</span>(<span class="at">x =</span> .data[[x_var]], <span class="at">y =</span> .data[[y_var]], <span class="at">color =</span> cas_variant),</span>
+<span id="cb11-33"><a href="#cb11-33" aria-hidden="true" tabindex="-1"></a>      <span class="at">size =</span> <span class="dv">1</span>,</span>
+<span id="cb11-34"><a href="#cb11-34" aria-hidden="true" tabindex="-1"></a>      <span class="at">alpha =</span> <span class="fl">0.8</span>,</span>
+<span id="cb11-35"><a href="#cb11-35" aria-hidden="true" tabindex="-1"></a>      <span class="at">position =</span> <span class="fu">position_dodge</span>(<span class="at">width =</span> <span class="fl">0.3</span>)</span>
+<span id="cb11-36"><a href="#cb11-36" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">+</span></span>
+<span id="cb11-37"><a href="#cb11-37" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_color_manual</span>(<span class="at">values =</span> variant_colors) <span class="sc">+</span></span>
+<span id="cb11-38"><a href="#cb11-38" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_x_continuous</span>(<span class="at">breaks =</span> x_values, <span class="at">limits =</span> x_limits, <span class="at">expand =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>)) <span class="sc">+</span></span>
+<span id="cb11-39"><a href="#cb11-39" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_y_continuous</span>(<span class="at">limits =</span> y_limits, <span class="at">expand =</span> <span class="fu">expansion</span>(<span class="at">mult =</span> <span class="fu">c</span>(<span class="fl">0.02</span>, <span class="fl">0.1</span>))) <span class="sc">+</span></span>
+<span id="cb11-40"><a href="#cb11-40" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(</span>
+<span id="cb11-41"><a href="#cb11-41" aria-hidden="true" tabindex="-1"></a>      <span class="at">title =</span> <span class="fu">paste</span>(<span class="fu">names</span>(selected_timepoints), selected_timepoints, <span class="at">sep =</span> <span class="st">": "</span>, <span class="at">collapse =</span> <span class="st">", "</span>),</span>
+<span id="cb11-42"><a href="#cb11-42" aria-hidden="true" tabindex="-1"></a>      <span class="at">y =</span> <span class="st">"Percent (%)"</span>,</span>
+<span id="cb11-43"><a href="#cb11-43" aria-hidden="true" tabindex="-1"></a>      <span class="at">x =</span> <span class="cn">NULL</span></span>
+<span id="cb11-44"><a href="#cb11-44" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">+</span></span>
+<span id="cb11-45"><a href="#cb11-45" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">10</span>) <span class="sc">+</span></span>
+<span id="cb11-46"><a href="#cb11-46" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme</span>(</span>
+<span id="cb11-47"><a href="#cb11-47" aria-hidden="true" tabindex="-1"></a>      <span class="at">panel.grid =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb11-48"><a href="#cb11-48" aria-hidden="true" tabindex="-1"></a>      <span class="at">axis.text.x =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb11-49"><a href="#cb11-49" aria-hidden="true" tabindex="-1"></a>      <span class="at">legend.position =</span> <span class="st">"none"</span>,</span>
+<span id="cb11-50"><a href="#cb11-50" aria-hidden="true" tabindex="-1"></a>      <span class="at">panel.border =</span> <span class="fu">element_rect</span>(<span class="at">colour =</span> <span class="st">"black"</span>, <span class="at">fill =</span> <span class="cn">NA</span>, <span class="at">linewidth =</span> <span class="fl">0.5</span>),</span>
+<span id="cb11-51"><a href="#cb11-51" aria-hidden="true" tabindex="-1"></a>      <span class="at">strip.background =</span> <span class="fu">element_blank</span>()</span>
+<span id="cb11-52"><a href="#cb11-52" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb11-53"><a href="#cb11-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-54"><a href="#cb11-54" aria-hidden="true" tabindex="-1"></a>  p_heat <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(plot_data_avg, <span class="fu">aes</span>(<span class="at">x =</span> .data[[x_var]], <span class="at">y =</span> cas_variant)) <span class="sc">+</span></span>
+<span id="cb11-55"><a href="#cb11-55" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_tile</span>(<span class="fu">aes</span>(<span class="at">fill =</span> cas_variant, <span class="at">alpha =</span> avg_y), <span class="at">color =</span> <span class="st">"white"</span>, <span class="at">linewidth =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb11-56"><a href="#cb11-56" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> variant_colors) <span class="sc">+</span></span>
+<span id="cb11-57"><a href="#cb11-57" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_alpha_continuous</span>(<span class="at">range =</span> <span class="fu">c</span>(<span class="fl">0.1</span>, <span class="dv">1</span>), <span class="at">limits =</span> y_limits, <span class="at">name =</span> <span class="st">"Avg %"</span>) <span class="sc">+</span></span>
+<span id="cb11-58"><a href="#cb11-58" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_x_continuous</span>(<span class="at">breaks =</span> x_values, <span class="at">limits =</span> x_limits, <span class="at">expand =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>)) <span class="sc">+</span></span>
+<span id="cb11-59"><a href="#cb11-59" aria-hidden="true" tabindex="-1"></a>    <span class="fu">coord_fixed</span>(<span class="at">ratio =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb11-60"><a href="#cb11-60" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> x_label, <span class="at">y =</span> <span class="cn">NULL</span>) <span class="sc">+</span></span>
+<span id="cb11-61"><a href="#cb11-61" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">14</span>) <span class="sc">+</span></span>
+<span id="cb11-62"><a href="#cb11-62" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme</span>(</span>
+<span id="cb11-63"><a href="#cb11-63" aria-hidden="true" tabindex="-1"></a>      <span class="at">panel.grid =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb11-64"><a href="#cb11-64" aria-hidden="true" tabindex="-1"></a>      <span class="at">axis.text.y =</span> <span class="fu">element_text</span>(<span class="at">face =</span> <span class="st">"bold"</span>),</span>
+<span id="cb11-65"><a href="#cb11-65" aria-hidden="true" tabindex="-1"></a>      <span class="at">legend.position =</span> <span class="st">"none"</span></span>
+<span id="cb11-66"><a href="#cb11-66" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb11-67"><a href="#cb11-67" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-68"><a href="#cb11-68" aria-hidden="true" tabindex="-1"></a>  (p_line <span class="sc">/</span> p_heat) <span class="sc">+</span></span>
+<span id="cb11-69"><a href="#cb11-69" aria-hidden="true" tabindex="-1"></a>    patchwork<span class="sc">::</span><span class="fu">plot_layout</span>(<span class="at">heights =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>), <span class="at">guides =</span> <span class="st">"collect"</span>) <span class="sc">&amp;</span></span>
+<span id="cb11-70"><a href="#cb11-70" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme</span>(<span class="at">plot.margin =</span> <span class="fu">margin</span>(<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>))</span>
+<span id="cb11-71"><a href="#cb11-71" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb11-72"><a href="#cb11-72" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-73"><a href="#cb11-73" aria-hidden="true" tabindex="-1"></a>guide_length_plot <span class="ot">&lt;-</span> <span class="fu">plot_flexible_final</span>(</span>
+<span id="cb11-74"><a href="#cb11-74" aria-hidden="true" tabindex="-1"></a>  guide_length,</span>
+<span id="cb11-75"><a href="#cb11-75" aria-hidden="true" tabindex="-1"></a>  selected_timepoints,</span>
+<span id="cb11-76"><a href="#cb11-76" aria-hidden="true" tabindex="-1"></a>  <span class="at">x_var =</span> <span class="st">"guide_length"</span>,</span>
+<span id="cb11-77"><a href="#cb11-77" aria-hidden="true" tabindex="-1"></a>  <span class="at">y_var =</span> <span class="st">"hdr_pct"</span>,</span>
+<span id="cb11-78"><a href="#cb11-78" aria-hidden="true" tabindex="-1"></a>  <span class="at">x_label =</span> <span class="st">"Guide length"</span></span>
+<span id="cb11-79"><a href="#cb11-79" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb11-80"><a href="#cb11-80" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-81"><a href="#cb11-81" aria-hidden="true" tabindex="-1"></a>donor_position_plot <span class="ot">&lt;-</span> <span class="fu">plot_flexible_final</span>(</span>
+<span id="cb11-82"><a href="#cb11-82" aria-hidden="true" tabindex="-1"></a>  donor_positions,</span>
+<span id="cb11-83"><a href="#cb11-83" aria-hidden="true" tabindex="-1"></a>  selected_timepoints,</span>
+<span id="cb11-84"><a href="#cb11-84" aria-hidden="true" tabindex="-1"></a>  <span class="at">x_var =</span> <span class="st">"dist"</span>,</span>
+<span id="cb11-85"><a href="#cb11-85" aria-hidden="true" tabindex="-1"></a>  <span class="at">y_var =</span> <span class="st">"hdr_pct"</span>,</span>
+<span id="cb11-86"><a href="#cb11-86" aria-hidden="true" tabindex="-1"></a>  <span class="at">x_label =</span> <span class="st">"Donor position"</span></span>
+<span id="cb11-87"><a href="#cb11-87" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb11-88"><a href="#cb11-88" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-89"><a href="#cb11-89" aria-hidden="true" tabindex="-1"></a><span class="fu">safe_ggsave</span>(</span>
+<span id="cb11-90"><a href="#cb11-90" aria-hidden="true" tabindex="-1"></a>  guide_length_plot,</span>
+<span id="cb11-91"><a href="#cb11-91" aria-hidden="true" tabindex="-1"></a>  <span class="fu">file.path</span>(plots_dir, <span class="st">"gRNA_length.pdf"</span>),</span>
+<span id="cb11-92"><a href="#cb11-92" aria-hidden="true" tabindex="-1"></a>  <span class="at">width =</span> <span class="dv">5</span>,</span>
+<span id="cb11-93"><a href="#cb11-93" aria-hidden="true" tabindex="-1"></a>  <span class="at">height =</span> <span class="dv">5</span></span>
+<span id="cb11-94"><a href="#cb11-94" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb11-95"><a href="#cb11-95" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-96"><a href="#cb11-96" aria-hidden="true" tabindex="-1"></a><span class="fu">safe_ggsave</span>(</span>
+<span id="cb11-97"><a href="#cb11-97" aria-hidden="true" tabindex="-1"></a>  donor_position_plot,</span>
+<span id="cb11-98"><a href="#cb11-98" aria-hidden="true" tabindex="-1"></a>  <span class="fu">file.path</span>(plots_dir, <span class="st">"donor_position.svg"</span>),</span>
+<span id="cb11-99"><a href="#cb11-99" aria-hidden="true" tabindex="-1"></a>  <span class="at">width =</span> <span class="dv">10</span>,</span>
+<span id="cb11-100"><a href="#cb11-100" aria-hidden="true" tabindex="-1"></a>  <span class="at">height =</span> <span class="dv">7</span></span>
+<span id="cb11-101"><a href="#cb11-101" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb11-102"><a href="#cb11-102" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-103"><a href="#cb11-103" aria-hidden="true" tabindex="-1"></a>guide_length_plot</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="03_donor_location_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>donor_position_plot</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="03_donor_location_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="short-guide-viability-overlays" class="level2">
+<h2 class="anchored" data-anchor-id="short-guide-viability-overlays">Short guide viability overlays</h2>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>short_guide_viability <span class="ot">&lt;-</span> <span class="fu">read_csv_clean</span>(</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">file.path</span>(paths<span class="sc">$</span>short_guide_root, <span class="st">"scripts"</span>, <span class="st">"clean_stats.csv"</span>)</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>New names:
+• `` -&gt; `...1`</code></pre>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>short_guide_viability_plot_data <span class="ot">&lt;-</span> short_guide_viability <span class="sc">%&gt;%</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    (strain <span class="sc">==</span> <span class="st">"ys85"</span> <span class="sc">&amp;</span> timepoint <span class="sc">==</span> <span class="st">"timepoint1"</span>) <span class="sc">|</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>      (strain <span class="sc">==</span> <span class="st">"ys88"</span> <span class="sc">&amp;</span> timepoint <span class="sc">==</span> <span class="st">"timepoint2"</span>)</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">cas_variant =</span> dplyr<span class="sc">::</span><span class="fu">case_when</span>(</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>      strain <span class="sc">==</span> <span class="st">"ys85"</span> <span class="sc">~</span> <span class="st">"enAsCas12a"</span>,</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>      strain <span class="sc">==</span> <span class="st">"ys88"</span> <span class="sc">~</span> <span class="st">"FnCas12a"</span>,</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>      <span class="cn">TRUE</span> <span class="sc">~</span> strain</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a><span class="fu">write_csv_checked</span>(</span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>  short_guide_viability_plot_data,</span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">file.path</span>(tables_dir, <span class="st">"short_guide_viability_plot_data.csv"</span>)</span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a>plot_short_guide_viability <span class="ot">&lt;-</span> <span class="cf">function</span>(data, strain_name, high_color) {</span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a>  data <span class="sc">%&gt;%</span></span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">filter</span>(strain <span class="sc">==</span> strain_name) <span class="sc">%&gt;%</span></span>
+<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> guide_length, <span class="at">y =</span> viability)) <span class="sc">+</span></span>
+<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">color =</span> editing_efficiency <span class="sc">*</span> <span class="dv">100</span>)) <span class="sc">+</span></span>
+<span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_color_gradient</span>(</span>
+<span id="cb15-25"><a href="#cb15-25" aria-hidden="true" tabindex="-1"></a>      <span class="at">low =</span> <span class="st">"#999999"</span>,</span>
+<span id="cb15-26"><a href="#cb15-26" aria-hidden="true" tabindex="-1"></a>      <span class="at">high =</span> high_color,</span>
+<span id="cb15-27"><a href="#cb15-27" aria-hidden="true" tabindex="-1"></a>      <span class="at">limits =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">100</span>),</span>
+<span id="cb15-28"><a href="#cb15-28" aria-hidden="true" tabindex="-1"></a>      <span class="at">oob =</span> scales<span class="sc">::</span>squish,</span>
+<span id="cb15-29"><a href="#cb15-29" aria-hidden="true" tabindex="-1"></a>      <span class="at">name =</span> <span class="st">"HDR fraction %"</span></span>
+<span id="cb15-30"><a href="#cb15-30" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">+</span></span>
+<span id="cb15-31"><a href="#cb15-31" aria-hidden="true" tabindex="-1"></a>    <span class="fu">coord_cartesian</span>(<span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>)) <span class="sc">+</span></span>
+<span id="cb15-32"><a href="#cb15-32" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Guide length"</span>, <span class="at">y =</span> <span class="st">"Viability"</span>) <span class="sc">+</span></span>
+<span id="cb15-33"><a href="#cb15-33" aria-hidden="true" tabindex="-1"></a>    <span class="fu">publication_theme</span>(<span class="at">legend_position =</span> <span class="st">"right"</span>, <span class="at">aspect_ratio =</span> <span class="dv">1</span>)</span>
+<span id="cb15-34"><a href="#cb15-34" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb15-35"><a href="#cb15-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-36"><a href="#cb15-36" aria-hidden="true" tabindex="-1"></a>short_guide_fn_plot <span class="ot">&lt;-</span> <span class="fu">plot_short_guide_viability</span>(short_guide_viability_plot_data, <span class="st">"ys88"</span>, <span class="st">"#009E73"</span>)</span>
+<span id="cb15-37"><a href="#cb15-37" aria-hidden="true" tabindex="-1"></a>short_guide_enas_plot <span class="ot">&lt;-</span> <span class="fu">plot_short_guide_viability</span>(short_guide_viability_plot_data, <span class="st">"ys85"</span>, <span class="st">"#E69F00"</span>)</span>
+<span id="cb15-38"><a href="#cb15-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-39"><a href="#cb15-39" aria-hidden="true" tabindex="-1"></a><span class="fu">safe_ggsave</span>(</span>
+<span id="cb15-40"><a href="#cb15-40" aria-hidden="true" tabindex="-1"></a>  short_guide_fn_plot,</span>
+<span id="cb15-41"><a href="#cb15-41" aria-hidden="true" tabindex="-1"></a>  <span class="fu">file.path</span>(plots_dir, <span class="st">"gRNA_length_viability_fnCas12a.png"</span>),</span>
+<span id="cb15-42"><a href="#cb15-42" aria-hidden="true" tabindex="-1"></a>  <span class="at">width =</span> <span class="dv">5</span>,</span>
+<span id="cb15-43"><a href="#cb15-43" aria-hidden="true" tabindex="-1"></a>  <span class="at">height =</span> <span class="dv">5</span></span>
+<span id="cb15-44"><a href="#cb15-44" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb15-45"><a href="#cb15-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-46"><a href="#cb15-46" aria-hidden="true" tabindex="-1"></a><span class="fu">safe_ggsave</span>(</span>
+<span id="cb15-47"><a href="#cb15-47" aria-hidden="true" tabindex="-1"></a>  short_guide_enas_plot,</span>
+<span id="cb15-48"><a href="#cb15-48" aria-hidden="true" tabindex="-1"></a>  <span class="fu">file.path</span>(plots_dir, <span class="st">"gRNA_length_viability_enAsCas12a.png"</span>),</span>
+<span id="cb15-49"><a href="#cb15-49" aria-hidden="true" tabindex="-1"></a>  <span class="at">width =</span> <span class="dv">5</span>,</span>
+<span id="cb15-50"><a href="#cb15-50" aria-hidden="true" tabindex="-1"></a>  <span class="at">height =</span> <span class="dv">5</span></span>
+<span id="cb15-51"><a href="#cb15-51" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb15-52"><a href="#cb15-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-53"><a href="#cb15-53" aria-hidden="true" tabindex="-1"></a>short_guide_fn_plot</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="03_donor_location_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="donor-position-colony-counts" class="level2">
+<h2 class="anchored" data-anchor-id="donor-position-colony-counts">Donor position colony counts</h2>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>fn_donor_count <span class="ot">&lt;-</span> <span class="fu">read_csv_clean</span>(</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">file.path</span>(paths<span class="sc">$</span>amplicon_root, <span class="st">"20250312_ys88_donor_mut"</span>, <span class="st">"data"</span>, <span class="st">"raw"</span>, <span class="st">"colony_counts.csv"</span>)</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>) <span class="sc">%&gt;%</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">transmute</span>(</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">replicate =</span> <span class="fu">as.character</span>(replicate),</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">part6 =</span> <span class="fu">as.numeric</span>(part6),</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">true_colony_count =</span> true_colony_count</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>donor_pos_fn <span class="ot">&lt;-</span> donor_positions <span class="sc">%&gt;%</span></span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(strain <span class="sc">==</span> <span class="st">"ys88"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(fn_donor_count, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"replicate"</span>, <span class="st">"dist"</span> <span class="ot">=</span> <span class="st">"part6"</span>))</span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a><span class="fu">write_csv_checked</span>(donor_pos_fn, <span class="fu">file.path</span>(tables_dir, <span class="st">"donor_pos_fn.csv"</span>))</span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a>fn_colony_plot <span class="ot">&lt;-</span> donor_pos_fn <span class="sc">%&gt;%</span></span>
+<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(timepoint <span class="sc">==</span> <span class="st">"T2"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> dist, <span class="at">y =</span> true_colony_count)) <span class="sc">+</span></span>
+<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">color =</span> frc_alt)) <span class="sc">+</span></span>
+<span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_gradient</span>(</span>
+<span id="cb16-21"><a href="#cb16-21" aria-hidden="true" tabindex="-1"></a>    <span class="at">low =</span> <span class="st">"#999999"</span>,</span>
+<span id="cb16-22"><a href="#cb16-22" aria-hidden="true" tabindex="-1"></a>    <span class="at">high =</span> <span class="st">"#009E73"</span>,</span>
+<span id="cb16-23"><a href="#cb16-23" aria-hidden="true" tabindex="-1"></a>    <span class="at">limits =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">100</span>),</span>
+<span id="cb16-24"><a href="#cb16-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">oob =</span> scales<span class="sc">::</span>squish,</span>
+<span id="cb16-25"><a href="#cb16-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">name =</span> <span class="st">"HDR fraction"</span></span>
+<span id="cb16-26"><a href="#cb16-26" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb16-27"><a href="#cb16-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Donor position (distance from PAM)"</span>, <span class="at">y =</span> <span class="st">"Colony count"</span>) <span class="sc">+</span></span>
+<span id="cb16-28"><a href="#cb16-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">publication_theme</span>(<span class="at">legend_position =</span> <span class="st">"right"</span>, <span class="at">aspect_ratio =</span> <span class="dv">1</span>)</span>
+<span id="cb16-29"><a href="#cb16-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-30"><a href="#cb16-30" aria-hidden="true" tabindex="-1"></a><span class="fu">safe_ggsave</span>(</span>
+<span id="cb16-31"><a href="#cb16-31" aria-hidden="true" tabindex="-1"></a>  fn_colony_plot,</span>
+<span id="cb16-32"><a href="#cb16-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">file.path</span>(plots_dir, <span class="st">"donor_position_colony_counts_fnCas12a.png"</span>),</span>
+<span id="cb16-33"><a href="#cb16-33" aria-hidden="true" tabindex="-1"></a>  <span class="at">width =</span> <span class="dv">5</span>,</span>
+<span id="cb16-34"><a href="#cb16-34" aria-hidden="true" tabindex="-1"></a>  <span class="at">height =</span> <span class="dv">5</span></span>
+<span id="cb16-35"><a href="#cb16-35" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb16-36"><a href="#cb16-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-37"><a href="#cb16-37" aria-hidden="true" tabindex="-1"></a>enas_donor_count <span class="ot">&lt;-</span> <span class="fu">read_csv_clean</span>(</span>
+<span id="cb16-38"><a href="#cb16-38" aria-hidden="true" tabindex="-1"></a>  <span class="fu">file.path</span>(paths<span class="sc">$</span>amplicon_root, <span class="st">"20250611_amplicons_ys85_misc"</span>, <span class="st">"data"</span>, <span class="st">"raw"</span>, <span class="st">"colony_counts.csv"</span>)</span>
+<span id="cb16-39"><a href="#cb16-39" aria-hidden="true" tabindex="-1"></a>) <span class="sc">%&gt;%</span></span>
+<span id="cb16-40"><a href="#cb16-40" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">transmute</span>(</span>
+<span id="cb16-41"><a href="#cb16-41" aria-hidden="true" tabindex="-1"></a>    <span class="at">replicate =</span> <span class="fu">as.character</span>(replicate),</span>
+<span id="cb16-42"><a href="#cb16-42" aria-hidden="true" tabindex="-1"></a>    <span class="at">part6 =</span> <span class="fu">as.numeric</span>(part6),</span>
+<span id="cb16-43"><a href="#cb16-43" aria-hidden="true" tabindex="-1"></a>    <span class="at">true_colony_count =</span> true_colony_count</span>
+<span id="cb16-44"><a href="#cb16-44" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb16-45"><a href="#cb16-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-46"><a href="#cb16-46" aria-hidden="true" tabindex="-1"></a>donor_pos_enas <span class="ot">&lt;-</span> donor_positions <span class="sc">%&gt;%</span></span>
+<span id="cb16-47"><a href="#cb16-47" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(strain <span class="sc">==</span> <span class="st">"ys85"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb16-48"><a href="#cb16-48" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(enas_donor_count, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"replicate"</span>, <span class="st">"dist"</span> <span class="ot">=</span> <span class="st">"part6"</span>))</span>
+<span id="cb16-49"><a href="#cb16-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-50"><a href="#cb16-50" aria-hidden="true" tabindex="-1"></a><span class="fu">write_csv_checked</span>(donor_pos_enas, <span class="fu">file.path</span>(tables_dir, <span class="st">"donor_pos_enas.csv"</span>))</span>
+<span id="cb16-51"><a href="#cb16-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-52"><a href="#cb16-52" aria-hidden="true" tabindex="-1"></a>enas_colony_plot <span class="ot">&lt;-</span> donor_pos_enas <span class="sc">%&gt;%</span></span>
+<span id="cb16-53"><a href="#cb16-53" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(timepoint <span class="sc">==</span> <span class="st">"T1"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb16-54"><a href="#cb16-54" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> dist, <span class="at">y =</span> true_colony_count)) <span class="sc">+</span></span>
+<span id="cb16-55"><a href="#cb16-55" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">color =</span> frc_alt)) <span class="sc">+</span></span>
+<span id="cb16-56"><a href="#cb16-56" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_gradient</span>(</span>
+<span id="cb16-57"><a href="#cb16-57" aria-hidden="true" tabindex="-1"></a>    <span class="at">low =</span> <span class="st">"#999999"</span>,</span>
+<span id="cb16-58"><a href="#cb16-58" aria-hidden="true" tabindex="-1"></a>    <span class="at">high =</span> <span class="st">"#E69F00"</span>,</span>
+<span id="cb16-59"><a href="#cb16-59" aria-hidden="true" tabindex="-1"></a>    <span class="at">limits =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">100</span>),</span>
+<span id="cb16-60"><a href="#cb16-60" aria-hidden="true" tabindex="-1"></a>    <span class="at">oob =</span> scales<span class="sc">::</span>squish,</span>
+<span id="cb16-61"><a href="#cb16-61" aria-hidden="true" tabindex="-1"></a>    <span class="at">name =</span> <span class="st">"HDR fraction"</span></span>
+<span id="cb16-62"><a href="#cb16-62" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb16-63"><a href="#cb16-63" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Donor position (distance from PAM)"</span>, <span class="at">y =</span> <span class="st">"Colony count"</span>) <span class="sc">+</span></span>
+<span id="cb16-64"><a href="#cb16-64" aria-hidden="true" tabindex="-1"></a>  <span class="fu">publication_theme</span>(<span class="at">legend_position =</span> <span class="st">"right"</span>, <span class="at">aspect_ratio =</span> <span class="dv">1</span>)</span>
+<span id="cb16-65"><a href="#cb16-65" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-66"><a href="#cb16-66" aria-hidden="true" tabindex="-1"></a><span class="fu">safe_ggsave</span>(</span>
+<span id="cb16-67"><a href="#cb16-67" aria-hidden="true" tabindex="-1"></a>  enas_colony_plot,</span>
+<span id="cb16-68"><a href="#cb16-68" aria-hidden="true" tabindex="-1"></a>  <span class="fu">file.path</span>(plots_dir, <span class="st">"donor_position_colony_counts_enAsCas12a.png"</span>),</span>
+<span id="cb16-69"><a href="#cb16-69" aria-hidden="true" tabindex="-1"></a>  <span class="at">width =</span> <span class="dv">5</span>,</span>
+<span id="cb16-70"><a href="#cb16-70" aria-hidden="true" tabindex="-1"></a>  <span class="at">height =</span> <span class="dv">5</span></span>
+<span id="cb16-71"><a href="#cb16-71" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb16-72"><a href="#cb16-72" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-73"><a href="#cb16-73" aria-hidden="true" tabindex="-1"></a>enas_colony_plot</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="03_donor_location_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

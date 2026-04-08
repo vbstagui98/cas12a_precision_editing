@@ -1,0 +1,407 @@
+---
+title: "Robust enAs Amplicon Colony Counts"
+format: html
+editor: visual
+---
+
+## Purpose
+
+This notebook rebuilds the amplicon-colony-count analysis with explicit joins, documented filtering, and deterministic exports under `results/02_enas_amplicon_colony_counts/`.
+
+## Setup
+
+```{r}
+resolve_project_root <- function() {
+  rstudio_path <- ""
+  if (requireNamespace("rstudioapi", quietly = TRUE)) {
+    rstudio_path <- tryCatch(rstudioapi::getSourceEditorContext()$path, error = function(e) "")
+    if (!nzchar(rstudio_path)) {
+      rstudio_path <- tryCatch(rstudioapi::getActiveDocumentContext()$path, error = function(e) "")
+    }
+  }
+
+  search_roots <- unique(c(
+    Sys.getenv("CAS12A_NOTEBOOK_PROJECT_ROOT", unset = ""),
+    tryCatch(knitr::current_input(dir = TRUE), error = function(e) ""),
+    rstudio_path,
+    getwd(),
+    normalizePath(file.path(getwd(), ".."), mustWork = FALSE),
+    normalizePath(file.path(getwd(), "..", ".."), mustWork = FALSE)
+  ))
+  search_roots <- search_roots[nzchar(search_roots)]
+
+  for (root in search_roots) {
+    current <- normalizePath(root, mustWork = FALSE)
+    if (!dir.exists(current)) {
+      current <- dirname(current)
+    }
+
+    repeat {
+      required_paths <- c(
+        file.path(current, "_quarto.yml"),
+        file.path(current, "config", "paths.R"),
+        file.path(current, "R", "common.R")
+      )
+
+      if (all(file.exists(required_paths))) {
+        return(current)
+      }
+
+      parent <- dirname(current)
+      if (identical(parent, current)) {
+        break
+      }
+
+      current <- parent
+    }
+  }
+
+  stop(
+    paste(
+      "Could not locate the notebook project root.",
+      "Save the notebook and either run it from the project root,",
+      "or set Sys.setenv(CAS12A_NOTEBOOK_PROJECT_ROOT = '/path/to/New project')."
+    ),
+    call. = FALSE
+  )
+}
+
+project_root <- resolve_project_root()
+
+source(file.path(project_root, "config", "paths.R"), local = knitr::knit_global())
+source(file.path(project_root, "R", "common.R"), local = knitr::knit_global())
+
+load_paper_packages()
+
+paths <- get_analysis_paths(
+  list(results_dir = normalizePath(file.path(project_root, "results"), mustWork = FALSE))
+)
+
+output_dir <- analysis_output_dir(paths, "02_enas_amplicon_colony_counts")
+tables_dir <- ensure_dir(file.path(output_dir, "tables"))
+plots_dir <- ensure_dir(file.path(output_dir, "plots"))
+```
+
+## Load and annotate colony counts
+
+```{r}
+annotation_path <- file.path(paths$cas12a_project_root, "plate_counts", "annotate_plate_images.xlsx")
+count_path <- file.path(paths$cas12a_project_root, "plate_counts", "master_count", "predict6", "colony_counts.csv")
+hdr_path <- file.path(paths$thesis_root, "20240516", "results", "editing_window_all_variants_20260122.csv")
+
+annotation <- read_excel_clean(annotation_path)
+colony_counts <- read_csv_clean(count_path)
+hdr_data <- read_csv_clean(hdr_path)
+
+assert_columns(annotation, c("file", "ys", "guide", "rep"))
+assert_columns(colony_counts, c("image_name", "colonies_cutoff"))
+assert_columns(hdr_data, c("experiment", "timepoint", "guide", "replicate", "promoter", "recruit", "mutation", "frc_alt", "frc_ref"))
+
+colony_counts_annotated <- annotation %>%
+  dplyr::mutate(file = paste0(file, ".jpg")) %>%
+  dplyr::filter(ys %in% c("ys78", "ys227")) %>%
+  dplyr::left_join(colony_counts, by = c("file" = "image_name")) %>%
+  dplyr::filter(!is.na(colonies_cutoff)) %>%
+  dplyr::mutate(
+    promoter = sub("_.*$", "", guide),
+    guide_id = sub("^.*_", "", guide),
+    recruit = dplyr::case_when(
+      ys == "ys78" ~ "No",
+      ys == "ys227" ~ "LexA-FHA",
+      TRUE ~ ys
+    ),
+    replicate = paste0("D", rep),
+    promoter = dplyr::if_else(promoter == "RPR", "RPR1", promoter)
+  )
+
+hdr_filtered <- hdr_data %>%
+  dplyr::filter(experiment != "E5", !replicate %in% c("C1", "C2"))
+
+merged_data <- hdr_filtered %>%
+  dplyr::left_join(
+    colony_counts_annotated,
+    by = c("promoter", "guide" = "guide_id", "recruit", "replicate")
+  )
+
+write_csv_checked(colony_counts_annotated, file.path(tables_dir, "colony_counts_annotated.csv"))
+write_csv_checked(merged_data, file.path(tables_dir, "merged_data.csv"))
+
+merged_data
+```
+
+## HDR versus colony counts
+
+```{r}
+hdr_timepoint1 <- merged_data %>%
+  dplyr::filter(timepoint == "T1", mutation == "HDR") %>%
+  dplyr::mutate(recruit = factor(recruit, levels = c("No", "LexA-FHA")))
+
+hdr_vs_counts_plot <- ggplot(hdr_timepoint1, aes(x = colonies_cutoff, y = frc_alt)) +
+  geom_point(aes(color = guide)) +
+  geom_smooth(method = "lm", se = FALSE, color = "blue") +
+  ggpmisc::stat_poly_eq(
+    aes(label = after_stat(rr.label)),
+    formula = y ~ x,
+    parse = TRUE,
+    label.x.npc = "left",
+    label.y.npc = "top"
+  ) +
+  facet_wrap(
+    ~ promoter * recruit,
+    labeller = labeller(recruit = c("No" = "", "LexA-FHA" = "LexA-FHA"))
+  ) +
+  labs(
+    title = "HDR efficiency versus colony counts at T1",
+    x = "Colony count",
+    y = "HDR efficiency"
+  ) +
+  publication_theme(legend_position = "none", aspect_ratio = 1)
+
+safe_ggsave(
+  hdr_vs_counts_plot,
+  file.path(plots_dir, "hdr_efficiency_vs_colony_counts_t1.png"),
+  width = 7,
+  height = 6
+)
+
+hdr_vs_counts_plot
+```
+
+## Replicate consistency
+
+```{r}
+replicate_check <- colony_counts_annotated %>%
+  dplyr::group_by(promoter, guide_id, recruit, replicate) %>%
+  dplyr::summarise(colony_count = mean(colonies_cutoff, na.rm = TRUE), .groups = "drop") %>%
+  tidyr::pivot_wider(names_from = replicate, values_from = colony_count) %>%
+  dplyr::rename(
+    count_d1 = dplyr::any_of("D1"),
+    count_d2 = dplyr::any_of("D2")
+  )
+
+replicate_check_plot <- ggplot(replicate_check, aes(x = count_d1, y = count_d2)) +
+  geom_point(aes(color = guide_id)) +
+  geom_smooth(method = "lm", se = FALSE, color = "blue") +
+  facet_wrap(
+    ~ recruit * promoter,
+    labeller = labeller(recruit = c("No" = "", "LexA-FHA" = "LexA-FHA"))
+  ) +
+  labs(
+    title = "Replicate colony counts",
+    x = "Replicate D1",
+    y = "Replicate D2"
+  ) +
+  publication_theme(legend_position = "none", aspect_ratio = 1)
+
+write_csv_checked(replicate_check, file.path(tables_dir, "replicate_check.csv"))
+safe_ggsave(
+  replicate_check_plot,
+  file.path(plots_dir, "replicate_check.png"),
+  width = 7,
+  height = 6
+)
+
+replicate_check_plot
+```
+
+## Amplicon heatmap
+
+```{r}
+plot_amplicon_heatmaps <- function(data, fill_high = "#E69F00", col_max = 100) {
+  timepoints <- unique(data$timepoint)
+  output <- vector("list", length(timepoints))
+  names(output) <- timepoints
+
+  for (timepoint_name in timepoints) {
+    timepoint_data <- data %>%
+      dplyr::filter(timepoint == timepoint_name)
+
+    stats_df <- timepoint_data %>%
+      dplyr::group_by(condition_label) %>%
+      dplyr::summarise(true_cond_avg = mean(avg_value, na.rm = TRUE), .groups = "drop")
+
+    timepoint_data <- timepoint_data %>%
+      dplyr::left_join(stats_df, by = "condition_label") %>%
+      dplyr::mutate(
+        y_label_final = paste0(condition_label, "\n(Avg: ", round(true_cond_avg, 1), "%)")
+      )
+
+    y_levels <- timepoint_data %>%
+      dplyr::arrange(dplyr::desc(true_cond_avg)) %>%
+      dplyr::pull(y_label_final) %>%
+      unique()
+
+    x_levels <- timepoint_data %>%
+      dplyr::group_by(well_position) %>%
+      dplyr::summarise(mean_eff = mean(avg_value, na.rm = TRUE), .groups = "drop") %>%
+      dplyr::arrange(mean_eff) %>%
+      dplyr::pull(well_position)
+
+    timepoint_data$y_label_final <- factor(timepoint_data$y_label_final, levels = y_levels)
+    timepoint_data$well_position <- factor(timepoint_data$well_position, levels = x_levels)
+
+    output[[timepoint_name]] <- ggplot(timepoint_data, aes(x = well_position, y = y_label_final, fill = avg_value)) +
+      geom_tile(color = "white", linewidth = 0.6) +
+      scale_fill_gradient(low = "#F8F9FA", high = fill_high, limits = c(0, col_max), oob = scales::squish) +
+      coord_fixed() +
+      labs(x = "Guide", y = NULL, title = paste("Amplicon HDR heatmap", timepoint_name)) +
+      theme_minimal(base_size = 11) +
+      theme(
+        panel.grid = element_blank(),
+        axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1, color = "black"),
+        axis.text.y = element_text(face = "bold", color = "black", size = 8),
+        plot.title = element_text(face = "bold", size = 12, hjust = 0)
+      )
+  }
+
+  output
+}
+
+amplicon_guides <- hdr_filtered %>%
+  dplyr::filter(mutation == "HDR") %>%
+  dplyr::group_by(guide, promoter, recruit, timepoint) %>%
+  dplyr::summarise(avg_value = mean(frc_alt, na.rm = TRUE), .groups = "drop") %>%
+  dplyr::mutate(
+    condition_label = paste(promoter, "+", recruit),
+    well_position = guide,
+    timepoint = dplyr::case_when(
+      timepoint == "T1" ~ "scraped",
+      timepoint == "T2" ~ "6_gen",
+      timepoint == "T3" ~ "12_gen",
+      TRUE ~ timepoint
+    )
+  )
+
+amplicon_heatmaps <- plot_amplicon_heatmaps(amplicon_guides)
+
+write_csv_checked(amplicon_guides, file.path(tables_dir, "amplicon_guides.csv"))
+
+safe_ggsave(
+  amplicon_heatmaps[["6_gen"]],
+  file.path(plots_dir, "genomic_amplicons.svg"),
+  width = 10,
+  height = 6
+)
+
+amplicon_heatmaps[["6_gen"]]
+```
+
+## Composition plots
+
+```{r}
+non_hdr <- hdr_filtered %>%
+  dplyr::filter(mutation == "HDR") %>%
+  dplyr::mutate(non_hdr = 100 - frc_alt - frc_ref)
+
+composition_data <- non_hdr %>%
+  dplyr::filter(timepoint == "T2") %>%
+  dplyr::group_by(promoter, recruit, experiment, timepoint, guide) %>%
+  dplyr::summarise(
+    hdr = mean(frc_alt, na.rm = TRUE),
+    non_hdr = mean(non_hdr, na.rm = TRUE),
+    unedited = mean(frc_ref, na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  tidyr::pivot_longer(c(hdr, non_hdr, unedited), names_to = "class", values_to = "pct") %>%
+  dplyr::mutate(
+    class = factor(class, levels = c("hdr", "unedited", "non_hdr")),
+    recruit = factor(recruit, levels = c("No", "LexA-FHA"))
+  )
+
+guide_order <- composition_data %>%
+  dplyr::filter(experiment == "E1", class == "hdr") %>%
+  dplyr::arrange(pct) %>%
+  dplyr::pull(guide) %>%
+  unique()
+
+composition_data <- composition_data %>%
+  dplyr::mutate(guide = factor(guide, levels = guide_order))
+
+composition_plot <- ggplot(composition_data, aes(guide, pct, fill = class)) +
+  geom_col(position = "fill") +
+  scale_y_continuous(labels = scales::percent) +
+  facet_wrap(
+    ~ recruit * promoter,
+    labeller = labeller(recruit = c("No" = "", "LexA-FHA" = "LexA-FHA"))
+  ) +
+  scale_fill_manual(values = c("hdr" = "#009E73", "non_hdr" = "#F0E442", "unedited" = "#A0949B")) +
+  labs(x = "Guide", y = "Fraction") +
+  publication_theme(legend_position = "top", aspect_ratio = 1) +
+  theme(axis.ticks.x = element_blank())
+
+safe_ggsave(
+  composition_plot,
+  file.path(plots_dir, "non_hdr_stacked_barplot.png"),
+  width = 7,
+  height = 6
+)
+
+composition_plot
+```
+
+```{r}
+non_hdr_type_g10 <- hdr_filtered %>%
+  dplyr::filter(timepoint == "T2", guide == "G10", experiment == "E1") %>%
+  dplyr::group_by(mutation) %>%
+  dplyr::summarise(frc = mean(frc_alt, na.rm = TRUE), .groups = "drop") %>%
+  dplyr::filter(mutation %in% c("del", "ins")) %>%
+  dplyr::mutate(mutation = factor(mutation, levels = c("del", "ins")))
+
+g10_plot <- ggplot(non_hdr_type_g10, aes(x = mutation, y = frc, fill = mutation)) +
+  geom_col() +
+  scale_fill_manual(values = c("del" = "#D55E00", "ins" = "#0072B2"), labels = c("del" = "Deletion", "ins" = "Insertion")) +
+  scale_x_discrete(labels = c("del" = "Deletion", "ins" = "Insertion")) +
+  labs(x = "Mutation type", y = "Fraction (%)") +
+  publication_theme(legend_position = "top", aspect_ratio = 1) +
+  theme(axis.ticks.x = element_blank())
+
+safe_ggsave(
+  g10_plot,
+  file.path(plots_dir, "g10_non_hdr_types.png"),
+  width = 5,
+  height = 5
+)
+
+g10_plot
+```
+
+## Kinetics
+
+```{r}
+hdr_raw <- hdr_filtered %>%
+  dplyr::filter(mutation == "HDR") %>%
+  dplyr::mutate(recruit = factor(recruit, levels = c("No", "LexA-FHA")))
+
+hdr_kinetics <- hdr_raw %>%
+  dplyr::group_by(promoter, recruit, timepoint, guide) %>%
+  dplyr::summarise(avg_frc = mean(frc_alt, na.rm = TRUE), .groups = "drop")
+
+kinetics_plot <- ggplot() +
+  geom_point(
+    data = hdr_raw,
+    aes(x = timepoint, y = frc_alt, color = guide),
+    alpha = 0.5,
+    size = 1.5,
+    position = position_jitter(width = 0.05)
+  ) +
+  geom_line(
+    data = hdr_kinetics,
+    aes(x = timepoint, y = avg_frc, group = guide, color = guide),
+    linewidth = 0.8
+  ) +
+  facet_wrap(
+    ~ recruit * promoter,
+    labeller = labeller(recruit = c("No" = "", "LexA-FHA" = "LexA-FHA"))
+  ) +
+  labs(x = "Timepoint", y = "HDR efficiency (%)") +
+  publication_theme(legend_position = "right", aspect_ratio = 1)
+
+safe_ggsave(
+  kinetics_plot,
+  file.path(plots_dir, "hdr_kinetics_all_guides.png"),
+  width = 10,
+  height = 6
+)
+
+kinetics_plot
+```

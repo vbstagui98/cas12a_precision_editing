@@ -1,0 +1,215 @@
+---
+title: "Plot Only: Donor Location"
+format: html
+editor: visual
+---
+
+## Setup
+
+```{r}
+resolve_project_root <- function() {
+  rstudio_path <- ""
+  if (requireNamespace("rstudioapi", quietly = TRUE)) {
+    rstudio_path <- tryCatch(rstudioapi::getSourceEditorContext()$path, error = function(e) "")
+    if (!nzchar(rstudio_path)) {
+      rstudio_path <- tryCatch(rstudioapi::getActiveDocumentContext()$path, error = function(e) "")
+    }
+  }
+
+  search_roots <- unique(c(
+    Sys.getenv("CAS12A_NOTEBOOK_PROJECT_ROOT", unset = ""),
+    tryCatch(knitr::current_input(dir = TRUE), error = function(e) ""),
+    rstudio_path,
+    getwd(),
+    normalizePath(file.path(getwd(), ".."), mustWork = FALSE),
+    normalizePath(file.path(getwd(), "..", ".."), mustWork = FALSE)
+  ))
+  search_roots <- search_roots[nzchar(search_roots)]
+
+  for (root in search_roots) {
+    current <- normalizePath(root, mustWork = FALSE)
+    if (!dir.exists(current)) {
+      current <- dirname(current)
+    }
+
+    repeat {
+      required_paths <- c(
+        file.path(current, "_quarto.yml"),
+        file.path(current, "config", "paths.R"),
+        file.path(current, "R", "common.R")
+      )
+
+      if (all(file.exists(required_paths))) {
+        return(current)
+      }
+
+      parent <- dirname(current)
+      if (identical(parent, current)) {
+        break
+      }
+
+      current <- parent
+    }
+  }
+
+  stop(
+    paste(
+      "Could not locate the notebook project root.",
+      "Save the notebook and either run it from the project root,",
+      "or set Sys.setenv(CAS12A_NOTEBOOK_PROJECT_ROOT = '/path/to/New project')."
+    ),
+    call. = FALSE
+  )
+}
+
+project_root <- resolve_project_root()
+
+source(file.path(project_root, "config", "paths.R"), local = knitr::knit_global())
+source(file.path(project_root, "R", "common.R"), local = knitr::knit_global())
+
+load_paper_packages()
+
+paths <- get_analysis_paths(
+  list(results_dir = normalizePath(file.path(project_root, "results"), mustWork = FALSE))
+)
+
+input_dir <- file.path(paths$results_dir, "03_donor_location", "tables")
+output_dir <- analysis_output_dir(paths, "plot_only/03_donor_location")
+plots_dir <- ensure_dir(file.path(output_dir, "plots"))
+
+donor_positions <- read_csv_clean(file.path(input_dir, "donor_positions.csv"))
+guide_length <- read_csv_clean(file.path(input_dir, "guide_length.csv"))
+short_guide_viability_plot_data <- read_csv_clean(file.path(input_dir, "short_guide_viability_plot_data.csv"))
+donor_pos_fn <- read_csv_clean(file.path(input_dir, "donor_pos_fn.csv"))
+donor_pos_enas <- read_csv_clean(file.path(input_dir, "donor_pos_enas.csv"))
+selected_timepoints <- c("enAsCas12a" = "T1", "FnCas12a" = "T2")
+```
+
+## Combined panels
+
+```{r}
+plot_flexible_final <- function(data, selected_timepoints, x_var, y_var, x_label, y_limits = c(0, 100)) {
+  lookup <- tibble::tibble(
+    cas_variant = names(selected_timepoints),
+    selected_timepoint = unname(selected_timepoints)
+  )
+
+  plot_data_raw <- data %>%
+    dplyr::left_join(lookup, by = "cas_variant") %>%
+    dplyr::filter(timepoint == selected_timepoint)
+
+  if (identical(x_var, "dist")) {
+    plot_data_raw <- plot_data_raw %>%
+      dplyr::filter(as.numeric(.data[[x_var]]) != 6)
+  }
+
+  plot_data_avg <- plot_data_raw %>%
+    dplyr::group_by(cas_variant, .data[[x_var]]) %>%
+    dplyr::summarise(avg_y = mean(.data[[y_var]], na.rm = TRUE), .groups = "drop")
+
+  variant_colors <- c("enAsCas12a" = "#E69F00", "FnCas12a" = "#009E73")
+  x_values <- sort(unique(plot_data_raw[[x_var]]))
+  x_limits <- c(min(x_values) - 0.5, max(x_values) + 0.5)
+
+  p_line <- ggplot() +
+    geom_line(
+      data = plot_data_avg,
+      aes(x = .data[[x_var]], y = avg_y, color = cas_variant, group = cas_variant),
+      linewidth = 0.8
+    ) +
+    geom_point(
+      data = plot_data_raw,
+      aes(x = .data[[x_var]], y = .data[[y_var]], color = cas_variant),
+      size = 1,
+      alpha = 0.8,
+      position = position_dodge(width = 0.3)
+    ) +
+    scale_color_manual(values = variant_colors) +
+    scale_x_continuous(breaks = x_values, limits = x_limits, expand = c(0, 0)) +
+    scale_y_continuous(limits = y_limits, expand = expansion(mult = c(0.02, 0.1))) +
+    labs(y = "Percent (%)", x = NULL) +
+    theme_minimal(base_size = 10) +
+    theme(
+      panel.grid = element_blank(),
+      axis.text.x = element_blank(),
+      legend.position = "none",
+      panel.border = element_rect(colour = "black", fill = NA, linewidth = 0.5)
+    )
+
+  p_heat <- ggplot(plot_data_avg, aes(x = .data[[x_var]], y = cas_variant)) +
+    geom_tile(aes(fill = cas_variant, alpha = avg_y), color = "white", linewidth = 0.5) +
+    scale_fill_manual(values = variant_colors) +
+    scale_alpha_continuous(range = c(0.1, 1), limits = y_limits, name = "Avg %") +
+    scale_x_continuous(breaks = x_values, limits = x_limits, expand = c(0, 0)) +
+    coord_fixed(ratio = 1) +
+    labs(x = x_label, y = NULL) +
+    theme_minimal(base_size = 14) +
+    theme(panel.grid = element_blank(), axis.text.y = element_text(face = "bold"), legend.position = "none")
+
+  (p_line / p_heat) +
+    patchwork::plot_layout(heights = c(1, 1), guides = "collect") &
+    theme(plot.margin = margin(1, 1, 1, 1))
+}
+
+guide_length_plot <- plot_flexible_final(guide_length, selected_timepoints, "guide_length", "hdr_pct", "Guide length")
+donor_position_plot <- plot_flexible_final(donor_positions, selected_timepoints, "dist", "hdr_pct", "Donor position")
+
+safe_ggsave(guide_length_plot, file.path(plots_dir, "gRNA_length.pdf"), width = 5, height = 5)
+safe_ggsave(donor_position_plot, file.path(plots_dir, "donor_position.svg"), width = 10, height = 7)
+
+guide_length_plot
+```
+
+## Viability overlays
+
+```{r}
+plot_short_guide_viability <- function(data, strain_name, high_color) {
+  data %>%
+    dplyr::filter(strain == strain_name) %>%
+    ggplot(aes(x = guide_length, y = viability)) +
+    geom_point(aes(color = editing_efficiency * 100)) +
+    scale_color_gradient(
+      low = "#999999",
+      high = high_color,
+      limits = c(0, 100),
+      oob = scales::squish,
+      name = "HDR fraction %"
+    ) +
+    coord_cartesian(ylim = c(0, 1)) +
+    labs(x = "Guide length", y = "Viability") +
+    publication_theme(legend_position = "right", aspect_ratio = 1)
+}
+
+short_guide_fn_plot <- plot_short_guide_viability(short_guide_viability_plot_data, "ys88", "#009E73")
+short_guide_enas_plot <- plot_short_guide_viability(short_guide_viability_plot_data, "ys85", "#E69F00")
+
+safe_ggsave(short_guide_fn_plot, file.path(plots_dir, "gRNA_length_viability_fnCas12a.png"), width = 5, height = 5)
+safe_ggsave(short_guide_enas_plot, file.path(plots_dir, "gRNA_length_viability_enAsCas12a.png"), width = 5, height = 5)
+
+short_guide_fn_plot
+```
+
+## Donor position colony counts
+
+```{r}
+fn_colony_plot <- donor_pos_fn %>%
+  dplyr::filter(timepoint == "T2") %>%
+  ggplot(aes(x = dist, y = true_colony_count)) +
+  geom_point(aes(color = frc_alt)) +
+  scale_color_gradient(low = "#999999", high = "#009E73", limits = c(0, 100), oob = scales::squish, name = "HDR fraction") +
+  labs(x = "Donor position (distance from PAM)", y = "Colony count") +
+  publication_theme(legend_position = "right", aspect_ratio = 1)
+
+enas_colony_plot <- donor_pos_enas %>%
+  dplyr::filter(timepoint == "T1") %>%
+  ggplot(aes(x = dist, y = true_colony_count)) +
+  geom_point(aes(color = frc_alt)) +
+  scale_color_gradient(low = "#999999", high = "#E69F00", limits = c(0, 100), oob = scales::squish, name = "HDR fraction") +
+  labs(x = "Donor position (distance from PAM)", y = "Colony count") +
+  publication_theme(legend_position = "right", aspect_ratio = 1)
+
+safe_ggsave(fn_colony_plot, file.path(plots_dir, "donor_position_colony_counts_fnCas12a.png"), width = 5, height = 5)
+safe_ggsave(enas_colony_plot, file.path(plots_dir, "donor_position_colony_counts_enAsCas12a.png"), width = 5, height = 5)
+
+enas_colony_plot
+```

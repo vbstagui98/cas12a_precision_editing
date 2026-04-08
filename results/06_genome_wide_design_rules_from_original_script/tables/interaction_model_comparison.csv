@@ -1,0 +1,5 @@
+"model","formula","aic","bic","logLik","df","delta_aic","delta_bic","lrt_p_vs_main"
+"main_effects","edited_design ~ pam + pam_upstream_nt + pam_dist_bin + deepcpf1_score +     guide_gc_20 + donor_wt_gc + dr_spacer_pair_any",598.1467975338,657.967075625446,-285.0733987669,14,0,0,NA
+"pam5_by_pam","edited_design ~ pam + pam_upstream_nt + pam_dist_bin + deepcpf1_score +     guide_gc_20 + donor_wt_gc + dr_spacer_pair_any + pam_upstream_nt:pam",603.542463754607,689.000003885531,-281.771231877304,20,5.39566622080736,31.0329282600843,0.358991478133887
+"score_by_distance","edited_design ~ pam + pam_upstream_nt + pam_dist_bin + deepcpf1_score +     guide_gc_20 + donor_wt_gc + dr_spacer_pair_any + deepcpf1_score:pam_dist_bin",604.459956261865,681.371742379697,-284.229978130933,18,6.31315872806556,23.4046667542502,0.79310651372092
+"pam_by_distance","edited_design ~ pam + pam_upstream_nt + pam_dist_bin + deepcpf1_score +     guide_gc_20 + donor_wt_gc + dr_spacer_pair_any + pam:pam_dist_bin",608.76947122589,702.772765369906,-282.384735612945,22,10.6226736920903,44.8056897444596,0.716589988227487

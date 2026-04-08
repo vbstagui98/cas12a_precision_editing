@@ -1,0 +1,253 @@
+---
+title: "Robust GFP Library Transfer Counts"
+format: html
+editor: visual
+---
+
+## Purpose
+
+This notebook replaces the exploratory GFP library transfer-count analysis with a reproducible workflow that:
+
+-   validates all required transfer-count inputs up front,
+-   standardizes the eight GFP library conditions into one schema,
+-   exports cleaned tables under `results/01_gfp_library_transfer_counts/`,
+-   regenerates the main heatmap, kinetics, and viability plots.
+
+## Setup
+
+```{r}
+resolve_project_root <- function() {
+  rstudio_path <- ""
+  if (requireNamespace("rstudioapi", quietly = TRUE)) {
+    rstudio_path <- tryCatch(rstudioapi::getSourceEditorContext()$path, error = function(e) "")
+    if (!nzchar(rstudio_path)) {
+      rstudio_path <- tryCatch(rstudioapi::getActiveDocumentContext()$path, error = function(e) "")
+    }
+  }
+
+  search_roots <- unique(c(
+    Sys.getenv("CAS12A_NOTEBOOK_PROJECT_ROOT", unset = ""),
+    tryCatch(knitr::current_input(dir = TRUE), error = function(e) ""),
+    rstudio_path,
+    getwd(),
+    normalizePath(file.path(getwd(), ".."), mustWork = FALSE),
+    normalizePath(file.path(getwd(), "..", ".."), mustWork = FALSE)
+  ))
+  search_roots <- search_roots[nzchar(search_roots)]
+
+  for (root in search_roots) {
+    current <- normalizePath(root, mustWork = FALSE)
+    if (!dir.exists(current)) {
+      current <- dirname(current)
+    }
+
+    repeat {
+      required_paths <- c(
+        file.path(current, "_quarto.yml"),
+        file.path(current, "config", "paths.R"),
+        file.path(current, "R", "common.R")
+      )
+
+      if (all(file.exists(required_paths))) {
+        return(current)
+      }
+
+      parent <- dirname(current)
+      if (identical(parent, current)) {
+        break
+      }
+
+      current <- parent
+    }
+  }
+
+  stop(
+    paste(
+      "Could not locate the notebook project root.",
+      "Save the notebook and either run it from the project root,",
+      "or set Sys.setenv(CAS12A_NOTEBOOK_PROJECT_ROOT = '/path/to/New project')."
+    ),
+    call. = FALSE
+  )
+}
+
+project_root <- resolve_project_root()
+
+source(file.path(project_root, "config", "paths.R"), local = knitr::knit_global())
+source(file.path(project_root, "R", "common.R"), local = knitr::knit_global())
+source(file.path(project_root, "R", "gfp_library.R"), local = knitr::knit_global())
+
+load_paper_packages()
+
+paths <- get_analysis_paths(
+  list(results_dir = normalizePath(file.path(project_root, "results"), mustWork = FALSE))
+)
+
+output_dir <- analysis_output_dir(paths, "01_gfp_library_transfer_counts")
+tables_dir <- ensure_dir(file.path(output_dir, "tables"))
+plots_dir <- ensure_dir(file.path(output_dir, "plots"))
+
+control_well <- "A09"
+selected_heatmap_timepoint <- "6_gen"
+```
+
+## Inputs
+
+```{r}
+gfp_transfer <- load_all_gfp_transfer_counts(paths)
+
+manifest <- gfp_transfer$manifest
+all_replicates <- gfp_transfer$all_replicates
+condition_averages <- prepare_gfp_condition_averages(all_replicates)
+all_replicates_with_viability <- compute_gfp_viability(all_replicates, control_well = control_well)
+first_timepoint_summary <- summarize_first_timepoint(
+  all_replicates_with_viability,
+  timepoint_name = "scraped",
+  control_well = control_well
+)
+
+write_csv_checked(manifest, file.path(tables_dir, "manifest.csv"))
+write_csv_checked(all_replicates, file.path(tables_dir, "standardized_all_replicates.csv"))
+write_csv_checked(condition_averages, file.path(tables_dir, "condition_averages.csv"))
+write_csv_checked(first_timepoint_summary, file.path(tables_dir, "first_timepoint_summary.csv"))
+
+manifest
+```
+
+## Heatmaps
+
+```{r}
+enas_heatmaps <- plot_gfp_heatmaps(
+  condition_averages %>% dplyr::filter(cas_variant == "enAsCas12a"),
+  plot_title = "GFP library: enAsCas12a",
+  fill_high = "#E69F00",
+  control_well = control_well
+)
+
+fn_heatmaps <- plot_gfp_heatmaps(
+  condition_averages %>% dplyr::filter(cas_variant == "FnCas12a"),
+  plot_title = "GFP library: FnCas12a",
+  fill_high = "#009E73",
+  control_well = control_well
+)
+
+stopifnot(selected_heatmap_timepoint %in% names(enas_heatmaps))
+stopifnot(selected_heatmap_timepoint %in% names(fn_heatmaps))
+
+safe_ggsave(
+  enas_heatmaps[[selected_heatmap_timepoint]],
+  file.path(plots_dir, "enAs_gfp_heat_6gen.pdf"),
+  width = 10,
+  height = 6
+)
+
+safe_ggsave(
+  fn_heatmaps[[selected_heatmap_timepoint]],
+  file.path(plots_dir, "fn_gfp_heat_6gen.pdf"),
+  width = 10,
+  height = 6
+)
+
+enas_heatmaps[[selected_heatmap_timepoint]]
+```
+
+```{r}
+fn_heatmaps[[selected_heatmap_timepoint]]
+```
+
+## Kinetics
+
+```{r}
+enas_kinetics_plot <- plot_gfp_kinetics(all_replicates, "enAsCas12a")
+fn_kinetics_plot <- plot_gfp_kinetics(all_replicates, "FnCas12a")
+
+safe_ggsave(
+  enas_kinetics_plot,
+  file.path(plots_dir, "enas_kinetics_all_guides.png"),
+  width = 10,
+  height = 6
+)
+
+safe_ggsave(
+  fn_kinetics_plot,
+  file.path(plots_dir, "fn_kinetics_all_guides.png"),
+  width = 10,
+  height = 6
+)
+
+enas_kinetics_plot
+```
+
+## Viability
+
+```{r}
+plot_first_timepoint_viability <- function(data, cas_variant_name) {
+  plot_data <- data %>%
+    dplyr::filter(cas_variant == cas_variant_name) %>%
+    dplyr::mutate(donor_recruitment = label_recruitment(donor_recruitment))
+
+  ggplot(plot_data, aes(x = viability, y = efficiency_avg)) +
+    geom_point(aes(color = well_position), size = 3) +
+    geom_smooth(method = "lm", se = FALSE, color = "black") +
+    ggpmisc::stat_poly_eq(
+      aes(label = after_stat(rr.label)),
+      formula = y ~ x,
+      parse = TRUE,
+      label.x.npc = "left",
+      label.y.npc = "top"
+    ) +
+    facet_wrap(
+      ~ donor_recruitment * promoter,
+      labeller = labeller(donor_recruitment = c("LexA-FHA" = "LexA-FHA", "No" = ""))
+    ) +
+    labs(
+      x = "Viability (relative to A09 control)",
+      y = "Average efficiency (%)",
+      title = paste("First timepoint viability:", cas_variant_name)
+    ) +
+    publication_theme(legend_position = "none", aspect_ratio = 1)
+}
+
+viability_enas_plot <- plot_first_timepoint_viability(first_timepoint_summary, "enAsCas12a")
+viability_fn_plot <- plot_first_timepoint_viability(first_timepoint_summary, "FnCas12a")
+
+safe_ggsave(
+  viability_enas_plot,
+  file.path(plots_dir, "viability_efficiency_enas_gfp_lib.png"),
+  width = 6,
+  height = 6
+)
+
+safe_ggsave(
+  viability_fn_plot,
+  file.path(plots_dir, "viability_efficiency_fn_gfp_lib.png"),
+  width = 6,
+  height = 6
+)
+
+viability_enas_plot
+```
+
+```{r}
+variant_boxplot <- first_timepoint_summary %>%
+  dplyr::mutate(donor_recruitment = label_recruitment(donor_recruitment)) %>%
+  ggplot(aes(cas_variant, viability, fill = cas_variant)) +
+  geom_boxplot() +
+  geom_jitter(width = 0.2, size = 1.5, aes(color = well_position)) +
+  scale_fill_manual(values = c("enAsCas12a" = "#E69F00", "FnCas12a" = "#009E73")) +
+  facet_wrap(
+    ~ donor_recruitment * promoter,
+    labeller = labeller(donor_recruitment = c("LexA-FHA" = "LexA-FHA", "No" = ""))
+  ) +
+  labs(x = "Cas variant", y = "Viability (relative to A09 control)") +
+  publication_theme(legend_position = "none", aspect_ratio = 1)
+
+safe_ggsave(
+  variant_boxplot,
+  file.path(plots_dir, "viability_boxplot_gfp_lib.pdf"),
+  width = 6,
+  height = 6
+)
+
+variant_boxplot
+```

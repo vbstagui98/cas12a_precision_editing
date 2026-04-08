@@ -1,0 +1,537 @@
+---
+title: "Genome-wide Cas12a Design Rules"
+format: html
+editor: visual
+---
+
+## Purpose
+
+This notebook rebuilds the genome-wide picked-colony editing screen into a shareable design-rules workflow. It integrates the original Tn5 coverage and normalized-variant logic with workspace guide annotations (`DeepCpf1`, SV hotspot context, and variant functional annotation) and exports figure-ready panels under `results/06_genome_wide_design_rules/`.
+
+## Setup
+
+```{r}
+resolve_project_root <- function() {
+  rstudio_path <- ""
+  if (requireNamespace("rstudioapi", quietly = TRUE)) {
+    rstudio_path <- tryCatch(rstudioapi::getSourceEditorContext()$path, error = function(e) "")
+    if (!nzchar(rstudio_path)) {
+      rstudio_path <- tryCatch(rstudioapi::getActiveDocumentContext()$path, error = function(e) "")
+    }
+  }
+
+  search_roots <- unique(c(
+    Sys.getenv("CAS12A_NOTEBOOK_PROJECT_ROOT", unset = ""),
+    tryCatch(knitr::current_input(dir = TRUE), error = function(e) ""),
+    rstudio_path,
+    getwd(),
+    normalizePath(file.path(getwd(), ".."), mustWork = FALSE),
+    normalizePath(file.path(getwd(), "..", ".."), mustWork = FALSE)
+  ))
+  search_roots <- search_roots[nzchar(search_roots)]
+
+  for (root in search_roots) {
+    current <- normalizePath(root, mustWork = FALSE)
+    if (!dir.exists(current)) {
+      current <- dirname(current)
+    }
+
+    repeat {
+      required_paths <- c(
+        file.path(current, "_quarto.yml"),
+        file.path(current, "config", "paths.R"),
+        file.path(current, "R", "common.R")
+      )
+
+      if (all(file.exists(required_paths))) {
+        return(current)
+      }
+
+      parent <- dirname(current)
+      if (identical(parent, current)) {
+        break
+      }
+
+      current <- parent
+    }
+  }
+
+  stop(
+    paste(
+      "Could not locate the notebook project root.",
+      "Save the notebook and either run it from the project root,",
+      "or set Sys.setenv(CAS12A_NOTEBOOK_PROJECT_ROOT = '/path/to/New project')."
+    ),
+    call. = FALSE
+  )
+}
+
+project_root <- resolve_project_root()
+
+source(file.path(project_root, "config", "paths.R"), local = knitr::knit_global())
+source(file.path(project_root, "R", "common.R"), local = knitr::knit_global())
+source(file.path(project_root, "R", "genome_wide_design_rules.R"), local = knitr::knit_global())
+
+load_paper_packages(extra = c("broom", "forcats", "scales"))
+
+paths <- get_analysis_paths(
+  list(results_dir = normalizePath(file.path(project_root, "results"), mustWork = FALSE))
+)
+
+output_dir <- analysis_output_dir(paths, "06_genome_wide_design_rules")
+tables_dir <- ensure_dir(file.path(output_dir, "tables"))
+plots_dir <- ensure_dir(file.path(output_dir, "plots"))
+```
+
+## Build cleaned assay tables
+
+```{r}
+design_rule_objects <- build_genome_wide_design_rule_tables(project_root, paths)
+
+colony_assays <- design_rule_objects$colony_assays
+design_outcomes <- design_rule_objects$design_outcomes
+
+stage_summary <- build_genome_wide_stage_summary(design_outcomes)
+pam_summary <- summarise_edit_rates(design_outcomes, "pam") %>%
+  dplyr::mutate(pam = factor(pam, levels = c("TTTC", "TTTA", "TTTG")))
+pam_distance_summary <- summarise_edit_rates(design_outcomes, "pam_dist_bin") %>%
+  dplyr::mutate(pam_dist_bin = factor(pam_dist_bin, levels = c("1-6", "7-11", "12-17", "18-23", "PAM")))
+pam_heatmap_summary <- summarise_edit_rates(design_outcomes, c("pam", "pam_dist_bin")) %>%
+  dplyr::filter(!is.na(pam_dist_bin), pam_dist_bin != ">23")
+deepcpf1_summary <- summarise_edit_rates(design_outcomes, "deepcpf1_quartile")
+pam_upstream_summary <- summarise_edit_rates(design_outcomes, "pam_upstream_nt") %>%
+  dplyr::mutate(pam_upstream_nt = factor(pam_upstream_nt, levels = c("C", "A", "G", "T")))
+full_pam_5mer_summary <- summarise_edit_rates(design_outcomes, "full_pam_5mer") %>%
+  dplyr::arrange(full_pam_5mer)
+ntttv_pattern_summary <- summarise_edit_rates(design_outcomes, "ntttv_pattern") %>%
+  dplyr::arrange(dplyr::desc(total_guides), ntttv_pattern)
+rule_count_summary <- summarise_edit_rates(design_outcomes, "preferred_rule_count") %>%
+  dplyr::mutate(preferred_rule_count = factor(preferred_rule_count, levels = 0:3))
+dr_perturbed_summary <- design_outcomes %>%
+  dplyr::mutate(
+    dr_perturbed_flag = dplyr::if_else(.data$dr_perturbed, "Perturbed", "Not perturbed"),
+    dr_perturbed_flag = factor(dr_perturbed_flag, levels = c("Not perturbed", "Perturbed"))
+  ) %>%
+  summarise_edit_rates("dr_perturbed_flag")
+dr_canonical_summary <- design_outcomes %>%
+  dplyr::mutate(
+    dr_canonical_flag = dplyr::if_else(.data$dr_canonical_structure, "Canonical", "Non-canonical"),
+    dr_canonical_flag = factor(dr_canonical_flag, levels = c("Canonical", "Non-canonical"))
+  ) %>%
+  summarise_edit_rates("dr_canonical_flag")
+dr_spacer_pair_summary <- design_outcomes %>%
+  dplyr::mutate(
+    dr_spacer_pair_flag = dplyr::if_else(.data$dr_spacer_pair_any, "Any DR-spacer pairing", "No DR-spacer pairing"),
+    dr_spacer_pair_flag = factor(
+      dr_spacer_pair_flag,
+      levels = c("No DR-spacer pairing", "Any DR-spacer pairing")
+    )
+  ) %>%
+  summarise_edit_rates("dr_spacer_pair_flag")
+guide_gc_23_summary <- summarise_edit_rates(design_outcomes, "guide_gc_23_bin") %>%
+  dplyr::mutate(guide_gc_23_bin = factor(guide_gc_23_bin, levels = c("<30%", "30-39%", "40-49%", "50-59%", ">=60%")))
+guide_gc_20_summary <- summarise_edit_rates(design_outcomes, "guide_gc_20_bin") %>%
+  dplyr::mutate(guide_gc_20_bin = factor(guide_gc_20_bin, levels = c("<30%", "30-39%", "40-49%", "50-59%", ">=60%")))
+guide_gc_18_summary <- summarise_edit_rates(design_outcomes, "guide_gc_18_bin") %>%
+  dplyr::mutate(guide_gc_18_bin = factor(guide_gc_18_bin, levels = c("<30%", "30-39%", "40-49%", "50-59%", ">=60%")))
+donor_wt_gc_summary <- summarise_edit_rates(design_outcomes, "donor_wt_gc_bin") %>%
+  dplyr::mutate(donor_wt_gc_bin = factor(donor_wt_gc_bin, levels = c("<30%", "30-39%", "40-49%", "50-59%", ">=60%")))
+max_a_summary <- summarise_edit_rates(design_outcomes, "max_a") %>%
+  dplyr::mutate(max_a = factor(max_a, levels = sort(unique(max_a))))
+max_t_summary <- summarise_edit_rates(design_outcomes, "max_t") %>%
+  dplyr::mutate(max_t = factor(max_t, levels = sort(unique(max_t))))
+region_class_summary <- design_outcomes %>%
+  dplyr::mutate(region_class = tidyr::replace_na(region_class, "unknown")) %>%
+  summarise_edit_rates("region_class") %>%
+  dplyr::mutate(region_class = factor(region_class, levels = c("coding", "promoter", "intergenic", "unknown")))
+hotspot_summary <- design_outcomes %>%
+  dplyr::mutate(
+    hotspot_flag = dplyr::if_else(
+      dplyr::coalesce(.data$in_sv_hotspot, FALSE),
+      "SV hotspot",
+      "Not hotspot"
+    ),
+    hotspot_flag = factor(hotspot_flag, levels = c("Not hotspot", "SV hotspot"))
+  ) %>%
+  summarise_edit_rates("hotspot_flag")
+multi_colony_consistency_summary <- build_multi_colony_consistency_summary(design_outcomes)
+design_rule_summary <- build_genome_wide_design_rule_summary(design_outcomes)
+
+background_variant_tables <- build_genome_wide_background_variant_tables(
+  design_rule_objects$files,
+  colony_assays,
+  qual_min = 20,
+  af_min = 50,
+  dp_min = 4
+)
+
+background_colony_summary <- background_variant_tables$colony_background_summary
+background_edit_status_summary <- background_colony_summary %>%
+  dplyr::mutate(target_edit_status = dplyr::if_else(.data$edited_colony, "Edited target", "Unedited target")) %>%
+  dplyr::group_by(.data$target_edit_status) %>%
+  dplyr::summarise(
+    colony_count = dplyr::n(),
+    mean_high_conf_non_target_count = mean(.data$high_conf_non_target_count, na.rm = TRUE),
+    median_high_conf_non_target_count = median(.data$high_conf_non_target_count, na.rm = TRUE),
+    frac_with_any_high_conf_non_target = mean(.data$high_conf_non_target_count > 0, na.rm = TRUE),
+    mean_max_non_target_score_sv = mean(.data$max_non_target_score_sv, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+recurrent_background_variants <- background_variant_tables$recurrent_high_conf_variants %>%
+  dplyr::filter(.data$sample_count >= 2)
+
+weighted_model <- fit_genome_wide_weighted_model(design_outcomes)
+weighted_model_table <- tidy_genome_wide_weighted_model(weighted_model)
+extended_weighted_model <- fit_genome_wide_extended_weighted_model(design_outcomes)
+extended_weighted_model_table <- tidy_genome_wide_extended_weighted_model(extended_weighted_model)
+
+write_csv_checked(colony_assays, file.path(tables_dir, "colony_assays.csv"))
+write_csv_checked(design_outcomes, file.path(tables_dir, "design_outcomes.csv"))
+write_csv_checked(stage_summary, file.path(tables_dir, "stage_summary.csv"))
+write_csv_checked(pam_summary, file.path(tables_dir, "pam_summary.csv"))
+write_csv_checked(pam_distance_summary, file.path(tables_dir, "pam_distance_summary.csv"))
+write_csv_checked(pam_heatmap_summary, file.path(tables_dir, "pam_distance_heatmap_summary.csv"))
+write_csv_checked(deepcpf1_summary, file.path(tables_dir, "deepcpf1_summary.csv"))
+write_csv_checked(pam_upstream_summary, file.path(tables_dir, "pam_upstream_summary.csv"))
+write_csv_checked(full_pam_5mer_summary, file.path(tables_dir, "full_pam_5mer_summary.csv"))
+write_csv_checked(ntttv_pattern_summary, file.path(tables_dir, "ntttv_pattern_summary.csv"))
+write_csv_checked(rule_count_summary, file.path(tables_dir, "preferred_rule_count_summary.csv"))
+write_csv_checked(dr_perturbed_summary, file.path(tables_dir, "dr_perturbed_summary.csv"))
+write_csv_checked(dr_canonical_summary, file.path(tables_dir, "dr_canonical_summary.csv"))
+write_csv_checked(dr_spacer_pair_summary, file.path(tables_dir, "dr_spacer_pair_summary.csv"))
+write_csv_checked(guide_gc_23_summary, file.path(tables_dir, "guide_gc_23_summary.csv"))
+write_csv_checked(guide_gc_20_summary, file.path(tables_dir, "guide_gc_20_summary.csv"))
+write_csv_checked(guide_gc_18_summary, file.path(tables_dir, "guide_gc_18_summary.csv"))
+write_csv_checked(donor_wt_gc_summary, file.path(tables_dir, "donor_wt_gc_summary.csv"))
+write_csv_checked(max_a_summary, file.path(tables_dir, "max_a_summary.csv"))
+write_csv_checked(max_t_summary, file.path(tables_dir, "max_t_summary.csv"))
+write_csv_checked(region_class_summary, file.path(tables_dir, "region_class_summary.csv"))
+write_csv_checked(hotspot_summary, file.path(tables_dir, "hotspot_summary.csv"))
+write_csv_checked(multi_colony_consistency_summary, file.path(tables_dir, "multi_colony_consistency_summary.csv"))
+write_csv_checked(design_rule_summary, file.path(tables_dir, "design_rule_summary.csv"))
+write_csv_checked(background_variant_tables$all_variants, file.path(tables_dir, "all_variants_with_score_sv.csv"))
+write_csv_checked(
+  background_variant_tables$high_conf_non_target_variants,
+  file.path(tables_dir, "high_conf_non_target_variants.csv")
+)
+write_csv_checked(background_colony_summary, file.path(tables_dir, "background_colony_summary.csv"))
+write_csv_checked(background_edit_status_summary, file.path(tables_dir, "background_edit_status_summary.csv"))
+write_csv_checked(recurrent_background_variants, file.path(tables_dir, "recurrent_background_variants.csv"))
+write_csv_checked(weighted_model_table, file.path(tables_dir, "weighted_model_coefficients.csv"))
+write_csv_checked(extended_weighted_model_table, file.path(tables_dir, "extended_weighted_model_coefficients.csv"))
+
+tibble::tibble(
+  metric = c(
+    "Picked colonies",
+    "Assayed colonies",
+    "Edited colonies",
+    "Unique picked designs",
+    "Assayed designs",
+    "Successful designs",
+    "Direct-repeat sequence",
+    "High-confidence non-target variants"
+  ),
+  value = c(
+    nrow(colony_assays),
+    sum(colony_assays$assayed_colony),
+    sum(colony_assays$edited_colony),
+    nrow(design_outcomes),
+    sum(design_outcomes$assayed_design),
+    sum(design_outcomes$edited_design),
+    genome_wide_dr_sequence(),
+    nrow(background_variant_tables$high_conf_non_target_variants)
+  )
+)
+```
+
+## Candidate main-figure panels
+
+```{r}
+pam_distance_heatmap <- plot_genome_wide_pam_distance_heatmap(pam_heatmap_summary)
+deepcpf1_plot <- plot_genome_wide_rate_bars(
+  deepcpf1_summary,
+  x_col = "deepcpf1_quartile",
+  x_label = "DeepCpf1 quartile",
+  title = "Higher DeepCpf1 scores enrich successful designs"
+)
+pam_upstream_plot <- plot_genome_wide_rate_bars(
+  pam_upstream_summary,
+  x_col = "pam_upstream_nt",
+  x_label = "5' PAM base (N in NTTTV)",
+  title = "The upstream PAM base adds additional design signal"
+)
+rule_count_plot <- plot_genome_wide_rate_bars(
+  rule_count_summary,
+  x_col = "preferred_rule_count",
+  x_label = "Preferred-rule count",
+  title = "Simple rule bundles separate strong from weak designs"
+)
+multi_colony_consistency_plot <- plot_multi_colony_consistency(multi_colony_consistency_summary)
+extended_model_plot <- plot_genome_wide_weighted_model(extended_weighted_model_table)
+
+safe_ggsave(pam_distance_heatmap, file.path(plots_dir, "pam_distance_heatmap.pdf"), width = 6.5, height = 4.5)
+safe_ggsave(deepcpf1_plot, file.path(plots_dir, "deepcpf1_quartiles.pdf"), width = 5.2, height = 4.8)
+safe_ggsave(pam_upstream_plot, file.path(plots_dir, "pam_upstream_nt.pdf"), width = 5.2, height = 4.8)
+safe_ggsave(rule_count_plot, file.path(plots_dir, "preferred_rule_count.pdf"), width = 5.2, height = 4.8)
+safe_ggsave(multi_colony_consistency_plot, file.path(plots_dir, "multi_colony_consistency.pdf"), width = 5.5, height = 5)
+safe_ggsave(extended_model_plot, file.path(plots_dir, "extended_weighted_model_odds_ratios.pdf"), width = 8.5, height = 5.5)
+
+candidate_main_figure <- (
+  (pam_distance_heatmap | deepcpf1_plot) /
+  (pam_upstream_plot | multi_colony_consistency_plot)
+) +
+  patchwork::plot_annotation(tag_levels = "A")
+
+safe_ggsave(
+  candidate_main_figure,
+  file.path(plots_dir, "candidate_main_figure_design_rules.pdf"),
+  width = 11,
+  height = 10
+)
+
+candidate_main_figure
+```
+
+## PAM 5' base and direct-repeat folding
+
+```{r}
+dr_perturbed_plot <- plot_genome_wide_rate_bars(
+  dr_perturbed_summary,
+  x_col = "dr_perturbed_flag",
+  x_label = "DR folding call",
+  title = "Perturbed DR folding alone was not a major failure mode"
+)
+dr_canonical_plot <- plot_genome_wide_rate_bars(
+  dr_canonical_summary,
+  x_col = "dr_canonical_flag",
+  x_label = "DR structure class",
+  title = "Canonical DR structures were not strongly enriched"
+)
+dr_spacer_pair_plot <- plot_genome_wide_rate_bars(
+  dr_spacer_pair_summary,
+  x_col = "dr_spacer_pair_flag",
+  x_label = "DR-spacer pairing",
+  title = "Any DR-spacer pairing had only a weak marginal effect"
+)
+
+safe_ggsave(dr_perturbed_plot, file.path(plots_dir, "dr_perturbed_summary.pdf"), width = 5.4, height = 4.8)
+safe_ggsave(dr_canonical_plot, file.path(plots_dir, "dr_canonical_summary.pdf"), width = 5.4, height = 4.8)
+safe_ggsave(dr_spacer_pair_plot, file.path(plots_dir, "dr_spacer_pair_summary.pdf"), width = 5.4, height = 4.8)
+
+dr_support_figure <- (
+  pam_upstream_plot | dr_perturbed_plot | dr_spacer_pair_plot
+) +
+  patchwork::plot_annotation(tag_levels = "A")
+
+safe_ggsave(
+  dr_support_figure,
+  file.path(plots_dir, "pam_upstream_and_dr_folding.pdf"),
+  width = 15,
+  height = 4.8
+)
+
+dr_support_figure
+```
+
+```{r}
+ntttv_pattern_summary %>%
+  dplyr::mutate(
+    design_success_rate = scales::percent(design_success_rate, accuracy = 0.1),
+    colony_edit_rate = scales::percent(colony_edit_rate, accuracy = 0.1)
+  ) %>%
+  dplyr::select(ntttv_pattern, total_guides, design_success_rate, colony_edit_rate) %>%
+  dplyr::slice_head(n = 12)
+```
+
+## GC dependencies across guide and donor
+
+```{r}
+guide_gc_23_plot <- plot_genome_wide_rate_bars(
+  guide_gc_23_summary,
+  x_col = "guide_gc_23_bin",
+  x_label = "Guide GC (23 nt)",
+  title = "Full spacer GC content"
+)
+guide_gc_20_plot <- plot_genome_wide_rate_bars(
+  guide_gc_20_summary,
+  x_col = "guide_gc_20_bin",
+  x_label = "Guide GC (first 20 nt)",
+  title = "Guide GC, first 20 nt"
+)
+guide_gc_18_plot <- plot_genome_wide_rate_bars(
+  guide_gc_18_summary,
+  x_col = "guide_gc_18_bin",
+  x_label = "Guide GC (first 18 nt)",
+  title = "Guide GC, first 18 nt"
+)
+donor_wt_gc_plot <- plot_genome_wide_rate_bars(
+  donor_wt_gc_summary,
+  x_col = "donor_wt_gc_bin",
+  x_label = "WT donor GC",
+  title = "WT donor GC content"
+)
+
+safe_ggsave(guide_gc_23_plot, file.path(plots_dir, "guide_gc_23_summary.pdf"), width = 5.2, height = 4.8)
+safe_ggsave(guide_gc_20_plot, file.path(plots_dir, "guide_gc_20_summary.pdf"), width = 5.2, height = 4.8)
+safe_ggsave(guide_gc_18_plot, file.path(plots_dir, "guide_gc_18_summary.pdf"), width = 5.2, height = 4.8)
+safe_ggsave(donor_wt_gc_plot, file.path(plots_dir, "donor_wt_gc_summary.pdf"), width = 5.2, height = 4.8)
+
+gc_dependency_figure <- (
+  (guide_gc_23_plot | guide_gc_20_plot) /
+  (guide_gc_18_plot | donor_wt_gc_plot)
+) +
+  patchwork::plot_annotation(tag_levels = "A")
+
+safe_ggsave(
+  gc_dependency_figure,
+  file.path(plots_dir, "gc_dependency_panels.pdf"),
+  width = 11,
+  height = 9.5
+)
+
+gc_dependency_figure
+```
+
+## Colony concordance across repeated barcodes
+
+```{r}
+multi_colony_consistency_summary
+```
+
+## Non-target variants and SCORE.SV
+
+```{r}
+background_variant_burden_plot <- plot_background_variant_burden(background_colony_summary)
+
+safe_ggsave(
+  background_variant_burden_plot,
+  file.path(plots_dir, "background_variant_burden.pdf"),
+  width = 5.5,
+  height = 5
+)
+
+background_variant_burden_plot
+```
+
+```{r}
+background_edit_status_summary %>%
+  dplyr::mutate(
+    mean_high_conf_non_target_count = round(mean_high_conf_non_target_count, 3),
+    median_high_conf_non_target_count = round(median_high_conf_non_target_count, 3),
+    frac_with_any_high_conf_non_target = scales::percent(frac_with_any_high_conf_non_target, accuracy = 0.1),
+    mean_max_non_target_score_sv = round(mean_max_non_target_score_sv, 3)
+  )
+```
+
+```{r}
+recurrent_background_variants
+```
+
+## Secondary filters and contextual checks
+
+```{r}
+attrition_plot <- plot_genome_wide_stage_attrition(stage_summary)
+coverage_qc_plot <- plot_genome_wide_coverage_qc(colony_assays)
+max_a_plot <- plot_genome_wide_rate_bars(
+  max_a_summary,
+  x_col = "max_a",
+  x_label = "max A run",
+  title = "Long A-runs are at most a secondary filter"
+)
+max_t_plot <- plot_genome_wide_rate_bars(
+  max_t_summary,
+  x_col = "max_t",
+  x_label = "max T run",
+  title = "T-runs were not a clean marginal failure mode"
+)
+region_class_plot <- plot_genome_wide_rate_bars(
+  region_class_summary,
+  x_col = "region_class",
+  x_label = "Variant region class",
+  title = "Locus context affects editability but is not a cassette rule"
+)
+hotspot_plot <- plot_genome_wide_rate_bars(
+  hotspot_summary,
+  x_col = "hotspot_flag",
+  x_label = "SV hotspot annotation",
+  title = "SV hotspots are a contextual caution flag"
+)
+weighted_model_plot <- plot_genome_wide_weighted_model(weighted_model_table)
+
+safe_ggsave(attrition_plot, file.path(plots_dir, "attrition_plot.pdf"), width = 8, height = 4.5)
+safe_ggsave(coverage_qc_plot, file.path(plots_dir, "coverage_qc.pdf"), width = 5.5, height = 5.5)
+safe_ggsave(max_a_plot, file.path(plots_dir, "max_a_summary.pdf"), width = 5.2, height = 4.8)
+safe_ggsave(max_t_plot, file.path(plots_dir, "max_t_summary.pdf"), width = 5.2, height = 4.8)
+safe_ggsave(region_class_plot, file.path(plots_dir, "region_class_summary.pdf"), width = 5.6, height = 4.8)
+safe_ggsave(hotspot_plot, file.path(plots_dir, "hotspot_summary.pdf"), width = 5.2, height = 4.8)
+safe_ggsave(weighted_model_plot, file.path(plots_dir, "weighted_model_odds_ratios.pdf"), width = 8.5, height = 4.8)
+
+supplementary_figure <- (
+  (attrition_plot | coverage_qc_plot) /
+  (max_a_plot | max_t_plot) /
+  (region_class_plot | hotspot_plot)
+) +
+  patchwork::plot_annotation(tag_levels = "A")
+
+safe_ggsave(
+  supplementary_figure,
+  file.path(plots_dir, "supplementary_design_rule_context.pdf"),
+  width = 11,
+  height = 13
+)
+
+supplementary_figure
+```
+
+## Rule summary
+
+```{r}
+design_rule_summary %>%
+  dplyr::mutate(
+    preferred_design_success_rate = scales::percent(preferred_design_success_rate, accuracy = 0.1),
+    other_design_success_rate = scales::percent(other_design_success_rate, accuracy = 0.1),
+    preferred_colony_edit_rate = scales::percent(preferred_colony_edit_rate, accuracy = 0.1),
+    other_colony_edit_rate = scales::percent(other_colony_edit_rate, accuracy = 0.1)
+  )
+```
+
+## Weighted model coefficients
+
+```{r}
+weighted_model_table %>%
+  dplyr::select(
+    feature_group,
+    term_label,
+    odds_ratio,
+    odds_ratio_low,
+    odds_ratio_high,
+    p.value
+  ) %>%
+  dplyr::mutate(
+    odds_ratio = round(odds_ratio, 3),
+    odds_ratio_low = round(odds_ratio_low, 3),
+    odds_ratio_high = round(odds_ratio_high, 3),
+    p.value = signif(p.value, 3)
+  )
+```
+
+## Extended model coefficients
+
+```{r}
+extended_weighted_model_table %>%
+  dplyr::select(
+    feature_group,
+    term_label,
+    odds_ratio,
+    odds_ratio_low,
+    odds_ratio_high,
+    p.value
+  ) %>%
+  dplyr::mutate(
+    odds_ratio = round(odds_ratio, 3),
+    odds_ratio_low = round(odds_ratio_low, 3),
+    odds_ratio_high = round(odds_ratio_high, 3),
+    p.value = signif(p.value, 3)
+  )
+```

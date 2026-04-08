@@ -1,0 +1,2 @@
+##gff-version 3
+chrI	test	CDS	14	18	.	+	0	ID=cds1;gene=GENEX
