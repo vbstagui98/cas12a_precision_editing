@@ -1,17 +1,19 @@
 default_analysis_paths <- function() {
+  project_root <- normalizePath(getwd(), mustWork = FALSE)
+
   list(
-    cas12a_project_root = "/Users/u0174312/Verstrepen.lab Dropbox/Vlad Batagui/Mac (2)/Documents/PhD/Writing/Cas12a_precision_editing",
-    figures_root = "/Users/u0174312/Verstrepen.lab Dropbox/Vlad Batagui/Mac (2)/Documents/PhD/Writing/Cas12a_precision_editing/Figures",
-    attune_root = "/Users/u0174312/Verstrepen.lab Dropbox/Vlad Batagui/Mac (2)/Documents/PhD/ATTUNE_DATA",
-    thesis_root = "/Users/u0174312/Verstrepen.lab Dropbox/Vlad Batagui/Mac (2)/Documents/Master_thesis/NGS_library",
-    genome_wide_root = "/Users/u0174312/Verstrepen.lab Dropbox/Vlad Batagui/Mac (2)/Documents/PhD/Cas12a_genome_wide",
-    presentations_amplicon_root = "/Users/u0174312/Verstrepen.lab Dropbox/Vlad Batagui/Mac (2)/Documents/PhD/Presentations/9-month_figs/amplicon_seq",
-    amplicon_root = "/Users/u0174312/Verstrepen.lab Dropbox/Vlad Batagui/amplicon_seq",
-    cognate_dr_root = "/Users/u0174312/Verstrepen.lab Dropbox/Vlad Batagui/dilutions_20250120_cognate_DR",
-    short_guide_root = "/Users/u0174312/Verstrepen.lab Dropbox/Vlad Batagui/20250219_ys85ys88_shorter_guide",
-    downloads_root = "/Users/u0174312/Downloads",
-    downloads_cas_variants_root = "/Users/u0174312/Downloads/20240724_cas12aversions",
-    results_dir = normalizePath(file.path(getwd(), "results"), mustWork = FALSE)
+    cas12a_project_root = file.path(project_root, "data", "cas12a_precision_editing"),
+    figures_root = file.path(project_root, "figures"),
+    attune_root = file.path(project_root, "data", "attune"),
+    thesis_root = file.path(project_root, "data", "thesis"),
+    genome_wide_root = file.path(project_root, "data", "genome_wide"),
+    presentations_amplicon_root = file.path(project_root, "data", "amplicon_seq"),
+    amplicon_root = file.path(project_root, "data", "amplicon_seq"),
+    cognate_dr_root = file.path(project_root, "data", "cognate_dr"),
+    short_guide_root = file.path(project_root, "data", "short_guide"),
+    downloads_root = file.path(project_root, "data", "downloads"),
+    downloads_cas_variants_root = file.path(project_root, "data", "downloads", "cas12a_variants"),
+    results_dir = normalizePath(file.path(project_root, "results"), mustWork = FALSE)
   )
 }
 

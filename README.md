@@ -28,4 +28,4 @@ BiocManager::install(c("flowCore", "flowWorkspace", "openCyto"))
 
 ## Path Configuration
 
-Machine-specific input paths are centralized in `config/paths.R`. Edit that file or set the corresponding `CAS12A_*` environment variables before running the scripts on another machine.
+Raw data are not stored in this repository. Machine-specific input paths are centralized in `config/paths.R`; set the corresponding `CAS12A_*` environment variables or pass script-level path overrides before running the workflows on another machine.

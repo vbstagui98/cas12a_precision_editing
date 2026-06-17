@@ -2,3 +2,9 @@
 **/*.quarto_ipynb
 /_freeze/
 .DS_Store
+.Rhistory
+.RData
+.Rproj.user/
+publication_exports_*/
+results/
+setlog-scraper*/
