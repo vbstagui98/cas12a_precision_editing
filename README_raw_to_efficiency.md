@@ -79,7 +79,6 @@ The genome-wide workflow uses the manuscript rule set:
 
 - intended editing: intended HDR allele has `AO >= 2`;
 - non-target variants: `frc_alt >= 50` and `DP >= 4`;
-- no `QUAL` threshold.
 
 Outputs:
 
