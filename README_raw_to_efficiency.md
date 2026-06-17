@@ -60,7 +60,19 @@ The donor-position and shorter-guide helper assigns designed HDR from the raw lo
 
 ```bash
 Rscript scripts/run_genome_wide_colony_status.R \
-  --output-dir results/genome_wide_colony_status
+  --output-dir results/genome_wide_colony_status \
+  --picked-colonies-round-1 path/to/picked_colonies_round_1.csv \
+  --picked-colonies-round-2 path/to/picked_colonies_round_2.csv \
+  --target-coverage-round-1 path/to/target_coverage_round_1.tsv \
+  --target-coverage-round-2 path/to/target_coverage_round_2.tsv \
+  --mean-coverage-round-1 path/to/mean_coverage_round_1.csv \
+  --mean-coverage-round-2 path/to/mean_coverage_round_2.csv \
+  --normalized-variants-round-1 path/to/variants_norm_round_1.csv \
+  --normalized-variants-round-2 path/to/variants_norm_round_2.csv \
+  --design-annotations path/to/designs_812_sv_my_variants_annotated.tsv \
+  --deepcpf1-scores path/to/input_deepcpf1_20260319.scored.csv \
+  --dr-scores path/to/guides_dr_scores_20260325.tsv \
+  --normalized-indels path/to/normalized_indel_designs.vcf
 ```
 
 The genome-wide workflow uses the manuscript rule set:
