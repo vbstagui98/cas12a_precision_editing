@@ -11,6 +11,7 @@ default_analysis_paths <- function() {
     amplicon_root = file.path(project_root, "data", "amplicon_seq"),
     cognate_dr_root = file.path(project_root, "data", "cognate_dr"),
     short_guide_root = file.path(project_root, "data", "short_guide"),
+    paper_notebooks_root = file.path(project_root, "data", "paper_notebooks"),
     downloads_root = file.path(project_root, "data", "downloads"),
     downloads_cas_variants_root = file.path(project_root, "data", "downloads", "cas12a_variants"),
     results_dir = normalizePath(file.path(project_root, "results"), mustWork = FALSE)
@@ -28,6 +29,7 @@ get_analysis_paths <- function(overrides = list()) {
     amplicon_root = "CAS12A_AMPLICON_ROOT",
     cognate_dr_root = "CAS12A_COGNATE_DR_ROOT",
     short_guide_root = "CAS12A_SHORT_GUIDE_ROOT",
+    paper_notebooks_root = "CAS12A_PAPER_NOTEBOOKS_ROOT",
     downloads_root = "CAS12A_DOWNLOADS_ROOT",
     downloads_cas_variants_root = "CAS12A_DOWNLOADS_VARIANTS_ROOT",
     results_dir = "CAS12A_RESULTS_DIR"

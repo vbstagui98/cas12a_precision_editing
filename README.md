@@ -12,8 +12,20 @@ This repository contains the minimal processing code needed to convert raw flow-
   Converts donor-position and shorter-guide long amplicon variant tables into designed-HDR efficiencies.
 - `scripts/run_genome_wide_colony_status.R`
   Converts genome-wide long variant tables into colony-level and design-level editing status tables.
+- `scripts/export_figure_tables.R`
+  Collects only the rows used in manuscript Figures 1-4 into one source-data table per figure.
 
 Detailed commands are in `README_raw_to_efficiency.md`.
+
+After rendering the figure notebooks, export publication source-data tables with:
+
+```sh
+Rscript scripts/export_figure_tables.R
+```
+
+This writes `results/publication_figure_tables/figure_1_source_data.csv` through `figure_4_source_data.csv`, plus `source_data_summary.csv`.
+
+For the manuscript Figure 1 source-data table, set `CAS12A_PAPER_NOTEBOOKS_ROOT` to the finalized paper-notebook folder before running the exporter. When that folder contains the 2026-05 processed files, Figure 1 uses the May GFP ON cognate/bridge-normalized rows; otherwise the exporter falls back to the rendered `results/04_cas_variants_overview/` tables.
 
 ## Requirements
 
