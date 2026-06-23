@@ -1,6 +1,6 @@
 # Cas12a Editing Efficiency Processing
 
-This repository contains the minimal processing code needed to convert raw flow-cytometry files, amplicon-sequencing variant tables, and genome-wide long variant tables into editing-efficiency/status tables for the Cas12a manuscript.
+This repository contains the minimal processing code needed to convert raw flow-cytometry files, amplicon-sequencing variant tables, and genome-wide long variant tables into editing-efficiency/status tables.
 
 ## Workflows
 
