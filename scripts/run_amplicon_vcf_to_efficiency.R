@@ -10,11 +10,14 @@ usage <- function() {
   cat(
     paste(
       "Usage:",
-      "  Rscript scripts/run_amplicon_vcf_to_efficiency.R \\",
+      "  Rscript scripts/run_endogenous_amplicon_vcf_to_efficiency.R \\",
       "    --variants path/to/concatenated_freebayes_variants.csv \\",
       "    --designs path/to/intended_loci.csv \\",
       "    [--guide-features path/to/endogenous_guide_features.csv] \\",
       "    --output-dir results/amplicon_efficiency",
+      "",
+      "Compatibility alias:",
+      "  Rscript scripts/run_amplicon_vcf_to_efficiency.R ...",
       "",
       "Required long-table columns (common aliases are accepted):",
       "  Sample, guide/crRNA ID, CHROM, POS, REF, ALT, TYPE, AO, RO, DP",
@@ -26,7 +29,6 @@ usage <- function() {
       "",
       "Rules:",
       "  intended edit detected: AO >= 2",
-      "  unintended variant flag: allele frequency >= 50% and DP >= 4",
       "  editing-window frequencies: count / (RO + sum(AO at the intended locus))",
       "  QUAL is retained when present but is never used as a filter",
       sep = "\n"
@@ -76,8 +78,6 @@ project_root <- normalizePath(file.path(dirname(script_path), ".."), mustWork = 
 source(file.path(project_root, "R", "amplicon_variant_efficiency.R"))
 
 intended_ao_min <- as.numeric(opts$intended_ao_min %||% 2)
-unintended_af_min <- as.numeric(opts$unintended_af_min %||% 50)
-unintended_dp_min <- as.numeric(opts$unintended_dp_min %||% 4)
 min_dp <- as.numeric(opts$min_dp %||% 0)
 
 designs <- read_variant_table(opts$designs)
@@ -92,13 +92,12 @@ annotated <- annotate_endogenous_amplicon_variants(
   long_variant_table = opts$variants,
   design_table = designs,
   intended_ao_min = intended_ao_min,
-  unintended_af_min = unintended_af_min,
-  unintended_dp_min = unintended_dp_min,
   min_dp = min_dp
 )
 
 editing_window <- build_endogenous_editing_window(annotated)
 efficiency <- endogenous_amplicon_efficiency_table(editing_window)
+hdr_efficiency <- endogenous_hdr_efficiency_table(annotated)
 
 dir.create(opts$output_dir, recursive = TRUE, showWarnings = FALSE)
 annotated_path <- file.path(
@@ -113,12 +112,18 @@ editing_window_path <- file.path(
   opts$output_dir,
   "amplicon_editing_window.csv"
 )
+hdr_efficiency_path <- file.path(
+  opts$output_dir,
+  "amplicon_hdr_efficiency.csv"
+)
 
 readr::write_csv(annotated, annotated_path)
 readr::write_csv(editing_window, editing_window_path)
 readr::write_csv(efficiency, efficiency_path)
+readr::write_csv(hdr_efficiency, hdr_efficiency_path)
 
 message("Annotated variant rows written: ", nrow(annotated))
 message("Annotated variants: ", annotated_path)
 message("Editing window: ", editing_window_path)
 message("Efficiency table: ", efficiency_path)
+message("Sample-level HDR efficiency: ", hdr_efficiency_path)

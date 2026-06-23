@@ -3,8 +3,8 @@
 This document covers the processing paths needed for the publication upload:
 
 - raw `.fcs` files to GFP editing efficiencies;
-- long amplicon-sequencing variant tables to HDR/ref/non-HDR efficiencies;
-- endogenous-panel long variant tables to intended/unintended annotations;
+- endogenous-panel long amplicon-sequencing variant tables to HDR/ref/non-HDR efficiencies;
+- donor-position and shorter-guide amplicon variant tables to designed-HDR efficiencies;
 - genome-wide long variant tables to colony-level editing status.
 
 All command-line table inputs are CSV, TSV, or TXT files. The supplementary
@@ -21,7 +21,7 @@ Rscript scripts/run_fcs_efficiency.R \
   --guide-features path/to/guides_donor_selected_info.csv
 ```
 
-The FCS workflow follows the original analysis workflow:
+The FCS workflow follows the original Transfer_counts notebooks:
 
 - read raw `.fcs` files;
 - filter wells with `<= 500` events;
@@ -39,14 +39,14 @@ Editing direction:
 - `GFP_OFF`: `editing_efficiency = 1 - gfp_positive_fraction`
 - `GFP_ON`: `editing_efficiency = gfp_positive_fraction`
 
-## Concatenated FreeBayes Variants To Amplicon Efficiency
+## Endogenous Concatenated FreeBayes Variants To Amplicon Efficiency
 
 The primary publication input is the long table produced after parsing and
 concatenating the FreeBayes VCF files from one sequencing run. The input does
 not need `frc_alt`, `frc_ref`, `MUTATION`, or any other calculated efficiency.
 
 ```bash
-Rscript scripts/run_amplicon_vcf_to_efficiency.R \
+Rscript scripts/run_endogenous_amplicon_vcf_to_efficiency.R \
   --variants path/to/concatenated_freebayes_variants.csv \
   --designs path/to/intended_loci.csv \
   --guide-features path/to/endogenous_guide_features.csv \
@@ -105,8 +105,9 @@ direction needed to reconstruct every intended locus.
 - `HDR`: the variant matches the designed chromosome, position, and alternate
   allele and has `AO >= 2`.
 - `HDR_below_read_threshold`: the designed allele is present with `AO < 2`.
-- `unintended_AF50_DP4`: a non-reference, non-intended variant has allele
-  frequency at least 50% and `DP >= 4`.
+- Other non-reference, non-intended variants are retained as `other_variant`.
+  No allele-frequency or depth threshold is used to label unwanted edits in
+  the amplicon-sequencing workflow.
 - `QUAL` is never used as a filter.
 - For samples with detected HDR, the editing window contains all variant rows
   with the same `Sample`, `CHROM`, `POS`, and `REF` as the intended call.
@@ -116,10 +117,9 @@ direction needed to reconstruct every intended locus.
 - Samples without at least two intended reads receive HDR 0% and reference
   100%.
 
-Optional thresholds can be changed with `--intended-ao-min`,
-`--unintended-af-min`, and `--unintended-dp-min`. The historical 2025 parser
-kept only rows with `DP > 10000`; reproduce that filter with
-`--min-dp 10000`.
+The intended-read threshold can be changed with `--intended-ao-min`. The
+historical 2025 parser kept only rows with `DP > 10000`; reproduce that filter
+with `--min-dp 10000`.
 
 Outputs:
 
@@ -141,7 +141,15 @@ processed tables where `MUTATION`/`editing_class`, `frc_alt`/`efficiency_pct`,
 and `frc_ref`/`reference_pct` already exist. It is not the primary raw-data
 workflow.
 
-For donor-position and shorter-guide amplicon sequencing:
+`scripts/run_amplicon_vcf_to_efficiency.R` remains as a compatibility alias for
+`scripts/run_endogenous_amplicon_vcf_to_efficiency.R`.
+
+## Donor-Position And Shorter-Guide Amplicon Variant Tables
+
+This is intentionally separate from the endogenous-panel workflow. It follows
+the Figure 3 donor-position and shorter-guide analyses, where the designed HDR
+allele is assigned from the expected edited SNP for that assay-specific design.
+It does not use the endogenous guide/promoter intended-locus table.
 
 ```bash
 Rscript scripts/run_donor_guide_variant_efficiency.R \
@@ -153,10 +161,11 @@ Outputs:
 - `donor_position_hdr_from_variants.csv`
 - `short_guide_hdr_from_variants.csv`
 
-The donor-position and shorter-guide helper assigns designed HDR from the raw long variant tables by matching the expected designed SNP.
+Inputs are the long variant tables generated for those experiments
+(`master_df_filtered.csv` in the original analysis folders). Outputs are one
+designed-HDR efficiency table for donor position and one for guide length.
 
 ## Genome-Wide Variant Tables To Colony Status
-
 
 ```bash
 Rscript scripts/run_genome_wide_colony_status.R \
