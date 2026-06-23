@@ -63,6 +63,7 @@ standardize_amplicon_columns <- function(data) {
     AO = c("AO", "ao", "alt_depth", "alternate_depth"),
     RO = c("RO", "ro", "ref_depth", "reference_depth"),
     DP = c("DP", "dp", "depth"),
+    total_count = c("total_count", "total", "allele_count_total"),
     QUAL = c("QUAL", "qual"),
     pos_mismatch = c("pos_mismatch", "mismatch_position", "mismatch_positions"),
     mismatches = c("mismatches", "mismatch_alt", "mismatch_bases")
@@ -147,7 +148,8 @@ standardize_guide_features <- function(guide_features) {
     crRNA_promoter = c("crRNA_promoter", "promoter"),
     intended_chromosome = c("intended_chromosome", "chr"),
     intended_position = c("intended_position", "position", "mutation_position"),
-    intended_match = c("intended_match", "match")
+    intended_match = c("intended_match", "match"),
+    intended_variant_id = c("intended_variant_id")
   )
 
   for (canonical in names(aliases)) {
@@ -309,6 +311,26 @@ contains_integer <- function(text, expected) {
   )
 }
 
+matches_intended_alias <- function(candidate, intended_aliases) {
+  mapply(
+    function(candidate_value, aliases_value) {
+      if (
+        is.na(candidate_value) ||
+          is.na(aliases_value) ||
+          !nzchar(as.character(aliases_value))
+      ) {
+        return(FALSE)
+      }
+
+      aliases <- trimws(strsplit(as.character(aliases_value), "\\|")[[1]])
+      as.character(candidate_value) %in% aliases
+    },
+    candidate,
+    intended_aliases,
+    USE.NAMES = FALSE
+  )
+}
+
 normalize_frequency_pct <- function(x) {
   values <- suppressWarnings(as.numeric(x))
   observed <- values[is.finite(values)]
@@ -461,6 +483,7 @@ merge_endogenous_design_features <- function(design_assignments, guide_features)
       intended_chromosome,
       intended_position,
       intended_match,
+      intended_variant_id,
       assignment_alternate_allele = alternate_allele
     )
 
@@ -480,8 +503,6 @@ annotate_endogenous_amplicon_variants <- function(
   long_variant_table,
   design_table,
   intended_ao_min = 2,
-  unintended_af_min = 50,
-  unintended_dp_min = 4,
   min_dp = 0
 ) {
   variants <- if (is.character(long_variant_table)) {
@@ -513,6 +534,7 @@ annotate_endogenous_amplicon_variants <- function(
     c(
       "TYPE",
       "QUAL",
+      "total_count",
       "frc_alt",
       "frc_ref",
       "pos_mismatch",
@@ -577,6 +599,7 @@ annotate_endogenous_amplicon_variants <- function(
       AO = suppressWarnings(as.numeric(.data$AO)),
       RO = suppressWarnings(as.numeric(.data$RO)),
       DP = suppressWarnings(as.numeric(.data$DP)),
+      total_count = suppressWarnings(as.numeric(.data$total_count)),
       mismatches = dplyr::coalesce(
         as.character(.data$mismatches),
         .data$derived_mismatches
@@ -590,13 +613,13 @@ annotate_endogenous_amplicon_variants <- function(
         .data$derived_pos_mismatch
       ),
       allele_frequency_pct = dplyr::if_else(
-        .data$DP > 0,
-        100 * .data$AO / .data$DP,
+        dplyr::coalesce(.data$total_count, .data$DP) > 0,
+        100 * .data$AO / dplyr::coalesce(.data$total_count, .data$DP),
         NA_real_
       ),
       reference_pct = dplyr::if_else(
-        .data$DP > 0,
-        100 * .data$RO / .data$DP,
+        dplyr::coalesce(.data$total_count, .data$DP) > 0,
+        100 * .data$RO / dplyr::coalesce(.data$total_count, .data$DP),
         NA_real_
       ),
       frc_alt = .data$allele_frequency_pct,
@@ -641,6 +664,16 @@ annotate_endogenous_amplicon_variants <- function(
         .data$mismatches,
         sep = "_"
       ),
+      candidate_variant_id = paste(
+        .data$promoter,
+        .data$Guide,
+        .data$CHROM,
+        .data$POS,
+        .data$REF,
+        .data$ALT,
+        .data$TYPE,
+        sep = "_"
+      ),
       simple_variant_matches_design = suppressWarnings(as.integer(.data$POS)) ==
         .data$expected_position &
         toupper(as.character(.data$ALT)) == .data$expected_alternate_allele,
@@ -652,11 +685,21 @@ annotate_endogenous_amplicon_variants <- function(
       is_intended_variant = .data$design_matched &
         .data$chromosome_matches_design &
         !.data$is_reference_row &
-        .data$is_substitution_call &
         (
-          (!is.na(.data$intended_match) &
-            .data$candidate_match == .data$intended_match) |
-            (is.na(.data$intended_match) &
+          (!is.na(.data$intended_variant_id) &
+            matches_intended_alias(
+              .data$candidate_variant_id,
+              .data$intended_variant_id
+            )) |
+            (is.na(.data$intended_variant_id) &
+              !is.na(.data$intended_match) &
+            matches_intended_alias(
+              .data$candidate_match,
+              .data$intended_match
+            )) |
+            (is.na(.data$intended_variant_id) &
+              is.na(.data$intended_match) &
+              .data$is_substitution_call &
               (
                 (.data$mismatch_position_matches_design &
                   .data$mismatch_alt_matches_design) |
@@ -666,17 +709,10 @@ annotate_endogenous_amplicon_variants <- function(
       intended_edit_detected = .data$is_intended_variant &
         !is.na(.data$AO) &
         .data$AO >= intended_ao_min,
-      unintended_variant_af50_dp4 = !.data$is_intended_variant &
-        !.data$is_reference_row &
-        !is.na(.data$allele_frequency_pct) &
-        !is.na(.data$DP) &
-        .data$allele_frequency_pct >= unintended_af_min &
-        .data$DP >= unintended_dp_min,
       variant_annotation = dplyr::case_when(
         .data$is_intended_variant & .data$intended_edit_detected ~ "HDR",
         .data$is_intended_variant ~ "HDR_below_read_threshold",
         .data$is_reference_row ~ "REF",
-        .data$unintended_variant_af50_dp4 ~ "unintended_AF50_DP4",
         TRUE ~ "other_variant"
       )
     )
@@ -790,7 +826,6 @@ build_endogenous_editing_window <- function(annotated_variants) {
       AO = .data$reference_count,
       synthetic_row = TRUE,
       intended_edit_detected = FALSE,
-      unintended_variant_af50_dp4 = FALSE,
       variant_annotation = "REF"
     )
 
@@ -839,7 +874,6 @@ build_endogenous_editing_window <- function(annotated_variants) {
         editing_window_total = 1,
         editing_window_pct = if (class_name == "HDR") 0 else 100,
         intended_edit_detected = FALSE,
-        unintended_variant_af50_dp4 = FALSE,
         variant_annotation = if (class_name == "HDR") "HDR_not_detected" else "REF",
         synthetic_row = TRUE
       )
@@ -851,6 +885,65 @@ build_endogenous_editing_window <- function(annotated_variants) {
     make_missing_rows("REF")
   ) %>%
     dplyr::arrange(.data$Sample, factor(.data$editing_class, levels = c("HDR", "REF")))
+}
+
+endogenous_hdr_efficiency_table <- function(annotated_variants) {
+  data <- standardize_amplicon_columns(annotated_variants)
+  required <- c(
+    "Sample",
+    "Guide",
+    "is_intended_variant",
+    "allele_frequency_pct"
+  )
+  missing_required <- setdiff(required, names(data))
+  if (length(missing_required) > 0) {
+    stop(
+      "Annotated variant table is missing required columns: ",
+      paste(missing_required, collapse = ", "),
+      call. = FALSE
+    )
+  }
+
+  data %>%
+    dplyr::group_by(.data$Sample) %>%
+    dplyr::summarise(
+      dplyr::across(
+        dplyr::any_of(c(
+          "cas_variant",
+          "promoter",
+          "DR_cognate",
+          "recruit",
+          "Guide",
+          "Replicate",
+          "Timepoint",
+          "total_gen_in_liquid",
+          "Experiment"
+        )),
+        dplyr::first
+      ),
+      hdr_efficiency_pct = sum(
+        .data$allele_frequency_pct[.data$is_intended_variant],
+        na.rm = TRUE
+      ),
+      intended_variant_rows = sum(.data$is_intended_variant, na.rm = TRUE),
+      intended_edit_detected = any(.data$intended_edit_detected, na.rm = TRUE),
+      .groups = "drop"
+    ) %>%
+    dplyr::transmute(
+      cas_variant,
+      crRNA_promoter = promoter,
+      direct_repeat = DR_cognate,
+      donor_recruitment = recruit,
+      crRNA_id = Guide,
+      replicate = Replicate,
+      timepoint = Timepoint,
+      generations = total_gen_in_liquid,
+      experiment = Experiment,
+      sample = Sample,
+      hdr_efficiency_pct,
+      intended_variant_rows,
+      intended_edit_detected
+    )
 }
 
 endogenous_amplicon_efficiency_table <- function(editing_window) {
@@ -905,8 +998,7 @@ endogenous_amplicon_efficiency_table <- function(editing_window) {
       ao = AO,
       ro = RO,
       dp = DP,
-      intended_edit_detected,
-      unintended_variant_af50_dp4
+      intended_edit_detected
     )
 }
 

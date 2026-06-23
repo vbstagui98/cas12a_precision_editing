@@ -29,7 +29,7 @@ annotated <- annotate_endogenous_amplicon_variants(variants, designs)
 stopifnot(
   annotated$variant_annotation[[1]] == "HDR",
   annotated$variant_annotation[[2]] == "HDR_below_read_threshold",
-  annotated$variant_annotation[[3]] == "unintended_AF50_DP4",
+  annotated$variant_annotation[[3]] == "other_variant",
   annotated$variant_annotation[[4]] == "other_variant",
   annotated$variant_annotation[[5]] == "REF"
 )
