@@ -17,7 +17,7 @@ usage <- function() {
       "  Rscript scripts/run_amplicon_variant_efficiency.R \\",
       "    --variants path/to/genomic_ampli_enas_fn_harmonized_20260318.csv \\",
       "    --output results/amplicon_panel_efficiency.csv \\",
-      "    [--guide-features results/panel_sequence_manifest/combined_sequence_manifest.csv]",
+      "    [--guide-features path/to/endogenous_designs.csv]",
       "",
       "Input must be a long amplicon variant table with at least:",
       "  MUTATION, frc_alt, frc_ref",

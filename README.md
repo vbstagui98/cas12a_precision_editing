@@ -6,8 +6,10 @@ This repository contains the minimal processing code needed to convert raw flow-
 
 - `scripts/run_fcs_efficiency.R`
   Converts raw `.fcs` files into GFP-positive fractions and GFP editing efficiencies.
+- `scripts/run_amplicon_vcf_to_efficiency.R`
+  Converts a concatenated, long FreeBayes variant table into annotated variants, editing-window frequencies, and a Supplementary Table S6-compatible efficiency table.
 - `scripts/run_amplicon_variant_efficiency.R`
-  Converts long amplicon variant tables into HDR, reference, and non-HDR editing efficiencies for the amplicon panel.
+  Compatibility workflow for tables where variant frequencies and HDR labels have already been calculated.
 - `scripts/run_donor_guide_variant_efficiency.R`
   Converts donor-position and shorter-guide long amplicon variant tables into designed-HDR efficiencies.
 - `scripts/run_genome_wide_colony_status.R`
@@ -29,7 +31,7 @@ For the manuscript Figure 1 source-data table, set `CAS12A_PAPER_NOTEBOOKS_ROOT`
 
 ## Requirements
 
-Core table processing uses `dplyr`, `readr`, `readxl`, `stringr`, and `tidyr`.
+Core table processing uses `dplyr`, `readr`, `stringr`, and `tidyr`.
 
 Raw FCS processing additionally requires Bioconductor flow-cytometry packages:
 
