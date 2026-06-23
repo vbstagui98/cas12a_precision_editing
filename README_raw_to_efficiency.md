@@ -21,7 +21,7 @@ Rscript scripts/run_fcs_efficiency.R \
   --guide-features path/to/guides_donor_selected_info.csv
 ```
 
-The FCS workflow follows the original Transfer_counts notebooks:
+The FCS workflow follows the original analysis workflow:
 
 - read raw `.fcs` files;
 - filter wells with `<= 500` events;
@@ -156,6 +156,7 @@ Outputs:
 The donor-position and shorter-guide helper assigns designed HDR from the raw long variant tables by matching the expected designed SNP.
 
 ## Genome-Wide Variant Tables To Colony Status
+
 
 ```bash
 Rscript scripts/run_genome_wide_colony_status.R \
