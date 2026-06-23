@@ -1,6 +1,6 @@
 # Raw Inputs To Editing Efficiencies
 
-This document covers only the two processing paths needed for the publication upload:
+Inputs and outputs 
 
 - raw `.fcs` files to GFP editing efficiencies;
 - long amplicon-sequencing variant tables to HDR/ref/non-HDR efficiencies;
@@ -16,7 +16,7 @@ Rscript scripts/run_fcs_efficiency.R \
   --guide-features path/to/guides_donor_selected_info.csv
 ```
 
-The FCS workflow follows the original Transfer_counts notebooks:
+The FCS workflow follows the original analysis workflow:
 
 - read raw `.fcs` files;
 - filter wells with `<= 500` events;
@@ -24,14 +24,13 @@ The FCS workflow follows the original Transfer_counts notebooks:
 - gate GFP-positive cells on `BL1.A`;
 - report `gfp_positive_fraction` and `editing_efficiency`.
 
-Editing direction:
-
+Editing efficiency calculated as a function of the GFP assay (total cleavage = GFP_OFF or HDR = GFP_ON)
 - `GFP_OFF`: `editing_efficiency = 1 - gfp_positive_fraction`
 - `GFP_ON`: `editing_efficiency = gfp_positive_fraction`
 
 ## Amplicon Variant Tables To Editing Efficiency
 
-For the amplicon panel:
+For the amplicon panel, the following workflow uses pre-comptued allele frequencies derived from vcf files:
 
 ```bash
 Rscript scripts/run_amplicon_variant_efficiency.R \
@@ -57,6 +56,7 @@ Outputs:
 The donor-position and shorter-guide helper assigns designed HDR from the raw long variant tables by matching the expected designed SNP.
 
 ## Genome-Wide Variant Tables To Colony Status
+
 
 ```bash
 Rscript scripts/run_genome_wide_colony_status.R \
