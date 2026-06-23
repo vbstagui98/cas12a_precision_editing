@@ -65,6 +65,33 @@ read_optional_table <- function(path) {
   read_csv_keep_names(path)
 }
 
+copy_alias_if_missing <- function(data, canonical, aliases) {
+  if (canonical %in% names(data)) {
+    return(data)
+  }
+
+  source <- aliases[aliases %in% names(data)][1]
+  if (!is.na(source)) {
+    data[[canonical]] <- data[[source]]
+  }
+
+  data
+}
+
+harmonise_publication_join_keys <- function(data) {
+  data <- copy_alias_if_missing(
+    data,
+    "guide_id",
+    c("crRNA_id", "Guide", "guide")
+  )
+  data <- copy_alias_if_missing(
+    data,
+    "WellPosition",
+    c("well_position", "well_attune")
+  )
+  data
+}
+
 make_common_logicle_transform <- function(fs, channels) {
   data_1frame <- fs[[1]]
   flowCore::exprs(data_1frame) <- flowCore::fsApply(fs, function(x) {
@@ -237,8 +264,13 @@ annotate_fcs_efficiency <- function(
   out <- standardise_pop_stats(pop_stats) %>%
     dplyr::left_join(platemap, by = "name")
 
+  out <- harmonise_publication_join_keys(out)
+  metadata <- if (is.null(metadata)) NULL else harmonise_publication_join_keys(metadata)
+  guide_features <- if (is.null(guide_features)) NULL else harmonise_publication_join_keys(guide_features)
+  colony_counts <- if (is.null(colony_counts)) NULL else harmonise_publication_join_keys(colony_counts)
+
   out <- join_optional_by_first_key(out, metadata, c("identifier", "SampleID", "WellPosition", "well_attune", "name"))
-  out <- join_optional_by_first_key(out, guide_features, c("WellPosition", "SampleID", "guide", "guide_id"))
+  out <- join_optional_by_first_key(out, guide_features, c("guide_id", "WellPosition", "SampleID"))
   out <- join_optional_by_first_key(out, colony_counts, c("name", "WellPosition", "well_attune", "identifier"))
 
   if (!assay_col %in% names(out)) {
@@ -254,7 +286,25 @@ annotate_fcs_efficiency <- function(
       editing_efficiency = editing_efficiency_from_gfp(gfp_positive_fraction, .data[[assay_col]])
     )
 
-  normalise_control_count(out, control_well = control_well)
+  out <- normalise_control_count(out, control_well = control_well)
+
+  for (column in c("true_colony_count", "control_colony_count", "viability")) {
+    if (!column %in% names(out)) {
+      out[[column]] <- NA_real_
+    }
+  }
+
+  out %>%
+    dplyr::mutate(
+      efficiency_pct = 100 * .data$editing_efficiency,
+      colony_count = as.numeric(.data$true_colony_count),
+      relative_viability = as.numeric(.data$viability),
+      viability_normalization_sample = dplyr::if_else(
+        !is.na(.data$control_colony_count),
+        paste0("control well ", control_well),
+        NA_character_
+      )
+    )
 }
 
 run_fcs_efficiency <- function(
