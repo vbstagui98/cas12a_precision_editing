@@ -110,17 +110,13 @@ direction needed to reconstruct every intended locus.
 
 ### Calculation
 
+- editing window = all haplotypes that co-ocur with the HDR haplotype. Thus HDR +
+  WT allele + other alleles = 100
 - `HDR`: a detected row exists after parser/depth filtering where
   `match = paste(promoter, Guide, CHROM, pos_mismatch, mismatches, sep = "_")`
   is present in the design table, `TYPE` is one of `snp`, `mnp`, or `complex`,
   and `nchar(ALT) == nchar(REF)`.
-- Other non-reference, non-intended variants are retained as `other_variant`.
-  No allele-frequency or depth threshold is used to label unwanted edits in
-  the amplicon-sequencing workflow.
-- No separate `AO` threshold is applied to amplicon HDR. A matched intended
-  variant row with `AO = 1` is HDR if it survived the parser/depth-filtered
-  input table.
-- `QUAL` is never used as a filter.
+- Other non-reference, non-intended variants are retained
 - For samples with detected HDR, the editing window contains all variant rows
   with the same `Sample`, `CHROM`, `POS`, and `REF` as the intended call.
 - One reference row is added using the intended call's `RO`.
