@@ -21,14 +21,15 @@ usage <- function() {
       "",
       "Required long-table columns (common aliases are accepted):",
       "  Sample, guide/crRNA ID, CHROM, POS, REF, ALT, TYPE, AO, RO, DP",
-      "  frc_alt and frc_ref must not be precomputed; they are calculated here",
+      "  frc_alt/frc_ref may be present from the parser but are recomputed for outputs",
       "",
       "Design assignment columns:",
       "  crRNA_id/Guide plus either match/intended_match, or exact",
       "  intended_chromosome, intended_position, and alternate_allele",
       "",
       "Rules:",
-      "  intended edit detected: AO >= 2",
+      "  intended HDR: matching substitution row exists after parser/depth filtering",
+      "  default amplicon depth filter: DP > 10000, matching the original parser",
       "  editing-window frequencies: count / (RO + sum(AO at the intended locus))",
       "  QUAL is retained when present but is never used as a filter",
       sep = "\n"
@@ -77,8 +78,7 @@ script_path <- normalizePath(
 project_root <- normalizePath(file.path(dirname(script_path), ".."), mustWork = FALSE)
 source(file.path(project_root, "R", "amplicon_variant_efficiency.R"))
 
-intended_ao_min <- as.numeric(opts$intended_ao_min %||% 2)
-min_dp <- as.numeric(opts$min_dp %||% 0)
+min_dp <- as.numeric(opts$min_dp %||% 10000)
 
 designs <- read_variant_table(opts$designs)
 if (!is.null(opts$guide_features)) {
@@ -91,7 +91,6 @@ if (!is.null(opts$guide_features)) {
 annotated <- annotate_endogenous_amplicon_variants(
   long_variant_table = opts$variants,
   design_table = designs,
-  intended_ao_min = intended_ao_min,
   min_dp = min_dp
 )
 

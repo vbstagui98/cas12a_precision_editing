@@ -24,14 +24,24 @@ variants <- tibble::tibble(
   DP = c(4, 4, 4, 3, 4)
 )
 
-annotated <- annotate_endogenous_amplicon_variants(variants, designs)
+annotated <- annotate_endogenous_amplicon_variants(
+  variants,
+  designs,
+  min_dp = 0
+)
 
 stopifnot(
   annotated$variant_annotation[[1]] == "HDR",
-  annotated$variant_annotation[[2]] == "HDR_below_read_threshold",
+  annotated$variant_annotation[[2]] == "HDR",
   annotated$variant_annotation[[3]] == "other_variant",
   annotated$variant_annotation[[4]] == "other_variant",
-  annotated$variant_annotation[[5]] == "REF"
+  annotated$variant_annotation[[5]] == "REF",
+  annotated$MUTATION[[1]] == "HDR",
+  annotated$MUTATION[[2]] == "HDR",
+  annotated$MUTATION[[3]] == "snp",
+  annotated$MUTATION[[5]] == "REF",
+  !any(annotated$variant_annotation == "unintended_AF50_DP4", na.rm = TRUE),
+  !any(annotated$variant_annotation == "HDR_below_read_threshold", na.rm = TRUE)
 )
 
 raw_counts <- tibble::tibble(
@@ -50,7 +60,11 @@ raw_counts <- tibble::tibble(
   frc_ref = rep(999, 4)
 )
 
-raw_annotated <- annotate_endogenous_amplicon_variants(raw_counts, designs)
+raw_annotated <- annotate_endogenous_amplicon_variants(
+  raw_counts,
+  designs,
+  min_dp = 0
+)
 editing_window <- build_endogenous_editing_window(raw_annotated)
 raw_efficiency <- endogenous_amplicon_efficiency_table(editing_window)
 
@@ -72,7 +86,11 @@ stopifnot(
   edited_ref$efficiency_pct[[1]] == 70,
   edited_hdr$non_hdr_pct[[1]] == 10,
   missing_hdr$efficiency_pct[[1]] == 0,
-  missing_ref$efficiency_pct[[1]] == 100
+  missing_ref$efficiency_pct[[1]] == 100,
+  sum(editing_window$Sample == "edited" & editing_window$editing_class == "HDR") == 1,
+  sum(editing_window$Sample == "edited" & editing_window$editing_class == "snp") == 1,
+  sum(editing_window$Sample == "edited" & editing_window$editing_class == "REF") == 1,
+  all(editing_window$editing_window_pct[editing_window$Sample == "edited"] != 999)
 )
 
 publication_table <- tibble::tibble(

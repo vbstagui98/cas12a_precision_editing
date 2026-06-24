@@ -502,8 +502,7 @@ merge_endogenous_design_features <- function(design_assignments, guide_features)
 annotate_endogenous_amplicon_variants <- function(
   long_variant_table,
   design_table,
-  intended_ao_min = 2,
-  min_dp = 0
+  min_dp = 10000
 ) {
   variants <- if (is.character(long_variant_table)) {
     read_variant_table(long_variant_table)
@@ -685,6 +684,7 @@ annotate_endogenous_amplicon_variants <- function(
       is_intended_variant = .data$design_matched &
         .data$chromosome_matches_design &
         !.data$is_reference_row &
+        .data$is_substitution_call &
         (
           (!is.na(.data$intended_variant_id) &
             matches_intended_alias(
@@ -699,19 +699,20 @@ annotate_endogenous_amplicon_variants <- function(
             )) |
             (is.na(.data$intended_variant_id) &
               is.na(.data$intended_match) &
-              .data$is_substitution_call &
               (
                 (.data$mismatch_position_matches_design &
                   .data$mismatch_alt_matches_design) |
                   .data$simple_variant_matches_design
               ))
         ),
-      intended_edit_detected = .data$is_intended_variant &
-        !is.na(.data$AO) &
-        .data$AO >= intended_ao_min,
+      intended_edit_detected = .data$is_intended_variant,
+      MUTATION = dplyr::case_when(
+        .data$is_intended_variant ~ "HDR",
+        .data$is_reference_row ~ "REF",
+        TRUE ~ as.character(.data$TYPE)
+      ),
       variant_annotation = dplyr::case_when(
-        .data$is_intended_variant & .data$intended_edit_detected ~ "HDR",
-        .data$is_intended_variant ~ "HDR_below_read_threshold",
+        .data$is_intended_variant ~ "HDR",
         .data$is_reference_row ~ "REF",
         TRUE ~ "other_variant"
       )

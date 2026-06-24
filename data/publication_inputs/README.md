@@ -12,7 +12,8 @@ Rscript scripts/run_endogenous_amplicon_vcf_to_efficiency.R \
   --variants data/publication_inputs/endogenous_freebayes_variants_publication.csv \
   --designs data/publication_inputs/endogenous_intended_loci.csv \
   --guide-features data/publication_inputs/endogenous_guide_features.csv \
-  --output-dir results/endogenous_amplicon
+  --output-dir results/endogenous_amplicon \
+  --min-dp 0
 ```
 
 Inputs:
@@ -28,10 +29,16 @@ Inputs:
   distance from PAM, strand, GC content, and DeepCpf1 score.
 - `endogenous_sample_metadata.csv`: one row per Figure 4 sample.
 
-The workflow uses no QUAL filter. Intended editing requires at least two
-alternate reads. Non-intended variants are retained as ordinary amplicon
-variants; the AF50/DP4 unwanted-edit rule is used only by the genome-wide
-colony-status workflow.
+The generic raw-parser workflow defaults to the original `DP > 10000` filter
+from `scripts_amplicons/04_parse_vcf.ipynb`. This committed CSV is a curated
+final manuscript input that already reflects the plotted data and retains a
+correction row, so the reproducibility command above uses `--min-dp 0`.
+
+The workflow uses no QUAL filter. Intended amplicon HDR is assigned when a
+matched intended substitution row exists after the parser/depth-filtering
+stage; no separate `AO >= 2` threshold is applied to amplicon data.
+Non-intended variants are retained as ordinary amplicon variants; the AF50/DP4
+unwanted-edit rule is used only by the genome-wide colony-status workflow.
 
 ## Flow cytometry
 

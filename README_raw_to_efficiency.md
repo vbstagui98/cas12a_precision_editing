@@ -42,8 +42,14 @@ Editing direction:
 ## Endogenous Concatenated FreeBayes Variants To Amplicon Efficiency
 
 The primary publication input is the long table produced after parsing and
-concatenating the FreeBayes VCF files from one sequencing run. The input does
-not need `frc_alt`, `frc_ref`, `MUTATION`, or any other calculated efficiency.
+concatenating the FreeBayes VCF files from one sequencing run. It should follow
+the original `scripts_amplicons` preprocessing chain: merge/trim reads with
+`fastp`, map with BBMap, call variants with FreeBayes using
+`--min-base-quality 3 --haplotype-length 30 -C 1 --min-coverage 50
+--min-alternate-fraction 0.001 --pooled-continuous`, parse/split the VCF
+records, calculate `frc_alt = AO / DP * 100` and
+`frc_ref = RO / DP * 100`, filter `DP > 10000`, and derive `mismatches`,
+`positions`, and `pos_mismatch`.
 
 ```bash
 Rscript scripts/run_endogenous_amplicon_vcf_to_efficiency.R \
@@ -70,6 +76,8 @@ VCF records should be split so that each alternate allele has its own row.
 | Alternate read count | `AO`, `ao`, `alt_depth` |
 | Reference read count | `RO`, `ro`, `ref_depth` |
 | Read depth | `DP`, `dp`, `depth` |
+| Parser allele frequency | `frc_alt`, `allele_frequency_pct`, optional |
+| Parser reference frequency | `frc_ref`, `reference_pct`, optional |
 
 Sample metadata such as `Experiment`, `Timepoint`, `Replicate`, `promoter`,
 `recruit`, `cas_variant`, and `DR_cognate` are retained. For the historical
@@ -102,24 +110,28 @@ direction needed to reconstruct every intended locus.
 
 ### Calculation
 
-- `HDR`: the variant matches the designed chromosome, position, and alternate
-  allele and has `AO >= 2`.
-- `HDR_below_read_threshold`: the designed allele is present with `AO < 2`.
+- `HDR`: a detected row exists after parser/depth filtering where
+  `match = paste(promoter, Guide, CHROM, pos_mismatch, mismatches, sep = "_")`
+  is present in the design table, `TYPE` is one of `snp`, `mnp`, or `complex`,
+  and `nchar(ALT) == nchar(REF)`.
 - Other non-reference, non-intended variants are retained as `other_variant`.
   No allele-frequency or depth threshold is used to label unwanted edits in
   the amplicon-sequencing workflow.
+- No separate `AO` threshold is applied to amplicon HDR. A matched intended
+  variant row with `AO = 1` is HDR if it survived the parser/depth-filtered
+  input table.
 - `QUAL` is never used as a filter.
 - For samples with detected HDR, the editing window contains all variant rows
   with the same `Sample`, `CHROM`, `POS`, and `REF` as the intended call.
 - One reference row is added using the intended call's `RO`.
 - Frequencies are calculated as
   `count / (reference RO + sum of alternate AO in the editing window) * 100`.
-- Samples without at least two intended reads receive HDR 0% and reference
-  100%.
+- Samples without a matched intended row receive an explicit HDR 0% placeholder
+  and reference 100%.
 
-The intended-read threshold can be changed with `--intended-ao-min`. The
-historical 2025 parser kept only rows with `DP > 10000`; reproduce that filter
-with `--min-dp 10000`.
+The script defaults to `--min-dp 10000`, matching the original parser's
+`DP > 10000` filter. Use `--min-dp 0` only when rerunning already curated final
+manuscript count tables that should not receive an additional depth filter.
 
 Outputs:
 
@@ -216,8 +228,8 @@ The harmonization layer was checked against the workbook column names:
   HDR assignment additionally requires `match` or explicit intended-locus
   columns because the published position field records the PAM coordinate.
 - Supplementary Tables S7/S8: the genome-wide workflow retains its dedicated
-  colony/design input files and already applies the manuscript `AO >= 2`,
-  `AF >= 50%`, `DP >= 4`, no-`QUAL` rules.
+  colony/design input files and applies the genome-wide manuscript rules:
+  intended `AO >= 2`, non-target `AF >= 50%` and `DP >= 4`, no `QUAL` filter.
 
 Run the table-level regression tests with:
 
