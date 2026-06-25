@@ -6,6 +6,10 @@ This repository contains the minimal processing code needed to convert raw flow-
 
 - `scripts/run_fcs_efficiency.R`
   Converts raw `.fcs` files into GFP-positive fractions and GFP editing efficiencies.
+- `scripts/amplicon_preprocessing/run_endogenous_amplicon_preprocessing.sh`
+  Runs endogenous amplicon FASTQ preprocessing: fastp merge, BBMap mapping,
+  optional BAM subsampling, FreeBayes variant calling, and VCF parsing into a
+  long variant table.
 - `scripts/run_endogenous_amplicon_vcf_to_efficiency.R`
   Converts a concatenated, long FreeBayes variant table for the endogenous amplicon panel into annotated variants, editing-window frequencies, and a Supplementary Table S6-compatible efficiency table.
 - `scripts/run_amplicon_vcf_to_efficiency.R`

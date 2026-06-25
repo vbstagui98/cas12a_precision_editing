@@ -51,6 +51,17 @@ records, calculate `frc_alt = AO / DP * 100` and
 `frc_ref = RO / DP * 100`, filter `DP > 10000`, and derive `mismatches`,
 `positions`, and `pos_mismatch`.
 
+A runnable, path-independent implementation of this preprocessing chain is in
+`scripts/amplicon_preprocessing/`. For example:
+
+```bash
+bash scripts/amplicon_preprocessing/run_endogenous_amplicon_preprocessing.sh \
+  --fastq-dir path/to/fastq_merged_lanes \
+  --analysis-dir results/amplicon_seq \
+  --reference path/to/saccharomyces_cerevisiae_sequence.fasta \
+  --sample-glob '*VB_Fn*_R1.fastq.gz'
+```
+
 ```bash
 Rscript scripts/run_endogenous_amplicon_vcf_to_efficiency.R \
   --variants path/to/concatenated_freebayes_variants.csv \

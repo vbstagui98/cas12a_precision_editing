@@ -24,6 +24,11 @@ assumptions is the original `scripts_amplicons` workflow, especially
 - `scripts/`
   Command-line entry points and helper/export scripts.
 
+- `scripts/amplicon_preprocessing/`
+  Runnable FASTQ-to-long-variant preprocessing for endogenous amplicon-seq:
+  fastp merge, BBMap mapping, optional BAM subsampling, FreeBayes calling, and
+  VCF parsing.
+
 - `data/publication_inputs/`
   Small, path-independent CSV inputs that reviewers can run without access to
   local Dropbox paths.
@@ -61,7 +66,20 @@ Reviewer shortcut:
 
 ### Endogenous Amplicon Workflow
 
-Entry point:
+Raw preprocessing entry point:
+
+```bash
+bash scripts/amplicon_preprocessing/run_endogenous_amplicon_preprocessing.sh \
+  --fastq-dir path/to/fastq_merged_lanes \
+  --analysis-dir results/amplicon_seq \
+  --reference path/to/saccharomyces_cerevisiae_sequence.fasta \
+  --sample-glob '*VB_Fn*_R1.fastq.gz'
+```
+
+The master script can run all samples matching the glob or any subset selected
+with `--sample-list` or `--sample-regex`.
+
+Efficiency entry point:
 
 ```bash
 Rscript scripts/run_endogenous_amplicon_vcf_to_efficiency.R \
@@ -94,6 +112,11 @@ Generic raw-parser input assumptions:
 7. filter `DP > 10000`;
 8. derive `mismatches`, `positions`, and `pos_mismatch`;
 9. assign HDR in R using the guide-design `match` column.
+
+The public parser is
+`scripts/amplicon_preprocessing/parse_freebayes_vcf.py`. It replaces the
+notebook execution step while preserving the fields needed by the R HDR
+assignment code.
 
 Important distinction:
 
