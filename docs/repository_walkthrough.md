@@ -347,15 +347,6 @@ amplicon-sequencing workflows.
 - `run_genome_wide_colony_status(input_paths, output_dir)`
   Writes the genome-wide colony, design, and non-target output CSVs.
 
-## Tests To Read First
-
-- `tests/test_amplicon_variant_efficiency.R`
-  Verifies that amplicon HDR is detected by matched row existence, not by an AO
-  threshold; verifies zero-HDR placeholders, synthetic REF rows, count-based
-  frequency recomputation, and absence of `unintended_AF50_DP4`.
-
-- `tests/test_fcs_table_harmonization.R`
-  Verifies guide aliases, GFP ON/OFF conversion, and colony-count normalization.
 
 ## Validation Commands
 
