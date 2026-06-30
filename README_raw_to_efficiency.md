@@ -7,9 +7,7 @@ This document covers the processing paths needed for the publication upload:
 - donor-position and shorter-guide amplicon variant tables to designed-HDR efficiencies;
 - genome-wide long variant tables to colony-level editing status.
 
-All command-line table inputs are CSV, TSV, or TXT files. The supplementary
-Excel workbook was used only to define the publication column names; the
-scripts do not read Excel files.
+All command-line table inputs are CSV, TSV, or TXT files.
 
 ## FCS To GFP Editing Efficiency
 
