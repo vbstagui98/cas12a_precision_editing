@@ -1,9 +1,7 @@
 # Publication FCS Data
 
 The event-level FCS files used for Figures 1 and 2 are distributed as GitHub
-Release assets because the complete package is larger than 1 GiB. The Git
-repository contains the code and path-independent sample metadata; it does not
-duplicate the binary FCS files in Git history.
+Release assets.
 
 Download the assets from the
 [`fcs-data-v1` release](https://github.com/vbstagui98/cas12a_precision_editing/releases/tag/fcs-data-v1).
@@ -17,9 +15,6 @@ Download the assets from the
 - `publication_fcs_manifest.csv`: one row per released FCS file, including the
   publication metadata, byte count, archive name, and SHA-256 checksum.
 - `release_checksums.sha256`: SHA-256 checksums for the release assets.
-
-The release contains 1,272 files totaling 1,241,415,160 bytes (1.156 GiB)
-before ZIP container overhead: 446 Figure 1 files and 826 Figure 2 files.
 
 Each ZIP extracts to a separate directory containing `FCS_DATA/` and an
 archive-specific copy of the manifest. Files are selected by the exact basenames
