@@ -20,9 +20,8 @@ if (length(args) == 0 || any(args %in% c("--help", "-h"))) {
   cat(paste(
     "Usage:",
     "  Rscript scripts/run_donor_guide_variant_efficiency.R \\",
-    "    --fn-donor-variants path/to/fn_donor_variants.csv \\",
-    "    --enas-donor-variants path/to/enas_donor_variants.csv \\",
-    "    --short-guide-variants path/to/short_guide_variants.csv \\",
+    "    --fn-variants path/to/fn_donor_variants.csv \\",
+    "    --enas-variants path/to/enas_donor_and_short_guide_variants.csv \\",
     "    --output-dir results/donor_guide_variant_efficiency",
     sep = "\n"
   ))
@@ -31,9 +30,8 @@ if (length(args) == 0 || any(args %in% c("--help", "-h"))) {
 
 opts <- read_args(args)
 required <- c(
-  "fn_donor_variants",
-  "enas_donor_variants",
-  "short_guide_variants",
+  "fn_variants",
+  "enas_variants",
   "output_dir"
 )
 missing <- setdiff(required, names(opts))
@@ -47,9 +45,9 @@ project_root <- dirname(dirname(normalizePath(script_file)))
 source(file.path(project_root, "R", "amplicon_variant_efficiency.R"))
 
 input_paths <- list(
-  fn_donor_variants = opts$fn_donor_variants,
-  enas_donor_variants = opts$enas_donor_variants,
-  short_guide_variants = opts$short_guide_variants
+  fn_donor_variants = opts$fn_variants,
+  enas_donor_variants = opts$enas_variants,
+  short_guide_variants = opts$enas_variants
 )
 
 outputs <- prepare_donor_and_guide_length_outputs(input_paths, opts$output_dir)

@@ -164,9 +164,8 @@ It does not use the endogenous guide/promoter intended-locus table.
 
 ```bash
 Rscript scripts/run_donor_guide_variant_efficiency.R \
-  --fn-donor-variants path/to/fn_donor_variants.csv \
-  --enas-donor-variants path/to/enas_donor_variants.csv \
-  --short-guide-variants path/to/short_guide_variants.csv \
+  --fn-variants data/publication_inputs/ampliconseq_fn_donor_variants.csv \
+  --enas-variants data/publication_inputs/ampliconseq_enas_donor_short_guide_variants.csv \
   --output-dir results/donor_guide_variant_efficiency
 ```
 
@@ -175,9 +174,23 @@ Outputs:
 - `donor_position_hdr_from_variants.csv`
 - `short_guide_hdr_from_variants.csv`
 
-Inputs are the long variant tables generated for those experiments
-(`master_df_filtered.csv` in the original analysis folders). Outputs are one
-designed-HDR efficiency table for donor position and one for guide length.
+Inputs are the two long variant tables generated for these experiments. The Fn
+table contains the donor-position experiment. The enAs table contains both the
+enAs donor-position samples and the shorter-guide samples for enAsCas12a and
+FnCas12a. These are selected from the historical `Part*` sample-name fields.
+
+The expected donor-position SNP is calculated from the edited position in the
+A04 target sequence. Designs 17 and 18 are swapped, following the correction
+in the original notebooks. Shorter-guide HDR is the fixed A-to-T substitution
+at position 217. No AO, allele-frequency, DP, or QUAL threshold is applied by
+this workflow; it uses the `frc_alt` value of the matching variant row.
+
+Outputs are one designed-HDR efficiency table for donor position and one for
+guide length. The committed inputs reproduce the three saved notebook outputs:
+182 Fn donor rows, 180 enAs donor rows, and 124 shorter-guide rows.
+
+`figure_3_ampliconseq_efficiency.csv` contains the 124 rows selected for Figure
+3: enAsCas12a at T1 and FnCas12a at T2 for both panels.
 
 ## Genome-Wide Variant Tables To Colony Status
 
@@ -231,5 +244,6 @@ Run the table-level regression tests with:
 
 ```bash
 Rscript tests/test_amplicon_variant_efficiency.R
+Rscript tests/test_public_ampliconseq_workflow.R
 Rscript tests/test_fcs_table_harmonization.R
 ```

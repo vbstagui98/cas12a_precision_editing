@@ -155,15 +155,15 @@ Entry point:
 
 ```bash
 Rscript scripts/run_donor_guide_variant_efficiency.R \
-  --fn-donor-variants path/to/fn_donor_variants.csv \
-  --enas-donor-variants path/to/enas_donor_variants.csv \
-  --short-guide-variants path/to/short_guide_variants.csv \
+  --fn-variants data/publication_inputs/ampliconseq_fn_donor_variants.csv \
+  --enas-variants data/publication_inputs/ampliconseq_enas_donor_short_guide_variants.csv \
   --output-dir results/donor_guide_variant_efficiency
 ```
 
 This workflow is separate from the endogenous panel. It uses assay-specific
 expected SNP positions and the historical `Part*` metadata columns from those
-amplicon experiments.
+amplicon experiments. The enAs input is one mixed sequencing-run table; the
+script selects its donor-position and shorter-guide rows separately.
 
 ### Genome-Wide Colony-Status Workflow
 

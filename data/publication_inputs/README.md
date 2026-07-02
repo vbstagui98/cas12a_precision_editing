@@ -40,6 +40,30 @@ stage; no separate `AO >= 2` threshold is applied to amplicon data.
 Non-intended variants are retained as ordinary amplicon variants; the AF50/DP4
 unwanted-edit rule is used only by the genome-wide colony-status workflow.
 
+## Donor position and shorter guides (Figure 3)
+
+The original analysis folder calls this workflow `amplicon_seq`. Run the
+committed data directly with:
+
+```bash
+Rscript scripts/run_donor_guide_variant_efficiency.R \
+  --fn-variants data/publication_inputs/ampliconseq_fn_donor_variants.csv \
+  --enas-variants data/publication_inputs/ampliconseq_enas_donor_short_guide_variants.csv \
+  --output-dir results/donor_guide_variant_efficiency
+```
+
+- `ampliconseq_fn_donor_variants.csv` contains the FnCas12a donor-position
+  samples and the corrected repeat-sample assignments used by the notebook.
+- `ampliconseq_enas_donor_short_guide_variants.csv` is the mixed sequencing-run
+  table containing the enAsCas12a donor-position samples and shorter-guide
+  samples for both Cas12a variants.
+
+The script matches the assay-specific intended SNP and reports the detected
+row's `frc_alt` as HDR efficiency. It does not apply the endogenous-panel
+editing-window calculation or the genome-wide AF50/DP4 rule.
+The output `figure_3_ampliconseq_efficiency.csv` applies the manuscript
+timepoint selection and contains the 124 Figure 3 rows.
+
 ## Flow cytometry
 
 The raw workflow requires the original `.fcs` files:
@@ -82,5 +106,4 @@ distributed as GitHub Release assets; see
 [`../publication_fcs/README.md`](../publication_fcs/README.md). FASTQ and BAM
 files should remain linked through ENA/SRA rather than committed to GitHub.
 
-`manifest.csv` records dimensions, descriptions, and SHA256 checksums for all
-CSV inputs.
+`manifest.csv` records dimensions and descriptions for the CSV inputs.

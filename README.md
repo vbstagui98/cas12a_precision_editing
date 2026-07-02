@@ -21,7 +21,8 @@ Commands and input-column requirements are described in
 
 ## Publication data
 
-Small inputs used to test the workflows are in `data/publication_inputs/`.
+The publication inputs used by the endogenous and Figure 3 amplicon workflows
+are in `data/publication_inputs/`.
 The event-level FCS files are available from the
 [`fcs-data-v1` release](https://github.com/vsbatagui/cas12a_precision_editing/releases/tag/fcs-data-v1).
 

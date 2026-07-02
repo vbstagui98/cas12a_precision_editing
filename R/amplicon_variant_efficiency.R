@@ -1127,15 +1127,68 @@ prepare_donor_and_guide_length_outputs <- function(paths, output_dir) {
       )
     )
 
+  figure_3 <- dplyr::bind_rows(
+    fn_donor %>%
+      dplyr::filter(.data$timepoint == "timepoint2") %>%
+      dplyr::transmute(
+        panel = "Donor position",
+        assay = "donor_position",
+        cas_variant,
+        strain,
+        replicate = paste0("R", .data$replicate),
+        timepoint = "T2",
+        position = .data$dist,
+        guide_length = NA_integer_,
+        efficiency_pct = .data$HDR_pct,
+        reference_pct = .data$frc_ref,
+        non_hdr_pct = 100 - .data$HDR_pct - .data$frc_ref
+      ),
+    enas_donor %>%
+      dplyr::filter(.data$timepoint == "T1") %>%
+      dplyr::transmute(
+        panel = "Donor position",
+        assay = "donor_position",
+        cas_variant,
+        strain,
+        replicate = paste0("R", .data$replicate),
+        timepoint = "T1",
+        position = .data$dist,
+        guide_length = NA_integer_,
+        efficiency_pct = .data$HDR_pct,
+        reference_pct = .data$frc_ref,
+        non_hdr_pct = 100 - .data$HDR_pct - .data$frc_ref
+      ),
+    short_guide %>%
+      dplyr::filter(
+        (.data$strain == "ys88" & .data$timepoint == "T2") |
+          (.data$strain == "ys85" & .data$timepoint == "T1")
+      ) %>%
+      dplyr::transmute(
+        panel = "Guide length",
+        assay = "shorter_guide",
+        cas_variant,
+        strain,
+        replicate = paste0("R", .data$replicate),
+        timepoint,
+        position = NA_integer_,
+        guide_length = as.integer(.data$guide_length),
+        efficiency_pct = .data$HDR_pct,
+        reference_pct = .data$frc_ref,
+        non_hdr_pct = 100 - .data$HDR_pct - .data$frc_ref
+      )
+  )
+
   write_csv_mkdir(fn_donor, file.path(output_dir, "fn_donor_position_hdr_from_variants.csv"))
   write_csv_mkdir(enas_donor, file.path(output_dir, "enas_donor_position_hdr_from_variants.csv"))
   write_csv_mkdir(dplyr::bind_rows(enas_donor, fn_donor), file.path(output_dir, "donor_position_hdr_from_variants.csv"))
   write_csv_mkdir(short_guide, file.path(output_dir, "short_guide_hdr_from_variants.csv"))
+  write_csv_mkdir(figure_3, file.path(output_dir, "figure_3_ampliconseq_efficiency.csv"))
 
   list(
     fn_donor = fn_donor,
     enas_donor = enas_donor,
     donor_position = dplyr::bind_rows(enas_donor, fn_donor),
-    short_guide = short_guide
+    short_guide = short_guide,
+    figure_3 = figure_3
   )
 }
