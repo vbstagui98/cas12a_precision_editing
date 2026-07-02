@@ -4,7 +4,7 @@ The event-level FCS files used for Figures 1 and 2 are distributed as GitHub
 Release assets.
 
 Download the assets from the
-[`fcs-data-v1` release](https://github.com/vbstagui98/cas12a_precision_editing/releases/tag/fcs-data-v1).
+[`fcs-data-v1` release](https://github.com/vsbatagui/cas12a_precision_editing/releases/tag/fcs-data-v1).
 
 ## Release contents
 
