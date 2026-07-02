@@ -11,6 +11,11 @@ All command-line table inputs are CSV, TSV, or TXT files.
 
 ## FCS To GFP Editing Efficiency
 
+Download and extract the relevant archive from the
+[`fcs-data-v1` release](https://github.com/vbstagui98/cas12a_precision_editing/releases/tag/fcs-data-v1).
+The committed release manifest and archive checksums are documented in
+`data/publication_fcs/README.md`.
+
 ```bash
 Rscript scripts/run_fcs_efficiency.R \
   --fcs-dir path/to/FACS_DATA \

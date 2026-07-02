@@ -49,3 +49,7 @@ BiocManager::install(c("flowCore", "flowWorkspace", "openCyto"))
 ## Path Configuration
 
 Raw data are not stored in this repository. Machine-specific input paths are centralized in `config/paths.R`; set the corresponding `CAS12A_*` environment variables or pass script-level path overrides before running the workflows on another machine.
+
+The event-level FCS files used in the paper are distributed as versioned GitHub
+Release assets. See [`data/publication_fcs/README.md`](data/publication_fcs/README.md)
+for archive contents, checksums, extraction, and analysis commands.

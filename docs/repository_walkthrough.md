@@ -60,6 +60,10 @@ Purpose:
 
 Reviewer shortcut:
 
+- The event-level files are available from the
+  [`fcs-data-v1` release](https://github.com/vbstagui98/cas12a_precision_editing/releases/tag/fcs-data-v1).
+  `data/publication_fcs/publication_fcs_manifest.csv` maps all 1,272 files to
+  figures and records byte counts and SHA-256 checksums.
 - `data/publication_inputs/fcs_population_frequencies_publication.csv`
   contains precomputed GFP population frequencies, so reviewers can test
   metadata joins and GFP-to-efficiency conversion without raw FCS files.

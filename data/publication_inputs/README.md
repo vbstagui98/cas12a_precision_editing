@@ -77,9 +77,11 @@ Compare the result with `fcs_expected_efficiencies_publication.csv`.
 
 ## Raw data availability
 
-CSV files cannot replace event-level FCS measurements. The `.fcs` files should
-be deposited in Zenodo, FlowRepository, or another archival repository and
-linked from the main project README. FASTQ and BAM files should likewise be
+CSV files cannot replace event-level FCS measurements. The `.fcs` files are
+distributed as versioned GitHub Release assets; see
+[`../publication_fcs/README.md`](../publication_fcs/README.md). The release
+manifest is generated from this directory's 1,272-row publication plate map and
+contains byte counts and SHA-256 checksums. FASTQ and BAM files should remain
 linked through ENA/SRA rather than committed to GitHub.
 
 `manifest.csv` records dimensions, descriptions, and SHA256 checksums for all
