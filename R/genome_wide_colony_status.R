@@ -14,7 +14,7 @@ suppressPackageStartupMessages({
 }
 
 clean_table_names <- function(x) {
-  x <- gsub("([a-z0-9])([A-Z])", "\1_\2", x)
+  x <- gsub("([a-z0-9])([A-Z])", "\\1_\\2", x)
   x <- iconv(x, to = "ASCII//TRANSLIT")
   x <- tolower(x)
   x <- gsub("%", "pct", x, fixed = TRUE)
@@ -191,13 +191,13 @@ load_picked_colonies <- function(picked_colonies_round_1, picked_colonies_round_
 load_target_coverage <- function(target_coverage_round_1, target_coverage_round_2) {
   round_1 <- read_tsv_clean(target_coverage_round_1) %>%
     dplyr::mutate(
-      colony_id = stringr::str_replace(.data$sample, ".*VB_(.*?)_S.*", "\1"),
+      colony_id = stringr::str_replace(.data$sample, ".*VB_(.*?)_S.*", "\\1"),
       round = "round_1"
     )
 
   round_2 <- read_tsv_clean(target_coverage_round_2) %>%
     dplyr::mutate(
-      colony_id = stringr::str_replace(.data$sample, ".*VB_(.*?)_S.*", "\1"),
+      colony_id = stringr::str_replace(.data$sample, ".*VB_(.*?)_S.*", "\\1"),
       round = "round_2"
     )
 
@@ -220,7 +220,7 @@ load_mean_coverage <- function(mean_coverage_round_1, mean_coverage_round_2) {
     read_csv_clean(mean_coverage_round_1),
     read_csv_clean(mean_coverage_round_2)
   ) %>%
-    dplyr::mutate(sample = stringr::str_remove(.data$file, "\.bincov\.txt$")) %>%
+    dplyr::mutate(sample = stringr::str_remove(.data$file, "\\.bincov\\.txt$")) %>%
     dplyr::transmute(
       sample = .data$sample,
       mean_cov = as.numeric(.data$mean_cov)

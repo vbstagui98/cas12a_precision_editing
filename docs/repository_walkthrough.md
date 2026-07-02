@@ -14,9 +14,6 @@ assumptions is the original `scripts_amplicons` workflow, especially
   Main runbook for converting raw or near-raw data into efficiency/status
   tables.
 
-- `config/paths.R`
-  Local path defaults and `CAS12A_*` environment-variable overrides.
-
 - `R/`
   Reusable functions. Public command-line scripts should source functions from
   here rather than implementing analysis logic inline.
@@ -62,8 +59,8 @@ Reviewer shortcut:
 
 - The event-level files are available from the
   [`fcs-data-v1` release](https://github.com/vsbatagui/cas12a_precision_editing/releases/tag/fcs-data-v1).
-  `data/publication_fcs/publication_fcs_manifest.csv` maps all 1,272 files to
-  figures and records byte counts and SHA-256 checksums.
+  `data/publication_inputs/fcs_publication_platemap.csv` contains the sample
+  annotation for all 1,272 files.
 - `data/publication_inputs/fcs_population_frequencies_publication.csv`
   contains precomputed GFP population frequencies, so reviewers can test
   metadata joins and GFP-to-efficiency conversion without raw FCS files.
@@ -158,6 +155,9 @@ Entry point:
 
 ```bash
 Rscript scripts/run_donor_guide_variant_efficiency.R \
+  --fn-donor-variants path/to/fn_donor_variants.csv \
+  --enas-donor-variants path/to/enas_donor_variants.csv \
+  --short-guide-variants path/to/short_guide_variants.csv \
   --output-dir results/donor_guide_variant_efficiency
 ```
 
@@ -271,10 +271,6 @@ amplicon-sequencing workflows.
 
 - `standardize_guide_features(guide_features)`
   Harmonizes guide/design feature columns and preserves intended-locus aliases.
-
-- `amplicon_efficiency_from_long_table(...)`
-  Compatibility function for already processed tables with `MUTATION`,
-  `frc_alt`, and `frc_ref`.
 
 - `normalize_chromosome(x)`
   Makes chromosome names comparable.

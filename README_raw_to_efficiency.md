@@ -13,8 +13,7 @@ All command-line table inputs are CSV, TSV, or TXT files.
 
 Download and extract the relevant archive from the
 [`fcs-data-v1` release](https://github.com/vsbatagui/cas12a_precision_editing/releases/tag/fcs-data-v1).
-The committed release manifest and archive checksums are documented in
-`data/publication_fcs/README.md`.
+The two archives are described in `data/publication_fcs/README.md`.
 
 ```bash
 Rscript scripts/run_fcs_efficiency.R \
@@ -156,16 +155,6 @@ The result was regression-tested against the historical
 `var_file_20250328.csv` workflow. The recalculated FnCas12a HDR and reference
 percentages match the old processed output to floating-point precision.
 
-### Compatibility Input
-
-`scripts/run_amplicon_variant_efficiency.R` remains available for previously
-processed tables where `MUTATION`/`editing_class`, `frc_alt`/`efficiency_pct`,
-and `frc_ref`/`reference_pct` already exist. It is not the primary raw-data
-workflow.
-
-`scripts/run_amplicon_vcf_to_efficiency.R` remains as a compatibility alias for
-`scripts/run_endogenous_amplicon_vcf_to_efficiency.R`.
-
 ## Donor-Position And Shorter-Guide Amplicon Variant Tables
 
 This is intentionally separate from the endogenous-panel workflow. It follows
@@ -175,6 +164,9 @@ It does not use the endogenous guide/promoter intended-locus table.
 
 ```bash
 Rscript scripts/run_donor_guide_variant_efficiency.R \
+  --fn-donor-variants path/to/fn_donor_variants.csv \
+  --enas-donor-variants path/to/enas_donor_variants.csv \
+  --short-guide-variants path/to/short_guide_variants.csv \
   --output-dir results/donor_guide_variant_efficiency
 ```
 
@@ -217,12 +209,6 @@ Outputs:
 - `genome_wide_colony_editing_status.csv`
 - `genome_wide_design_editing_status.csv`
 - `genome_wide_non_target_af50_dp4_variants.csv`
-
-Optional path overrides are listed in:
-
-```bash
-Rscript scripts/run_genome_wide_colony_status.R --help
-```
 
 ## Schema Checks
 
